@@ -18,7 +18,9 @@ RUN npm ci
 
 COPY index.html tsconfig.json vite.config.ts ./
 COPY src ./src
+COPY public ./public
 RUN npm run build \
+    && test -s dist/og.png \
     && npm prune --omit=dev \
     && npm cache clean --force
 
