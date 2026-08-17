@@ -1,0 +1,153 @@
+import { z } from "zod";
+
+const idSchema = z
+  .string()
+  .min(2)
+  .max(80)
+  .regex(/^[a-zA-Z0-9][a-zA-Z0-9_-]*$/, "ID 只能包含字母、数字、下划线和连字符");
+
+const optionSchema = z.object({
+  id: idSchema,
+  label: z.string().min(1).max(8),
+  content: z.string().min(1).max(1000),
+  correct: z.boolean(),
+});
+
+const questionSchema = z
+  .object({
+    id: idSchema,
+    type: z.enum(["single", "multiple"]),
+    prompt: z.string().min(1).max(5000),
+    explanation: z.string().max(10000).default(""),
+    points: z.number().int().positive().max(100).default(1),
+    options: z.array(optionSchema).min(2).max(12),
+  })
+  .superRefine((question, context) => {
+    const correctCount = question.options.filter((option) => option.correct).length;
+    const optionIds = new Set(question.options.map((option) => option.id));
+
+    if (optionIds.size !== question.options.length) {
+      context.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["options"],
+        message: "同一道题的选项 ID 不得重复",
+      });
+    }
+
+    if (question.type === "single" && correctCount !== 1) {
+      context.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["options"],
+        message: "单选题必须且只能有一个正确选项",
+      });
+    }
+
+    if (question.type === "multiple" && correctCount < 2) {
+      context.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["options"],
+        message: "多选题至少需要两个正确选项",
+      });
+    }
+  });
+
+const materialSchema = z.object({
+  id: idSchema,
+  title: z.string().min(1).max(200),
+  summary: z.string().max(1000).default(""),
+  content: z.string().max(200000).default(""),
+  category: z.string().min(1).max(80).default("未分类"),
+  estimatedMinutes: z.number().int().min(0).max(10000).default(0),
+  status: z.enum(["draft", "published"]).default("published"),
+});
+
+const assetSchema = z.object({
+  id: idSchema,
+  materialId: idSchema,
+  role: z.enum(["cover", "attachment"]),
+  title: z.string().min(1).max(200),
+  source: z.string().min(1).max(2000),
+});
+
+const examSchema = z.object({
+  id: idSchema,
+  title: z.string().min(1).max(200),
+  description: z.string().max(2000).default(""),
+  durationMinutes: z.number().int().positive().max(1440),
+  passingScore: z.number().int().min(0).max(100).default(60),
+  status: z.enum(["draft", "published"]).default("published"),
+  questions: z.array(questionSchema).min(1).max(500),
+});
+
+export const contentSchema = z
+  .object({
+    materials: z.array(materialSchema).default([]),
+    exams: z.array(examSchema).default([]),
+    assets: z.array(assetSchema).default([]),
+  })
+  .superRefine((content, context) => {
+    const ids = [
+      ...content.materials.map((material) => material.id),
+      ...content.exams.map((exam) => exam.id),
+      ...content.exams.flatMap((exam) => exam.questions.map((question) => question.id)),
+      ...content.exams.flatMap((exam) =>
+        exam.questions.flatMap((question) => question.options.map((option) => option.id)),
+      ),
+      ...content.assets.map((asset) => asset.id),
+    ];
+
+    if (new Set(ids).size !== ids.length) {
+      context.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "资料、试卷、题目和选项的 ID 必须全局唯一",
+      });
+    }
+
+    const materialIds = new Set(content.materials.map((material) => material.id));
+    content.assets.forEach((asset, index) => {
+      if (!materialIds.has(asset.materialId)) {
+        context.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["assets", index, "materialId"],
+          message: "附件指向的资料必须同时出现在本次导入文件中",
+        });
+      }
+    });
+
+    const coverMaterialIds = content.assets
+      .filter((asset) => asset.role === "cover")
+      .map((asset) => asset.materialId);
+    if (new Set(coverMaterialIds).size !== coverMaterialIds.length) {
+      context.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["assets"],
+        message: "每条资料最多只能配置一张封面图",
+      });
+    }
+  });
+
+export const submissionSchema = z.object({
+  deviceId: z
+    .string()
+    .min(8)
+    .max(128)
+    .regex(/^[a-zA-Z0-9._:-]+$/, "设备标识格式无效"),
+  durationSeconds: z.number().int().min(0).max(604800).default(0),
+  startedAt: z.string().datetime().optional(),
+  answers: z
+    .array(
+      z.object({
+        questionId: idSchema,
+        optionIds: z.array(idSchema).max(12),
+      }),
+    )
+    .max(500),
+});
+
+export const deviceQuerySchema = z.object({
+  deviceId: z
+    .string()
+    .min(8)
+    .max(128)
+    .regex(/^[a-zA-Z0-9._:-]+$/, "设备标识格式无效"),
+});

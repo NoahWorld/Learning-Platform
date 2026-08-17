@@ -1,0 +1,139 @@
+import Database from "better-sqlite3";
+import { mkdirSync } from "node:fs";
+import { dirname, resolve } from "node:path";
+
+const CURRENT_SCHEMA_VERSION = 1;
+
+export function openDatabase(databasePath = "./data/study-workbench.sqlite") {
+  const resolvedPath = databasePath === ":memory:" ? databasePath : resolve(databasePath);
+
+  if (resolvedPath !== ":memory:") {
+    mkdirSync(dirname(resolvedPath), { recursive: true });
+  }
+
+  const db = new Database(resolvedPath);
+  db.pragma("foreign_keys = ON");
+  db.pragma("busy_timeout = 5000");
+
+  if (resolvedPath !== ":memory:") {
+    db.pragma("journal_mode = WAL");
+  }
+
+  migrate(db);
+  return db;
+}
+
+function migrate(db) {
+  const version = db.pragma("user_version", { simple: true });
+
+  if (version > CURRENT_SCHEMA_VERSION) {
+    throw new Error(
+      `Database schema version ${version} is newer than supported version ${CURRENT_SCHEMA_VERSION}`,
+    );
+  }
+
+  if (version === 0) {
+    db.transaction(() => {
+      db.exec(`
+        CREATE TABLE materials (
+          id TEXT PRIMARY KEY,
+          title TEXT NOT NULL,
+          summary TEXT NOT NULL DEFAULT '',
+          content TEXT NOT NULL DEFAULT '',
+          category TEXT NOT NULL DEFAULT '未分类',
+          estimated_minutes INTEGER NOT NULL DEFAULT 0 CHECK (estimated_minutes >= 0),
+          status TEXT NOT NULL DEFAULT 'published' CHECK (status IN ('draft', 'published')),
+          created_at TEXT NOT NULL,
+          updated_at TEXT NOT NULL
+        );
+
+        CREATE TABLE exams (
+          id TEXT PRIMARY KEY,
+          title TEXT NOT NULL,
+          description TEXT NOT NULL DEFAULT '',
+          duration_minutes INTEGER NOT NULL CHECK (duration_minutes > 0),
+          passing_score INTEGER NOT NULL DEFAULT 60 CHECK (passing_score BETWEEN 0 AND 100),
+          status TEXT NOT NULL DEFAULT 'published' CHECK (status IN ('draft', 'published')),
+          created_at TEXT NOT NULL,
+          updated_at TEXT NOT NULL
+        );
+
+        CREATE TABLE questions (
+          id TEXT PRIMARY KEY,
+          exam_id TEXT NOT NULL REFERENCES exams(id) ON DELETE CASCADE,
+          type TEXT NOT NULL CHECK (type IN ('single', 'multiple')),
+          prompt TEXT NOT NULL,
+          explanation TEXT NOT NULL DEFAULT '',
+          position INTEGER NOT NULL CHECK (position >= 0),
+          points INTEGER NOT NULL DEFAULT 1 CHECK (points > 0),
+          UNIQUE (exam_id, position)
+        );
+
+        CREATE TABLE question_options (
+          id TEXT PRIMARY KEY,
+          question_id TEXT NOT NULL REFERENCES questions(id) ON DELETE CASCADE,
+          label TEXT NOT NULL,
+          content TEXT NOT NULL,
+          is_correct INTEGER NOT NULL CHECK (is_correct IN (0, 1)),
+          position INTEGER NOT NULL CHECK (position >= 0),
+          UNIQUE (question_id, position)
+        );
+
+        CREATE TABLE assets (
+          id TEXT PRIMARY KEY,
+          material_id TEXT NOT NULL REFERENCES materials(id) ON DELETE CASCADE,
+          role TEXT NOT NULL CHECK (role IN ('cover', 'attachment')),
+          title TEXT NOT NULL,
+          object_key TEXT NOT NULL UNIQUE,
+          file_name TEXT NOT NULL,
+          content_type TEXT NOT NULL,
+          size_bytes INTEGER NOT NULL CHECK (size_bytes >= 0),
+          created_at TEXT NOT NULL,
+          updated_at TEXT NOT NULL
+        );
+
+        CREATE TABLE attempts (
+          id TEXT PRIMARY KEY,
+          device_id TEXT NOT NULL,
+          exam_id TEXT NOT NULL REFERENCES exams(id) ON DELETE RESTRICT,
+          score INTEGER NOT NULL CHECK (score BETWEEN 0 AND 100),
+          correct_count INTEGER NOT NULL CHECK (correct_count >= 0),
+          wrong_count INTEGER NOT NULL CHECK (wrong_count >= 0),
+          total_questions INTEGER NOT NULL CHECK (total_questions > 0),
+          duration_seconds INTEGER NOT NULL DEFAULT 0 CHECK (duration_seconds >= 0),
+          started_at TEXT NOT NULL,
+          submitted_at TEXT NOT NULL
+        );
+
+        CREATE TABLE attempt_answers (
+          attempt_id TEXT NOT NULL REFERENCES attempts(id) ON DELETE CASCADE,
+          question_id TEXT NOT NULL REFERENCES questions(id) ON DELETE RESTRICT,
+          selected_option_ids TEXT NOT NULL,
+          is_correct INTEGER NOT NULL CHECK (is_correct IN (0, 1)),
+          earned_points INTEGER NOT NULL DEFAULT 0 CHECK (earned_points >= 0),
+          PRIMARY KEY (attempt_id, question_id)
+        );
+
+        CREATE INDEX idx_materials_status_category
+          ON materials(status, category);
+
+        CREATE INDEX idx_exams_status_updated_at
+          ON exams(status, updated_at DESC);
+
+        CREATE INDEX idx_questions_exam_position
+          ON questions(exam_id, position);
+
+        CREATE INDEX idx_assets_material_role
+          ON assets(material_id, role);
+
+        CREATE INDEX idx_attempts_device_submitted
+          ON attempts(device_id, submitted_at DESC);
+
+        CREATE INDEX idx_attempt_answers_question_correct
+          ON attempt_answers(question_id, is_correct);
+      `);
+      db.pragma(`user_version = ${CURRENT_SCHEMA_VERSION}`);
+      db.pragma("optimize");
+    })();
+  }
+}

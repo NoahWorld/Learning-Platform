@@ -1,0 +1,80 @@
+{
+  "materials": [
+    {
+      "id": "sample-learning-method",
+      "title": "示例：主动回忆学习法",
+      "summary": "理解为什么“合上书再回想”比重复阅读更有效。",
+      "content": "# 主动回忆\n\n主动回忆的核心，是在不看答案的情况下尝试提取信息。\n\n## 一次练习流程\n\n1. 学习一个小节。\n2. 合上资料，写下记住的要点。\n3. 对照原文补漏。\n4. 隔一段时间再次自测。\n\n> 这是一条示例资料，正式导入时可替换或删除。",
+      "category": "学习方法",
+      "estimatedMinutes": 6,
+      "status": "published"
+    }
+  ],
+  "assets": [],
+  "exams": [
+    {
+      "id": "sample-learning-check",
+      "title": "示例：学习方法小测",
+      "description": "用于验证试卷导入格式的两道示例题。",
+      "durationMinutes": 5,
+      "passingScore": 60,
+      "status": "published",
+      "questions": [
+        {
+          "id": "sample-q-active-recall",
+          "type": "single",
+          "prompt": "下面哪一种行为最符合主动回忆？",
+          "explanation": "主动回忆要求先脱离资料，主动尝试提取已经学过的信息。",
+          "points": 1,
+          "options": [
+            {
+              "id": "sample-q1-a",
+              "label": "A",
+              "content": "连续重读同一页三遍",
+              "correct": false
+            },
+            {
+              "id": "sample-q1-b",
+              "label": "B",
+              "content": "合上资料后写出关键要点",
+              "correct": true
+            },
+            {
+              "id": "sample-q1-c",
+              "label": "C",
+              "content": "只把重点句子涂成不同颜色",
+              "correct": false
+            }
+          ]
+        },
+        {
+          "id": "sample-q-review",
+          "type": "multiple",
+          "prompt": "一次有效复盘通常包含哪些步骤？",
+          "explanation": "记录错误原因并安排再次练习，才能形成可执行的复盘闭环。",
+          "points": 2,
+          "options": [
+            {
+              "id": "sample-q2-a",
+              "label": "A",
+              "content": "定位错误原因",
+              "correct": true
+            },
+            {
+              "id": "sample-q2-b",
+              "label": "B",
+              "content": "只看总分，不看题目",
+              "correct": false
+            },
+            {
+              "id": "sample-q2-c",
+              "label": "C",
+              "content": "安排下一次针对性练习",
+              "correct": true
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

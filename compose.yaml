@@ -1,0 +1,63 @@
+name: learning-workbench
+
+services:
+  app:
+    build:
+      context: .
+    image: learning-workbench-app:local
+    restart: unless-stopped
+    init: true
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      HOST: 0.0.0.0
+      DATABASE_PATH: /app/data/study-workbench.sqlite
+      LOG_LEVEL: info
+      MINIO_ENDPOINT: minio
+      MINIO_PORT: 9000
+      MINIO_USE_SSL: "false"
+      MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY:?MINIO_ACCESS_KEY is required}
+      MINIO_SECRET_KEY: ${MINIO_SECRET_KEY:?MINIO_SECRET_KEY is required}
+      MINIO_BUCKET: ${MINIO_BUCKET:-learning-assets}
+    ports:
+      - "80:3000"
+    volumes:
+      - app_data:/app/data
+      - ./imports:/app/imports:ro
+    depends_on:
+      minio:
+        condition: service_started
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - fetch('http://127.0.0.1:3000/api/health').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    mem_limit: 512m
+
+  minio:
+    image: quay.io/minio/minio:RELEASE.2025-09-07T16-13-09Z
+    restart: unless-stopped
+    command: server /data
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ACCESS_KEY:?MINIO_ACCESS_KEY is required}
+      MINIO_ROOT_PASSWORD: ${MINIO_SECRET_KEY:?MINIO_SECRET_KEY is required}
+    volumes:
+      - minio_data:/data
+    expose:
+      - "9000"
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 512m
+
+volumes:
+  app_data:
+  minio_data:
