@@ -1,8 +1,16 @@
 ARG NODE_IMAGE=node:22-bookworm-slim
 FROM ${NODE_IMAGE} AS build
 
+ARG DEBIAN_MIRROR=
+ARG DEBIAN_SECURITY_MIRROR=
 WORKDIR /app
-RUN apt-get update \
+RUN if [ -n "$DEBIAN_MIRROR" ]; then \
+      sed -i "s|http://deb.debian.org/debian|$DEBIAN_MIRROR|g" /etc/apt/sources.list.d/debian.sources; \
+    fi \
+    && if [ -n "$DEBIAN_SECURITY_MIRROR" ]; then \
+      sed -i "s|http://deb.debian.org/debian-security|$DEBIAN_SECURITY_MIRROR|g" /etc/apt/sources.list.d/debian.sources; \
+    fi \
+    && apt-get update \
     && apt-get install -y --no-install-recommends python3 make g++ \
     && rm -rf /var/lib/apt/lists/*
 COPY package.json package-lock.json ./

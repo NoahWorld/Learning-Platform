@@ -6,6 +6,8 @@ services:
       context: .
       args:
         NODE_IMAGE: ${NODE_IMAGE:-node:22-bookworm-slim}
+        DEBIAN_MIRROR: ${DEBIAN_MIRROR:-}
+        DEBIAN_SECURITY_MIRROR: ${DEBIAN_SECURITY_MIRROR:-}
     image: learning-workbench-app:local
     restart: unless-stopped
     init: true

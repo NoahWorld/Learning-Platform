@@ -34,6 +34,7 @@
 - 启停命令：`docker compose up -d --build`、`docker compose down`。
 - 生产密钥只保存在服务器的 `/opt/learning-workbench/.env`，不得提交 Git。
 - Dockerfile 的 Node 基础镜像通过 `NODE_IMAGE` 构建参数覆盖；代码默认官方镜像，大陆部署可在服务器 `.env` 中指定可信代理。
+- Debian 构建源可通过 `DEBIAN_MIRROR` 与 `DEBIAN_SECURITY_MIRROR` 覆盖；代码默认仍使用官方源。
 - `better-sqlite3` 原生模块在 Docker 构建阶段使用 Python/make/g++ 编译；运行镜像只复制裁剪后的生产依赖，不携带编译工具链。
 - 当前仅通过 HTTP/IP 提供服务，因此关闭 HSTS 与 CSP `upgrade-insecure-requests`；配置域名和 TLS 后必须同步恢复这两项。
 - 部署后必须检查容器健康状态、`/api/health`、首页、前端深层路由和容器日志。

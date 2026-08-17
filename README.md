@@ -57,7 +57,7 @@ mkdir -p imports
 docker compose up -d --build
 ```
 
-如果服务器无法访问 Docker Hub，可在 `.env` 中把 `NODE_IMAGE` 指向可用的可信镜像代理；默认值仍是官方 `node:22-bookworm-slim`。
+如果服务器无法访问 Docker Hub，可在 `.env` 中把 `NODE_IMAGE` 指向可用的可信镜像代理；默认值仍是官方 `node:22-bookworm-slim`。原生模块编译期间如无法访问 Debian 官方源，可通过 `DEBIAN_MIRROR` 和 `DEBIAN_SECURITY_MIRROR` 覆盖软件源；默认保持官方源。
 
 应用公开宿主机 80 端口，SQLite 与 MinIO 数据分别保存在 Docker 命名卷中；MinIO 的 API 和管理界面不暴露到公网。
 
