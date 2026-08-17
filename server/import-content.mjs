@@ -99,8 +99,8 @@ export function importContent(db, rawContent, uploadedAssets = []) {
     `);
     const insertQuestion = db.prepare(`
       INSERT INTO questions (
-        id, exam_id, type, prompt, explanation, position, points
-      ) VALUES (?, ?, ?, ?, ?, ?, ?)
+        id, exam_id, type, section, passage, prompt, explanation, position, points
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
     `);
     const insertOption = db.prepare(`
       INSERT INTO question_options (
@@ -136,6 +136,8 @@ export function importContent(db, rawContent, uploadedAssets = []) {
           question.id,
           exam.id,
           question.type,
+          question.section,
+          question.passage,
           question.prompt,
           question.explanation,
           questionIndex,

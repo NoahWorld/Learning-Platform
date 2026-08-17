@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="720" viewBox="0 0 1200 720" role="img" aria-labelledby="title desc">
+  <title id="title">中级经济师人力资源管理封面</title>
+  <desc id="desc">明亮的漫画风学习卡片，包含人物、书本、图表和勾选符号。</desc>
+  <rect width="1200" height="720" rx="48" fill="#fff7d6"/>
+  <path d="M0 520C190 425 342 608 544 520s344-20 656-112v312H0Z" fill="#ff7ca8"/>
+  <circle cx="1050" cy="116" r="146" fill="#ffd43b"/>
+  <path d="M1020 78l22 43 47 7-34 33 8 47-43-22-42 22 8-47-34-33 47-7Z" fill="#fff" stroke="#202020" stroke-width="8"/>
+  <rect x="76" y="78" width="706" height="424" rx="36" fill="#fff" stroke="#202020" stroke-width="10"/>
+  <text x="132" y="170" font-family="Arial, PingFang SC, sans-serif" font-size="34" font-weight="700" fill="#6d55e8">ECONOMIST · HR</text>
+  <text x="132" y="258" font-family="Arial, PingFang SC, sans-serif" font-size="66" font-weight="900" fill="#202020">中级经济师</text>
+  <text x="132" y="340" font-family="Arial, PingFang SC, sans-serif" font-size="62" font-weight="900" fill="#202020">人力资源管理</text>
+  <rect x="132" y="390" width="430" height="66" rx="33" fill="#53d7c1" stroke="#202020" stroke-width="6"/>
+  <text x="175" y="435" font-family="Arial, PingFang SC, sans-serif" font-size="30" font-weight="800" fill="#202020">缩编全真结构体验卷</text>
+  <g transform="translate(825 300) rotate(-5)">
+    <rect width="248" height="300" rx="28" fill="#fff" stroke="#202020" stroke-width="10"/>
+    <path d="M54 72h140M54 124h112M54 176h140M54 228h84" stroke="#6d55e8" stroke-width="16" stroke-linecap="round"/>
+    <circle cx="197" cy="230" r="62" fill="#53d7c1" stroke="#202020" stroke-width="8"/>
+    <path d="M168 230l20 20 39-48" fill="none" stroke="#202020" stroke-width="13" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+  <path d="M60 625h685" stroke="#202020" stroke-width="11" stroke-linecap="round"/>
+  <text x="75" y="682" font-family="Arial, PingFang SC, sans-serif" font-size="31" font-weight="800" fill="#202020">知行台 · 学习 → 自测 → 复盘</text>
+</svg>

@@ -1347,6 +1347,7 @@ img {
 }
 
 .review-card.correct { border-left: 9px solid var(--green); }
+.review-card.partial { border-left: 9px solid var(--yellow); }
 .review-card.incorrect { border-left: 9px solid var(--pink); }
 
 .review-card > header {
@@ -1879,6 +1880,10 @@ img {
 }
 
 .question-topline { display: flex; justify-content: space-between; gap: 15px; color: #747f7a; font-size: 11px; font-weight: 750; }
+.case-passage { margin: 18px 0 22px; padding: 16px 18px; border: 1px solid #d9e3df; border-left: 4px solid #60756c; border-radius: 12px; background: #f4f7f5; color: #425149; }
+.case-passage strong { display: block; margin-bottom: 7px; color: #26352e; font-size: 12px; letter-spacing: .08em; }
+.case-passage p { margin: 0; white-space: pre-line; font-size: 14px; line-height: 1.75; }
+.review-passage { grid-column: 1 / -1; margin: 4px 0 16px; }
 .question-card h1 { margin: 25px 0 8px; font-family: "Songti SC", STSong, serif; font-size: clamp(23px, 3.3vw, 31px); line-height: 1.55; }
 .question-hint { margin: 0; color: #78827e; font-size: 12px; }
 .option-list { display: grid; gap: 11px; margin-top: 27px; }

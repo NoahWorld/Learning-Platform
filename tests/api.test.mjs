@@ -3,12 +3,16 @@ import { mkdtemp, readFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import test from "node:test";
+import Database from "better-sqlite3";
 import { createApp } from "../server/app.mjs";
 import { openDatabase } from "../server/db.mjs";
 import { importContent } from "../server/import-content.mjs";
 
 const fixture = JSON.parse(
   await readFile(new URL("../data/content.example.json", import.meta.url), "utf8"),
+);
+const hrEconomistFixture = JSON.parse(
+  await readFile(new URL("../data/hr-economist-sample.json", import.meta.url), "utf8"),
 );
 const deviceId = "device-test-123";
 
@@ -167,4 +171,101 @@ test("invalid submissions fail clearly and do not create attempts", async (conte
   assert.equal(invalid.statusCode, 400);
   assert.match(invalid.json().error, /重复题目/);
   assert.equal(testApp.app.db.prepare("SELECT COUNT(*) AS count FROM attempts").get().count, 0);
+});
+
+test("multiple-choice omissions receive official-style partial credit", async (context) => {
+  const testApp = await createTestApp();
+  context.after(() => testApp.cleanup());
+
+  const response = await testApp.app.inject({
+    method: "POST",
+    url: "/api/exams/sample-learning-check/submissions",
+    payload: {
+      deviceId,
+      durationSeconds: 20,
+      answers: [
+        { questionId: "sample-q-active-recall", optionIds: ["sample-q1-b"] },
+        { questionId: "sample-q-review", optionIds: ["sample-q2-a"] },
+      ],
+    },
+  });
+
+  assert.equal(response.statusCode, 201);
+  const result = response.json();
+  assert.equal(result.score, 50);
+  assert.equal(result.correctCount, 1);
+  assert.equal(result.wrongCount, 1);
+  assert.equal(result.answers[1].earnedPoints, 0.5);
+  assert.equal(result.answers[1].isCorrect, false);
+});
+
+test("version 1 databases migrate case-question fields without losing rows", async (context) => {
+  const directory = await mkdtemp(join(tmpdir(), "learning-workbench-migration-"));
+  const databasePath = join(directory, "version-1.sqlite");
+  context.after(() => rm(directory, { recursive: true, force: true }));
+
+  const legacyDb = new Database(databasePath);
+  legacyDb.exec(`
+    CREATE TABLE questions (
+      id TEXT PRIMARY KEY,
+      exam_id TEXT NOT NULL,
+      type TEXT NOT NULL CHECK (type IN ('single', 'multiple')),
+      prompt TEXT NOT NULL,
+      explanation TEXT NOT NULL DEFAULT '',
+      position INTEGER NOT NULL CHECK (position >= 0),
+      points INTEGER NOT NULL DEFAULT 1 CHECK (points > 0)
+    );
+    INSERT INTO questions (id, exam_id, type, prompt, explanation, position, points)
+      VALUES ('legacy-q', 'legacy-exam', 'single', '旧题目', '旧解析', 0, 1);
+    PRAGMA user_version = 1;
+  `);
+  legacyDb.close();
+
+  const migratedDb = openDatabase(databasePath);
+  context.after(() => migratedDb.close());
+  assert.equal(migratedDb.pragma("user_version", { simple: true }), 2);
+  assert.deepEqual(
+    migratedDb.prepare("SELECT id, section, passage FROM questions WHERE id = ?").get("legacy-q"),
+    { id: "legacy-q", section: "standard", passage: "" },
+  );
+});
+
+test("HR economist sample imports its exact exam structure and asset metadata", () => {
+  const db = openDatabase(":memory:");
+  const uploadedAssets = hrEconomistFixture.assets.map((asset, index) => ({
+    ...asset,
+    objectKey: `test/${asset.id}`,
+    fileName: asset.source.split("/").at(-1),
+    contentType: index === 0 ? "image/svg+xml" : "text/markdown",
+    sizeBytes: 100 + index,
+  }));
+
+  try {
+    assert.deepEqual(importContent(db, hrEconomistFixture, uploadedAssets), {
+      materials: 1,
+      exams: 1,
+      questions: 20,
+      assets: 2,
+    });
+    assert.deepEqual(
+      db.prepare(
+        `SELECT
+           SUM(CASE WHEN section = 'standard' AND type = 'single' THEN 1 ELSE 0 END) AS singles,
+           SUM(CASE WHEN section = 'standard' AND type = 'multiple' THEN 1 ELSE 0 END) AS multiples,
+           SUM(CASE WHEN section = 'case' THEN 1 ELSE 0 END) AS cases,
+           SUM(points) AS total_points
+         FROM questions
+         WHERE exam_id = ?`,
+      ).get("hr-economist-practice-2026-a"),
+      { singles: 12, multiples: 4, cases: 4, total_points: 28 },
+    );
+    assert.equal(
+      db.prepare("SELECT COUNT(*) AS count FROM assets WHERE material_id = ?").get(
+        "hr-economist-exam-guide-2026",
+      ).count,
+      2,
+    );
+  } finally {
+    db.close();
+  }
 });

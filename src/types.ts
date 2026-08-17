@@ -58,6 +58,8 @@ export interface ExamOption {
 export interface ExamQuestion {
   id: string;
   type: "single" | "multiple";
+  section: "standard" | "case";
+  passage: string;
   prompt: string;
   points: number;
   explanation?: string;
@@ -86,6 +88,8 @@ export interface AnswerReview {
   prompt: string;
   explanation: string;
   type: "single" | "multiple";
+  section: "standard" | "case";
+  passage: string;
   points: number;
   earnedPoints: number;
   isCorrect: boolean;

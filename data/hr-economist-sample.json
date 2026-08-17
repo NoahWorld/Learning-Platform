@@ -1,0 +1,315 @@
+{
+  "materials": [
+    {
+      "id": "hr-economist-exam-guide-2026",
+      "title": "中级经济师·人力资源管理：考试说明与高频框架",
+      "summary": "先看题型、计分规则和六大知识模块，再进入缩编全真结构体验卷。",
+      "content": "# 人力资源管理专业知识和实务\n\n这份资料用于验证知行台的资料阅读、附件存储、模拟考试、成绩与错题闭环。题目均为原创模拟题，不是真题复刻。\n\n## 正式考试结构\n\n- 《专业知识和实务》为客观题，考试时长 90 分钟。\n- 通常包含 60 道单项选择题、20 道多项选择题和 20 道案例分析题。\n- 满分 140 分，全国相对固定合格标准为满分的 60%，即 84 分。\n- 多选题全选正确得满分；少选时，每个选中的正确选项得 0.5 分；错选不得分。案例分析题由单选和多选组成，按相应规则计分。\n\n本平台首套体验卷按 60:20:20 等比例缩编为 20 题，方便快速检查页面、接口和数据链路；平台成绩仍折算为百分制。\n\n## 高频知识地图\n\n1. **组织行为学**：需要、动机、领导、组织设计和文化。\n2. **战略性人力资源管理**：战略匹配、高绩效工作系统与组织变革。\n3. **人力资源规划与甄选**：工作分析、招募、测评信效度。\n4. **培训、绩效与薪酬**：学习评估、绩效闭环、薪酬公平与激励。\n5. **劳动力市场**：劳动力供求、人力资本投资、工资差别。\n6. **劳动关系与社会保险**：劳动合同、争议处理与社会保障。\n\n## 两条法律记忆点\n\n- 同一用人单位与同一劳动者只能约定一次试用期；试用期包含在劳动合同期限内。\n- 劳动争议申请仲裁的一般时效期间为一年，从当事人知道或者应当知道权利被侵害之日起计算。\n\n> 法律依据可查阅人力资源社会保障部公布的《劳动合同法》和中国人大网公布的《劳动争议调解仲裁法》。本资料仅用于考试学习，不构成法律意见。",
+      "category": "中级经济师·人力资源",
+      "estimatedMinutes": 18,
+      "status": "published"
+    }
+  ],
+  "assets": [
+    {
+      "id": "hr-economist-cover-2026",
+      "materialId": "hr-economist-exam-guide-2026",
+      "role": "cover",
+      "title": "人力资源管理学习封面",
+      "source": "assets/hr-economist-cover.svg"
+    },
+    {
+      "id": "hr-economist-review-card-2026",
+      "materialId": "hr-economist-exam-guide-2026",
+      "role": "attachment",
+      "title": "人力资源管理速记卡",
+      "source": "assets/hr-review-card.md"
+    }
+  ],
+  "exams": [
+    {
+      "id": "hr-economist-practice-2026-a",
+      "title": "中级经济师·人力资源管理｜全真结构体验卷 A",
+      "description": "20 题缩编卷：12 道单选、4 道多选、4 道案例分析题。题型比例与正式专业科目一致，满分 28 分并折算百分制。",
+      "durationMinutes": 25,
+      "passingScore": 60,
+      "status": "published",
+      "questions": [
+        {
+          "id": "hr26a-q01",
+          "type": "single",
+          "prompt": "根据赫茨伯格的双因素理论，下列因素中最可能属于激励因素的是（ ）。",
+          "explanation": "成就感、认可、责任和晋升等与工作本身相关的因素属于激励因素；工资、监督方式和工作条件通常属于保健因素。",
+          "points": 1,
+          "options": [
+            { "id": "hr26a-q01-a", "label": "A", "content": "工作环境的照明条件", "correct": false },
+            { "id": "hr26a-q01-b", "label": "B", "content": "组织的薪酬政策", "correct": false },
+            { "id": "hr26a-q01-c", "label": "C", "content": "完成挑战性任务后的成就感", "correct": true },
+            { "id": "hr26a-q01-d", "label": "D", "content": "上级的日常监督方式", "correct": false }
+          ]
+        },
+        {
+          "id": "hr26a-q02",
+          "type": "single",
+          "prompt": "在期望理论中，员工相信“只要投入足够努力就能达到绩效要求”，反映的是（ ）。",
+          "explanation": "期望是个人对努力能够带来一定绩效水平的主观估计；工具性关注绩效能否带来奖励，效价关注奖励本身的吸引力。",
+          "points": 1,
+          "options": [
+            { "id": "hr26a-q02-a", "label": "A", "content": "效价", "correct": false },
+            { "id": "hr26a-q02-b", "label": "B", "content": "公平", "correct": false },
+            { "id": "hr26a-q02-c", "label": "C", "content": "工具性", "correct": false },
+            { "id": "hr26a-q02-d", "label": "D", "content": "期望", "correct": true }
+          ]
+        },
+        {
+          "id": "hr26a-q03",
+          "type": "single",
+          "prompt": "员工认为自己的投入产出比低于参照对象时，按照公平理论，他最可能采取的行为是（ ）。",
+          "explanation": "感知到不公平时，员工可能改变投入或产出、改变对投入产出的认知、更换参照对象或离开组织。降低投入是典型反应。",
+          "points": 1,
+          "options": [
+            { "id": "hr26a-q03-a", "label": "A", "content": "主动增加工作投入且不寻求解释", "correct": false },
+            { "id": "hr26a-q03-b", "label": "B", "content": "降低工作投入以恢复心理平衡", "correct": true },
+            { "id": "hr26a-q03-c", "label": "C", "content": "必然提高组织承诺", "correct": false },
+            { "id": "hr26a-q03-d", "label": "D", "content": "停止与任何人比较", "correct": false }
+          ]
+        },
+        {
+          "id": "hr26a-q04",
+          "type": "single",
+          "prompt": "目标管理实践中，更有利于提升绩效的目标特征是（ ）。",
+          "explanation": "目标设置理论强调具体且有一定难度的目标，并配合及时反馈，通常比模糊或过于容易的目标更能改善绩效。",
+          "points": 1,
+          "options": [
+            { "id": "hr26a-q04-a", "label": "A", "content": "模糊且容易完成", "correct": false },
+            { "id": "hr26a-q04-b", "label": "B", "content": "具体、有挑战性并提供反馈", "correct": true },
+            { "id": "hr26a-q04-c", "label": "C", "content": "只强调结果且完全不反馈", "correct": false },
+            { "id": "hr26a-q04-d", "label": "D", "content": "由员工随时单方面改变", "correct": false }
+          ]
+        },
+        {
+          "id": "hr26a-q05",
+          "type": "single",
+          "prompt": "领导—成员交换理论认为，领导者与下属之间通常会形成（ ）。",
+          "explanation": "领导—成员交换理论强调领导者与不同下属建立质量不同的交换关系，常表现为圈内成员与圈外成员。",
+          "points": 1,
+          "options": [
+            { "id": "hr26a-q05-a", "label": "A", "content": "完全相同的交换关系", "correct": false },
+            { "id": "hr26a-q05-b", "label": "B", "content": "仅由正式职位决定的关系", "correct": false },
+            { "id": "hr26a-q05-c", "label": "C", "content": "质量存在差异的交换关系", "correct": true },
+            { "id": "hr26a-q05-d", "label": "D", "content": "不受信任影响的关系", "correct": false }
+          ]
+        },
+        {
+          "id": "hr26a-q06",
+          "type": "single",
+          "prompt": "矩阵组织形式最典型的特征是（ ）。",
+          "explanation": "矩阵组织把职能维度与项目或产品维度结合起来，员工往往同时接受职能经理和项目经理的双重领导。",
+          "points": 1,
+          "options": [
+            { "id": "hr26a-q06-a", "label": "A", "content": "员工通常存在双重汇报关系", "correct": true },
+            { "id": "hr26a-q06-b", "label": "B", "content": "完全取消专业职能分工", "correct": false },
+            { "id": "hr26a-q06-c", "label": "C", "content": "只适用于规模很小的组织", "correct": false },
+            { "id": "hr26a-q06-d", "label": "D", "content": "权力永远集中于最高管理层", "correct": false }
+          ]
+        },
+        {
+          "id": "hr26a-q07",
+          "type": "single",
+          "prompt": "战略性人力资源管理中的“纵向一致性”主要是指（ ）。",
+          "explanation": "纵向一致性强调人力资源管理实践与组织战略相匹配；横向一致性强调各项人力资源管理实践彼此协调。",
+          "points": 1,
+          "options": [
+            { "id": "hr26a-q07-a", "label": "A", "content": "不同员工获得完全相同的薪酬", "correct": false },
+            { "id": "hr26a-q07-b", "label": "B", "content": "人力资源实践与组织战略相匹配", "correct": true },
+            { "id": "hr26a-q07-c", "label": "C", "content": "人力资源部门取代业务部门决策", "correct": false },
+            { "id": "hr26a-q07-d", "label": "D", "content": "所有企业采用同一套最佳实践", "correct": false }
+          ]
+        },
+        {
+          "id": "hr26a-q08",
+          "type": "single",
+          "prompt": "工作分析结果中，主要说明任职者需要具备何种知识、技能、能力和其他特征的是（ ）。",
+          "explanation": "任职资格说明书关注承担工作所需要的人的条件；工作描述主要说明工作职责、任务、权限和工作关系。",
+          "points": 1,
+          "options": [
+            { "id": "hr26a-q08-a", "label": "A", "content": "组织结构图", "correct": false },
+            { "id": "hr26a-q08-b", "label": "B", "content": "任职资格说明书", "correct": true },
+            { "id": "hr26a-q08-c", "label": "C", "content": "绩效改进计划", "correct": false },
+            { "id": "hr26a-q08-d", "label": "D", "content": "薪酬调查报告", "correct": false }
+          ]
+        },
+        {
+          "id": "hr26a-q09",
+          "type": "single",
+          "prompt": "某公司发现甄选测试得分与员工入职后的绩效得分高度相关，这主要说明该测试具有较好的（ ）。",
+          "explanation": "甄选工具得分与未来工作绩效这一效标之间存在稳定关系，体现较好的效标关联效度。",
+          "points": 1,
+          "options": [
+            { "id": "hr26a-q09-a", "label": "A", "content": "内容效度", "correct": false },
+            { "id": "hr26a-q09-b", "label": "B", "content": "表面效度", "correct": false },
+            { "id": "hr26a-q09-c", "label": "C", "content": "效标关联效度", "correct": true },
+            { "id": "hr26a-q09-d", "label": "D", "content": "内部一致性信度", "correct": false }
+          ]
+        },
+        {
+          "id": "hr26a-q10",
+          "type": "single",
+          "prompt": "关于 360 度绩效反馈的说法，正确的是（ ）。",
+          "explanation": "360 度反馈综合上级、同事、下属、本人以及内外部客户等多个来源的信息，适合发展性反馈，但实施质量取决于用途、保密和评价者训练。",
+          "points": 1,
+          "options": [
+            { "id": "hr26a-q10-a", "label": "A", "content": "只收集直接上级的评价", "correct": false },
+            { "id": "hr26a-q10-b", "label": "B", "content": "能够整合多个相关主体的反馈", "correct": true },
+            { "id": "hr26a-q10-c", "label": "C", "content": "天然不会受到评价偏差影响", "correct": false },
+            { "id": "hr26a-q10-d", "label": "D", "content": "只能用于确定基本工资", "correct": false }
+          ]
+        },
+        {
+          "id": "hr26a-q11",
+          "type": "single",
+          "prompt": "企业开展薪酬市场调查，最直接的目的通常是（ ）。",
+          "explanation": "薪酬市场调查帮助企业掌握外部市场薪酬水平，支持薪酬定位与外部竞争性决策。",
+          "points": 1,
+          "options": [
+            { "id": "hr26a-q11-a", "label": "A", "content": "评价员工个人绩效", "correct": false },
+            { "id": "hr26a-q11-b", "label": "B", "content": "确定职位内部相对价值", "correct": false },
+            { "id": "hr26a-q11-c", "label": "C", "content": "了解外部劳动力市场的薪酬水平", "correct": true },
+            { "id": "hr26a-q11-d", "label": "D", "content": "替代企业的薪酬战略", "correct": false }
+          ]
+        },
+        {
+          "id": "hr26a-q12",
+          "type": "single",
+          "prompt": "根据《劳动争议调解仲裁法》，劳动争议申请仲裁的一般时效期间是（ ）。",
+          "explanation": "一般仲裁时效为一年，从当事人知道或者应当知道其权利被侵害之日起计算；拖欠劳动报酬等情形另有特别规定。",
+          "points": 1,
+          "options": [
+            { "id": "hr26a-q12-a", "label": "A", "content": "30 日", "correct": false },
+            { "id": "hr26a-q12-b", "label": "B", "content": "60 日", "correct": false },
+            { "id": "hr26a-q12-c", "label": "C", "content": "6 个月", "correct": false },
+            { "id": "hr26a-q12-d", "label": "D", "content": "1 年", "correct": true }
+          ]
+        },
+        {
+          "id": "hr26a-q13",
+          "type": "multiple",
+          "prompt": "下列领导行为中，属于变革型领导特征的有（ ）。",
+          "explanation": "变革型领导包括理想化影响、鼓舞性激励、智力激发和个性化关怀。例外管理更接近交易型领导。",
+          "points": 2,
+          "options": [
+            { "id": "hr26a-q13-a", "label": "A", "content": "通过愿景激发下属", "correct": true },
+            { "id": "hr26a-q13-b", "label": "B", "content": "鼓励下属重新审视旧假设", "correct": true },
+            { "id": "hr26a-q13-c", "label": "C", "content": "关注每位下属的发展需要", "correct": true },
+            { "id": "hr26a-q13-d", "label": "D", "content": "仅在出现偏差时进行例外管理", "correct": false },
+            { "id": "hr26a-q13-e", "label": "E", "content": "以自身行为形成理想化影响", "correct": true }
+          ]
+        },
+        {
+          "id": "hr26a-q14",
+          "type": "multiple",
+          "prompt": "为提高结构化面试的可靠性和有效性，组织可以采取的措施有（ ）。",
+          "explanation": "统一问题、明确评分锚点、训练评价者并由多名评价者独立评分，有助于减少随意性和偏差。仅凭直觉或临时改题会降低可比性。",
+          "points": 2,
+          "options": [
+            { "id": "hr26a-q14-a", "label": "A", "content": "依据工作分析设计统一问题", "correct": true },
+            { "id": "hr26a-q14-b", "label": "B", "content": "建立清晰的行为评分锚点", "correct": true },
+            { "id": "hr26a-q14-c", "label": "C", "content": "对面试评价者进行训练", "correct": true },
+            { "id": "hr26a-q14-d", "label": "D", "content": "让评价者只凭整体直觉打分", "correct": false },
+            { "id": "hr26a-q14-e", "label": "E", "content": "采用多名评价者独立评分", "correct": true }
+          ]
+        },
+        {
+          "id": "hr26a-q15",
+          "type": "multiple",
+          "prompt": "按照培训效果评估的常见层次，属于培训成果评估内容的有（ ）。",
+          "explanation": "培训评估通常考察反应、学习、行为和结果。培训预算规模是投入条件，不是培训成果层次。",
+          "points": 2,
+          "options": [
+            { "id": "hr26a-q15-a", "label": "A", "content": "受训者对课程的反应", "correct": true },
+            { "id": "hr26a-q15-b", "label": "B", "content": "知识或技能的掌握程度", "correct": true },
+            { "id": "hr26a-q15-c", "label": "C", "content": "工作行为是否发生改变", "correct": true },
+            { "id": "hr26a-q15-d", "label": "D", "content": "组织绩效结果是否改善", "correct": true },
+            { "id": "hr26a-q15-e", "label": "E", "content": "培训部门年度预算总额", "correct": false }
+          ]
+        },
+        {
+          "id": "hr26a-q16",
+          "type": "multiple",
+          "prompt": "关于劳动合同试用期的说法，符合现行《劳动合同法》的有（ ）。",
+          "explanation": "试用期包含在劳动合同期限内；同一单位与同一劳动者只能约定一次；两年期合同试用期最长两个月；试用期工资还不得低于当地最低工资标准。",
+          "points": 2,
+          "options": [
+            { "id": "hr26a-q16-a", "label": "A", "content": "同一用人单位与同一劳动者只能约定一次试用期", "correct": true },
+            { "id": "hr26a-q16-b", "label": "B", "content": "试用期不包含在劳动合同期限内", "correct": false },
+            { "id": "hr26a-q16-c", "label": "C", "content": "两年期劳动合同的试用期最长不得超过两个月", "correct": true },
+            { "id": "hr26a-q16-d", "label": "D", "content": "仅约定试用期的，该期限仍只按试用期处理", "correct": false },
+            { "id": "hr26a-q16-e", "label": "E", "content": "试用期工资不得低于劳动合同约定工资的百分之八十，并不得低于当地最低工资标准", "correct": true }
+          ]
+        },
+        {
+          "id": "hr26a-q17",
+          "type": "single",
+          "section": "case",
+          "passage": "甲互联网公司年初只给研发团队提出“尽快提升产品质量”的口号。主管平时很少与员工讨论进度，到年末才凭总体印象给出一个绩效等级。多名员工表示不知道评价依据，也不知道如何改进。公司准备重新设计绩效管理流程。",
+          "prompt": "针对案例中的首要问题，公司最先应采取的措施是（ ）。",
+          "explanation": "绩效管理应从明确、可衡量且与战略一致的目标开始。目标和标准不清会使后续监控、评价和反馈失去共同依据。",
+          "points": 2,
+          "options": [
+            { "id": "hr26a-q17-a", "label": "A", "content": "立即扩大强制分布比例", "correct": false },
+            { "id": "hr26a-q17-b", "label": "B", "content": "将“提升质量”转化为明确、可衡量的绩效目标", "correct": true },
+            { "id": "hr26a-q17-c", "label": "C", "content": "取消所有绩效评价", "correct": false },
+            { "id": "hr26a-q17-d", "label": "D", "content": "只提高年终奖金总额", "correct": false }
+          ]
+        },
+        {
+          "id": "hr26a-q18",
+          "type": "multiple",
+          "section": "case",
+          "passage": "甲互联网公司年初只给研发团队提出“尽快提升产品质量”的口号。主管平时很少与员工讨论进度，到年末才凭总体印象给出一个绩效等级。多名员工表示不知道评价依据，也不知道如何改进。公司准备重新设计绩效管理流程。",
+          "prompt": "为形成完整的绩效管理闭环，公司还可以采取的措施有（ ）。",
+          "explanation": "有效绩效管理包括持续沟通辅导、基于事实记录绩效、评价校准、反馈与改进。只看最近表现会造成近因误差。",
+          "points": 2,
+          "options": [
+            { "id": "hr26a-q18-a", "label": "A", "content": "安排定期绩效沟通和辅导", "correct": true },
+            { "id": "hr26a-q18-b", "label": "B", "content": "记录关键事件和阶段性成果", "correct": true },
+            { "id": "hr26a-q18-c", "label": "C", "content": "开展跨团队评价校准", "correct": true },
+            { "id": "hr26a-q18-d", "label": "D", "content": "只依据年末最后一个月的表现打分", "correct": false },
+            { "id": "hr26a-q18-e", "label": "E", "content": "反馈后共同制定绩效改进计划", "correct": true }
+          ]
+        },
+        {
+          "id": "hr26a-q19",
+          "type": "single",
+          "section": "case",
+          "passage": "乙制造企业计划招聘 100 名智能设备技术员。过去招聘时，各部门经理随意提问并凭第一印象录用，公司也没有统一岗位标准。新员工入职后三个月离职率很高，生产部门反映部分人员缺少必要的故障诊断能力。",
+          "prompt": "为改善甄选质量，企业首先应开展的工作是（ ）。",
+          "explanation": "没有清晰的岗位职责和任职条件，就无法确定招募对象、设计测评内容或评价候选人。工作分析是建立甄选标准的基础。",
+          "points": 2,
+          "options": [
+            { "id": "hr26a-q19-a", "label": "A", "content": "进行工作分析并明确任职资格", "correct": true },
+            { "id": "hr26a-q19-b", "label": "B", "content": "把面试时间统一延长一倍", "correct": false },
+            { "id": "hr26a-q19-c", "label": "C", "content": "只扩大招聘广告投放量", "correct": false },
+            { "id": "hr26a-q19-d", "label": "D", "content": "完全取消面试环节", "correct": false }
+          ]
+        },
+        {
+          "id": "hr26a-q20",
+          "type": "multiple",
+          "section": "case",
+          "passage": "乙制造企业计划招聘 100 名智能设备技术员。过去招聘时，各部门经理随意提问并凭第一印象录用，公司也没有统一岗位标准。新员工入职后三个月离职率很高，生产部门反映部分人员缺少必要的故障诊断能力。",
+          "prompt": "基于案例，能够提高甄选效度的做法有（ ）。",
+          "explanation": "结构化面试、与岗位一致的工作样本、评价者训练以及持续验证测评结果与工作绩效的关系，都有助于提升甄选质量。笔迹判断缺乏岗位相关证据。",
+          "points": 2,
+          "options": [
+            { "id": "hr26a-q20-a", "label": "A", "content": "设计基于岗位胜任要求的结构化面试", "correct": true },
+            { "id": "hr26a-q20-b", "label": "B", "content": "增加故障诊断工作样本测试", "correct": true },
+            { "id": "hr26a-q20-c", "label": "C", "content": "训练评价者并使用统一评分标准", "correct": true },
+            { "id": "hr26a-q20-d", "label": "D", "content": "根据候选人笔迹美观程度决定录用", "correct": false },
+            { "id": "hr26a-q20-e", "label": "E", "content": "跟踪测评得分与入职后绩效的关系", "correct": true }
+          ]
+        }
+      ]
+    }
+  ]
+}

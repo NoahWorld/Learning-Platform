@@ -30,6 +30,14 @@ npm run import:data -- /你的文件路径/content.json
 
 导入器会在事务中校验并写入资料、试卷和题目；任何格式错误都会中止整次导入。
 
+仓库同时提供一套可直接导入的中级经济师人力资源管理体验内容：
+
+```bash
+npm run import:data -- data/hr-economist-sample.json
+```
+
+该体验卷包含 12 道单选、4 道多选和 4 道案例分析题。题目的 `type` 控制作答方式，`section: "case"` 与 `passage` 用于案例题。多选题全选正确得满分；没有错选但少选时，每个已选正确选项得 0.5 分；错选不得分。
+
 图片和附件由 MinIO 保存，SQLite 只保存文件元数据。需要导入附件时，在 JSON 顶层加入：
 
 ```json

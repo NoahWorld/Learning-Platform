@@ -17,6 +17,8 @@ const questionSchema = z
   .object({
     id: idSchema,
     type: z.enum(["single", "multiple"]),
+    section: z.enum(["standard", "case"]).default("standard"),
+    passage: z.string().max(10000).default(""),
     prompt: z.string().min(1).max(5000),
     explanation: z.string().max(10000).default(""),
     points: z.number().int().positive().max(100).default(1),
@@ -47,6 +49,14 @@ const questionSchema = z
         code: z.ZodIssueCode.custom,
         path: ["options"],
         message: "多选题至少需要两个正确选项",
+      });
+    }
+
+    if (question.section === "case" && question.passage.trim().length === 0) {
+      context.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["passage"],
+        message: "案例分析题必须提供案例材料",
       });
     }
   });

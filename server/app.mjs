@@ -347,12 +347,17 @@ function registerApiRoutes(app, db, storage) {
         .filter((option) => option.correct)
         .map((option) => option.id);
       const isCorrect = sameSet(selectedOptionIds, correctOptionIds);
-      const questionPoints = isCorrect ? question.points : 0;
+      const hasWrongSelection = selectedOptionIds.some((id) => !correctOptionIds.includes(id));
+      const questionPoints = isCorrect
+        ? question.points
+        : question.type === "multiple" && !hasWrongSelection
+          ? Math.min(question.points, selectedOptionIds.length * 0.5)
+          : 0;
 
       if (isCorrect) {
         correctCount += 1;
-        earnedPoints += question.points;
       }
+      earnedPoints += questionPoints;
 
       return {
         questionId: question.id,
@@ -508,7 +513,7 @@ function getExam(db, examId, includeAnswers) {
 
   const questionRows = db
     .prepare(
-      `SELECT id, type, prompt, explanation, position, points
+      `SELECT id, type, section, passage, prompt, explanation, position, points
        FROM questions
        WHERE exam_id = ?
        ORDER BY position ASC`,
@@ -530,6 +535,8 @@ function getExam(db, examId, includeAnswers) {
     questions: questionRows.map((question) => ({
       id: question.id,
       type: question.type,
+      section: question.section,
+      passage: question.passage,
       prompt: question.prompt,
       points: question.points,
       ...(includeAnswers ? { explanation: question.explanation } : {}),
@@ -563,7 +570,8 @@ function getAttemptDetails(db, attemptId, deviceId) {
   const answerRows = db
     .prepare(
       `SELECT aa.question_id, aa.selected_option_ids, aa.is_correct,
-              aa.earned_points, q.prompt, q.explanation, q.type, q.points
+              aa.earned_points, q.prompt, q.explanation, q.type, q.section,
+              q.passage, q.points
        FROM attempt_answers aa
        JOIN questions q ON q.id = aa.question_id
        WHERE aa.attempt_id = ?
@@ -585,6 +593,8 @@ function getAttemptDetails(db, attemptId, deviceId) {
       prompt: answer.prompt,
       explanation: answer.explanation,
       type: answer.type,
+      section: answer.section,
+      passage: answer.passage,
       points: answer.points,
       earnedPoints: answer.earned_points,
       isCorrect: answer.is_correct === 1,

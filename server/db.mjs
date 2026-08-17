@@ -2,7 +2,7 @@ import Database from "better-sqlite3";
 import { mkdirSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 
-const CURRENT_SCHEMA_VERSION = 1;
+const CURRENT_SCHEMA_VERSION = 2;
 
 export function openDatabase(databasePath = "./data/study-workbench.sqlite") {
   const resolvedPath = databasePath === ":memory:" ? databasePath : resolve(databasePath);
@@ -62,6 +62,8 @@ function migrate(db) {
           id TEXT PRIMARY KEY,
           exam_id TEXT NOT NULL REFERENCES exams(id) ON DELETE CASCADE,
           type TEXT NOT NULL CHECK (type IN ('single', 'multiple')),
+          section TEXT NOT NULL DEFAULT 'standard' CHECK (section IN ('standard', 'case')),
+          passage TEXT NOT NULL DEFAULT '',
           prompt TEXT NOT NULL,
           explanation TEXT NOT NULL DEFAULT '',
           position INTEGER NOT NULL CHECK (position >= 0),
@@ -131,6 +133,22 @@ function migrate(db) {
 
         CREATE INDEX idx_attempt_answers_question_correct
           ON attempt_answers(question_id, is_correct);
+      `);
+      db.pragma(`user_version = ${CURRENT_SCHEMA_VERSION}`);
+      db.pragma("optimize");
+    })();
+
+    return;
+  }
+
+  if (version === 1) {
+    db.transaction(() => {
+      db.exec(`
+        ALTER TABLE questions
+          ADD COLUMN section TEXT NOT NULL DEFAULT 'standard'
+          CHECK (section IN ('standard', 'case'));
+        ALTER TABLE questions
+          ADD COLUMN passage TEXT NOT NULL DEFAULT '';
       `);
       db.pragma(`user_version = ${CURRENT_SCHEMA_VERSION}`);
       db.pragma("optimize");

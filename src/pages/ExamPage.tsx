@@ -127,7 +127,7 @@ export function ExamPage() {
             <strong>开始前请确认</strong>
             <ul>
               <li><CheckCircle2 size={17} /> 开始后立即计时，倒计时结束会自动交卷。</li>
-              <li><CheckCircle2 size={17} /> 多选题必须选全且不多选，才会得分。</li>
+              <li><CheckCircle2 size={17} /> 多选题全选正确得满分；少选每个正确选项得 0.5 分，错选不得分。</li>
               <li><CheckCircle2 size={17} /> 交卷后可查看解析，错题会自动归档。</li>
             </ul>
           </div>
@@ -190,8 +190,9 @@ export function ExamPage() {
         <section className="question-card">
           <div className="question-topline">
             <span>第 {currentIndex + 1} / {exam.questionCount} 题</span>
-            <span>{question.type === "single" ? "单选题" : "多选题"} · {question.points} 分</span>
+            <span>{question.section === "case" ? `案例分析题（${question.type === "single" ? "单选" : "多选"}）` : question.type === "single" ? "单选题" : "多选题"} · {question.points} 分</span>
           </div>
+          {question.section === "case" ? <div className="case-passage"><strong>案例材料</strong><p>{question.passage}</p></div> : null}
           <h1>{question.prompt}</h1>
           <p className="question-hint">{question.type === "single" ? "请选择一个答案" : "请选择所有正确答案"}</p>
 

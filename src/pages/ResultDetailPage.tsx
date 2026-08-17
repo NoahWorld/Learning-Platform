@@ -58,15 +58,16 @@ export function ResultDetailPage() {
 
         <div className="review-list">
           {data.answers.map((answer, index) => (
-            <article className={`review-card ${answer.isCorrect ? "correct" : "incorrect"}`} key={answer.questionId}>
+            <article className={`review-card ${answer.isCorrect ? "correct" : answer.earnedPoints > 0 ? "partial" : "incorrect"}`} key={answer.questionId}>
               <header>
                 <span className="review-number">{String(index + 1).padStart(2, "0")}</span>
                 <div>
-                  <span>{answer.type === "single" ? "单选题" : "多选题"}</span>
+                  <span>{answer.section === "case" ? `案例分析题（${answer.type === "single" ? "单选" : "多选"}）` : answer.type === "single" ? "单选题" : "多选题"}</span>
                   <h3>{answer.prompt}</h3>
                 </div>
-                <strong>{answer.isCorrect ? <><Check size={17} /> 正确</> : <><X size={17} /> 错误</>}</strong>
+                <strong>{answer.isCorrect ? <><Check size={17} /> 正确</> : answer.earnedPoints > 0 ? <>部分得分 {answer.earnedPoints}/{answer.points}</> : <><X size={17} /> 错误</>}</strong>
               </header>
+              {answer.section === "case" ? <div className="case-passage review-passage"><strong>案例材料</strong><p>{answer.passage}</p></div> : null}
               <div className="review-options">
                 {answer.options.map((option) => {
                   const selected = answer.selectedOptionIds.includes(option.id);
