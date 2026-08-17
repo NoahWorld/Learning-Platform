@@ -1,4 +1,5 @@
-FROM node:22-bookworm-slim AS build
+ARG NODE_IMAGE=node:22-bookworm-slim
+FROM ${NODE_IMAGE} AS build
 
 WORKDIR /app
 COPY package.json package-lock.json ./
@@ -8,7 +9,7 @@ COPY index.html tsconfig.json vite.config.ts ./
 COPY src ./src
 RUN npm run build
 
-FROM node:22-bookworm-slim AS runtime
+FROM ${NODE_IMAGE} AS runtime
 
 ENV NODE_ENV=production \
     PORT=3000 \

@@ -54,9 +54,13 @@ export async function createApp({
         objectSrc: ["'none'"],
         scriptSrc: ["'self'"],
         styleSrc: ["'self'", "'unsafe-inline'"],
+        // The initial deployment is HTTP-only. Enable this after a domain and TLS
+        // certificate are configured, otherwise browsers upgrade assets to HTTPS.
+        upgradeInsecureRequests: null,
       },
     },
     crossOriginResourcePolicy: { policy: "same-site" },
+    strictTransportSecurity: false,
   });
 
   registerApiRoutes(app, db, storage);
