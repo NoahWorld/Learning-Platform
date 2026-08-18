@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { mkdtemp, readFile, rm } from "node:fs/promises";
+import { mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import test from "node:test";
@@ -39,6 +39,63 @@ async function createTestApp() {
     },
   };
 }
+
+test("web pages are mounted under /study and legacy links redirect", async (context) => {
+  const directory = await mkdtemp(join(tmpdir(), "learning-workbench-routes-"));
+  const databasePath = join(directory, "test.sqlite");
+  const staticDir = join(directory, "dist");
+  await mkdir(staticDir);
+  await writeFile(
+    join(staticDir, "index.html"),
+    "<!doctype html><html><body><div id=\"root\">study-route-fixture</div></body></html>",
+  );
+
+  const app = await createApp({
+    databasePath,
+    logger: false,
+    serveStatic: true,
+    staticDir,
+    storage: null,
+  });
+  context.after(async () => {
+    await app.close();
+    await rm(directory, { recursive: true, force: true });
+  });
+
+  const root = await app.inject({ method: "GET", url: "/?from=bookmark" });
+  assert.equal(root.statusCode, 302);
+  assert.equal(root.headers.location, "/study?from=bookmark");
+
+  const studyHome = await app.inject({ method: "GET", url: "/study" });
+  assert.equal(studyHome.statusCode, 200);
+  assert.match(studyHome.headers["content-type"], /^text\/html/);
+  assert.match(studyHome.body, /study-route-fixture/);
+
+  const studyDeepLink = await app.inject({
+    method: "GET",
+    url: "/study/exams/sample-learning-check",
+  });
+  assert.equal(studyDeepLink.statusCode, 200);
+  assert.match(studyDeepLink.body, /study-route-fixture/);
+
+  const legacyDeepLink = await app.inject({
+    method: "GET",
+    url: "/exams/sample-learning-check?mode=review",
+  });
+  assert.equal(legacyDeepLink.statusCode, 302);
+  assert.equal(
+    legacyDeepLink.headers.location,
+    "/study/exams/sample-learning-check?mode=review",
+  );
+
+  const unknownPage = await app.inject({ method: "GET", url: "/outside-study" });
+  assert.equal(unknownPage.statusCode, 404);
+  assert.equal(unknownPage.body, "页面不存在");
+
+  const unknownApi = await app.inject({ method: "GET", url: "/api/not-found" });
+  assert.equal(unknownApi.statusCode, 404);
+  assert.equal(unknownApi.json().error, "接口不存在");
+});
 
 test("published materials and exams are readable without leaking answer keys", async (context) => {
   const testApp = await createTestApp();

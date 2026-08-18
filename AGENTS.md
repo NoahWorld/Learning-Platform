@@ -9,6 +9,7 @@
 - 对象存储：私有 MinIO；图片和资料附件存对象存储，SQLite 只保存元数据。
 - 身份策略：浏览器生成匿名 `device_id`，只用于区分本机成绩与错题；不建立账号系统。
 - 生产部署：阿里云 Ubuntu，Docker Engine + Compose；应用只公开宿主机 80 端口，MinIO 仅在 Compose 私有网络中提供服务。
+- 公网页面统一挂载在 `/study`；根地址跳转到 `/study`，旧版资料、考试、错题和成绩链接跳转到对应的 `/study/...` 地址；API 与静态资源仍分别使用 `/api` 和 `/assets`。
 
 ## 常用命令
 
@@ -41,4 +42,4 @@
 - `better-sqlite3` 原生模块在 Docker 构建阶段使用 Python/make/g++ 编译；运行镜像只复制裁剪后的生产依赖，不携带编译工具链。
 - 当前仅通过 HTTP/IP 提供服务，因此关闭 HSTS 与 CSP `upgrade-insecure-requests`；配置域名和 TLS 后必须同步恢复这两项。
 - 匿名设备 ID 优先使用 `crypto.randomUUID()`；HTTP 非安全上下文下使用 `crypto.getRandomValues()` 生成 RFC 4122 v4 UUID，不得降级到 `Math.random()`。
-- 部署后必须检查容器健康状态、`/api/health`、首页、前端深层路由和容器日志。
+- 部署后必须检查容器健康状态、`/api/health`、`/study`、`/study` 下的前端深层路由、根地址和旧链接跳转，以及容器日志。

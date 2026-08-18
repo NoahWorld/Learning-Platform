@@ -10,6 +10,7 @@ import { openDatabase } from "./db.mjs";
 import { createStorage } from "./storage.mjs";
 
 const DEFAULT_STATIC_DIR = fileURLToPath(new URL("../dist", import.meta.url));
+const LEGACY_STUDY_PATH = /^\/(?:materials(?:\/.*)?|exams(?:\/.*)?|mistakes|results(?:\/.*)?)$/;
 
 export async function createApp({
   databasePath = process.env.DATABASE_PATH ?? "./data/study-workbench.sqlite",
@@ -92,7 +93,21 @@ export async function createApp({
         });
       }
 
-      return reply.type("text/html; charset=utf-8").sendFile("index.html");
+      const requestUrl = new URL(request.url, "http://localhost");
+
+      if (requestUrl.pathname === "/") {
+        return reply.redirect(`/study${requestUrl.search}`);
+      }
+
+      if (LEGACY_STUDY_PATH.test(requestUrl.pathname)) {
+        return reply.redirect(`/study${requestUrl.pathname}${requestUrl.search}`);
+      }
+
+      if (requestUrl.pathname === "/study" || requestUrl.pathname.startsWith("/study/")) {
+        return reply.type("text/html; charset=utf-8").sendFile("index.html");
+      }
+
+      return reply.status(404).type("text/plain; charset=utf-8").send("页面不存在");
     });
   }
 

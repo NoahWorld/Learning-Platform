@@ -8,7 +8,7 @@ import {
   X,
 } from "lucide-react";
 import { useEffect } from "react";
-import { Link, NavLink, Outlet, useLocation } from "react-router-dom";
+import { Link, NavLink, Outlet, useLocation, useMatch } from "react-router-dom";
 
 const navigation = [
   { to: "/", label: "工作台", icon: Home, end: true },
@@ -20,8 +20,8 @@ const navigation = [
 
 export function AppShell() {
   const location = useLocation();
-  const isReading = /^\/materials\/[^/]+$/.test(location.pathname);
-  const isExam = /^\/exams\/[^/]+$/.test(location.pathname);
+  const isReading = Boolean(useMatch("/materials/:materialId"));
+  const isExam = Boolean(useMatch("/exams/:examId"));
   const focusMode = isReading || isExam;
 
   useEffect(() => {
