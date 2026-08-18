@@ -2066,14 +2066,18 @@ img {
   .question-map.expanded > p { display: flex; }
   .question-map-toggle {
     display: inline-flex;
+    width: auto;
+    min-height: 28px;
     align-items: center;
     gap: 3px;
     padding: 0;
+    aspect-ratio: auto;
     border: 0;
     color: #315f54;
     background: transparent;
     font-size: 11px;
     font-weight: 800;
+    white-space: nowrap;
     cursor: pointer;
   }
   .question-map-toggle svg { transition: transform 180ms ease; }
