@@ -43,3 +43,4 @@
 - 当前仅通过 HTTP/IP 提供服务，因此关闭 HSTS 与 CSP `upgrade-insecure-requests`；配置域名和 TLS 后必须同步恢复这两项。
 - 匿名设备 ID 优先使用 `crypto.randomUUID()`；HTTP 非安全上下文下使用 `crypto.getRandomValues()` 生成 RFC 4122 v4 UUID，不得降级到 `Math.random()`。
 - 部署后必须检查容器健康状态、`/api/health`、`/study`、`/study` 下的前端深层路由、根地址和旧链接跳转，以及容器日志。
+- “人力600母题”当前附件实际只有 154 题，权威导入文件为 `data/hr-600-master-collection.json`，试卷 ID 为 `hr-600-master-collection-v1`；不得用虚构题目补足到 600。答案与解析仅在交卷后的成绩详情中展示。

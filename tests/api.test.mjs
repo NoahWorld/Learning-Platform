@@ -14,6 +14,9 @@ const fixture = JSON.parse(
 const hrEconomistFixture = JSON.parse(
   await readFile(new URL("../data/hr-economist-sample.json", import.meta.url), "utf8"),
 );
+const hrMasterCollectionFixture = JSON.parse(
+  await readFile(new URL("../data/hr-600-master-collection.json", import.meta.url), "utf8"),
+);
 const deviceId = "device-test-123";
 
 async function createTestApp() {
@@ -131,6 +134,66 @@ test("published materials and exams are readable without leaking answer keys", a
       assert.equal(Object.hasOwn(option, "correct"), false);
     }
   }
+});
+
+test("HR master collection imports all source questions and reveals answers only after submission", async (context) => {
+  const directory = await mkdtemp(join(tmpdir(), "learning-workbench-hr-master-"));
+  const databasePath = join(directory, "test.sqlite");
+  const db = openDatabase(databasePath);
+  const imported = importContent(db, hrMasterCollectionFixture);
+  db.close();
+
+  assert.deepEqual(imported, { materials: 0, exams: 1, questions: 154, assets: 0 });
+
+  const app = await createApp({
+    databasePath,
+    logger: false,
+    serveStatic: false,
+    storage: null,
+  });
+  context.after(async () => {
+    await app.close();
+    await rm(directory, { recursive: true, force: true });
+  });
+
+  const examId = hrMasterCollectionFixture.exams[0].id;
+  const examResponse = await app.inject({ method: "GET", url: `/api/exams/${examId}` });
+  assert.equal(examResponse.statusCode, 200);
+  const publicExam = examResponse.json();
+  assert.equal(publicExam.questionCount, 154);
+  assert.equal(publicExam.totalPoints, 246);
+  assert.match(publicExam.title, /母题集锦/);
+  for (const question of publicExam.questions) {
+    assert.equal(Object.hasOwn(question, "explanation"), false);
+    for (const option of question.options) {
+      assert.equal(Object.hasOwn(option, "correct"), false);
+    }
+  }
+
+  const sourceQuestions = hrMasterCollectionFixture.exams[0].questions;
+  const submission = await app.inject({
+    method: "POST",
+    url: `/api/exams/${examId}/submissions`,
+    payload: {
+      deviceId: "hr-master-test-device",
+      durationSeconds: 154,
+      answers: sourceQuestions.map((question) => ({
+        questionId: question.id,
+        optionIds: question.options.filter((option) => option.correct).map((option) => option.id),
+      })),
+    },
+  });
+
+  assert.equal(submission.statusCode, 201);
+  const result = submission.json();
+  assert.equal(result.score, 100);
+  assert.equal(result.correctCount, 154);
+  assert.equal(result.wrongCount, 0);
+  assert.equal(result.answers.length, 154);
+  assert.deepEqual(
+    result.answers.at(-1).options.filter((option) => option.correct).map((option) => option.label),
+    ["A", "D"],
+  );
 });
 
 test("submissions persist results and mark a later-correct mistake as corrected", async (context) => {

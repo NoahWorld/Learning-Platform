@@ -1,0 +1,5768 @@
+{
+  "materials": [],
+  "assets": [],
+  "exams": [
+    {
+      "id": "hr-600-master-collection-v1",
+      "title": "人力600母题｜母题集锦（当前154题）",
+      "description": "附件当前实际收录154道中级经济师·人力资源选择题，按原题顺序完整导入。题目区不显示答案；完成交卷后，可在成绩详情末尾统一查看全部参考答案与解析。",
+      "durationMinutes": 240,
+      "passingScore": 60,
+      "status": "published",
+      "questions": [
+        {
+          "id": "hr600-master-q001",
+          "type": "single",
+          "section": "standard",
+          "prompt": "用人单位违反劳动和社会保险法律、法规或者规章的行为，在两年内未被劳动行政部门发现，也未被举报、投诉的，劳动行政部门不再查处。如违法的行为属于连续或者继续状态的，两年的期限应自（）起计算。",
+          "explanation": "本题考查劳动监察的相关内容。用人单位违反劳动和社会保险法律、法规或者规章的行为，在两年内未被劳动行政部门发现，也未被举报、投诉的，劳动行政部门不再查处。如违法的行为属于连续或者继续状态的，两年的期限应自违法行为终了之日起计算。",
+          "points": 1,
+          "options": [
+            {
+              "id": "hr600-master-q001-a",
+              "label": "A",
+              "content": "违法行为发生之日",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q001-b",
+              "label": "B",
+              "content": "违法行为终了之日",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q001-c",
+              "label": "C",
+              "content": "劳动者举报之日",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q001-d",
+              "label": "D",
+              "content": "立案之日",
+              "correct": false
+            }
+          ]
+        },
+        {
+          "id": "hr600-master-q002",
+          "type": "multiple",
+          "section": "standard",
+          "prompt": "在人员招募与甄选的战略选择中，应重点关注（）方面。",
+          "explanation": "本题考查人力资源战略与人力资源管理实践选择。在人员招募与甄选的战略选择中，要素：外部来源／内部来源；有限社会化／全面社会化；评价特定技能／评价一般技能；狭窄的职业发展通道／宽阔的职业发展通道。C 选择任务的复杂程度属于“职位分析与职位设计”的内容。",
+          "points": 2,
+          "options": [
+            {
+              "id": "hr600-master-q002-a",
+              "label": "A",
+              "content": "招聘来源",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q002-b",
+              "label": "B",
+              "content": "招聘范围",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q002-c",
+              "label": "C",
+              "content": "任务复杂程度",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q002-d",
+              "label": "D",
+              "content": "技能水平",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q002-e",
+              "label": "E",
+              "content": "职业发展通道",
+              "correct": true
+            }
+          ]
+        },
+        {
+          "id": "hr600-master-q003",
+          "type": "single",
+          "section": "standard",
+          "prompt": "自然失业率在（），它的存在并不影响充分就业的实现。",
+          "explanation": "摩擦性失业、技术性失业、结构性失业和季节性失业均属于竞争性劳动力市场上一种不可避免的较低水平的失业，是正常性失业，即自然失业率。自然失业率为 4％～6％，它的存在并不影响充分就业的实现。",
+          "points": 1,
+          "options": [
+            {
+              "id": "hr600-master-q003-a",
+              "label": "A",
+              "content": "1％以内",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q003-b",
+              "label": "B",
+              "content": "1％～3％",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q003-c",
+              "label": "C",
+              "content": "4％～6％",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q003-d",
+              "label": "D",
+              "content": "4％以下",
+              "correct": false
+            }
+          ]
+        },
+        {
+          "id": "hr600-master-q004",
+          "type": "multiple",
+          "section": "standard",
+          "prompt": "双因素理论给管理者的启示有（）。",
+          "explanation": "本题考查双因素理论在管理上的应用。让员工满意和防止员工不满是两回事，防止员工不满并不一定能让员工满意；要想激励员工，就必须重视员工的成就感、认同感、责任感以及个人成长等。具体来说，管理者要调动员工的积极性，首先要注意工资、工作环境等保健因素，使员工不致产生不满情绪（故 E选项错误），但更为重要的是要利用工作本身对员工的价值这类激励因素去激发员工的工作热情。",
+          "points": 2,
+          "options": [
+            {
+              "id": "hr600-master-q004-a",
+              "label": "A",
+              "content": "防止员工不满一定能让员工满意",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q004-b",
+              "label": "B",
+              "content": "保健因素只能消除不满，不一定能激励员工",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q004-c",
+              "label": "C",
+              "content": "要想激励员工，就必须重视员工的成就感、认同感、责任感以及个人成长等",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q004-d",
+              "label": "D",
+              "content": "要创造一流业绩，除了注意保健因素外，更重要的是要运用好激励因素",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q004-e",
+              "label": "E",
+              "content": "管理者要调动员工的积极性，首先要注意激发员工的工作热情",
+              "correct": false
+            }
+          ]
+        },
+        {
+          "id": "hr600-master-q005",
+          "type": "multiple",
+          "section": "standard",
+          "prompt": "衡量劳动力市场松紧程度的指标包括（）。",
+          "explanation": "本题考查影响劳动力流动的市场周期理论。失业率是衡量劳动力市场松紧程度的一个重要指标，临时解雇率是另外一个指标。",
+          "points": 2,
+          "options": [
+            {
+              "id": "hr600-master-q005-a",
+              "label": "A",
+              "content": "就业率",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q005-b",
+              "label": "B",
+              "content": "临时解雇率",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q005-c",
+              "label": "C",
+              "content": "失业率",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q005-d",
+              "label": "D",
+              "content": "离职率",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q005-e",
+              "label": "E",
+              "content": "通货膨胀率",
+              "correct": false
+            }
+          ]
+        },
+        {
+          "id": "hr600-master-q006",
+          "type": "single",
+          "section": "standard",
+          "prompt": "领导者通过更高的理想和组织价值观来激励他的追随者们，更多地通过自己的领导风格来影响员工和团队的绩效。该领导模式属于（）。",
+          "explanation": "本题考查变革型领导的特征。①变革型领导则是通过更高的理想和组织价值观来激励他的追随者们。变革型领导能够为组织制定明确的愿景，他们更多地通过自己的领导风格来影响员工（如增强员工的动机）和团队（如调解团队内部的冲突）的绩效。②魅力型领导是指具有自信并且信任下属,对下属有高度的期望,有理想化的愿景和个性化风格的领导。魅力型领导的追随者认同他们的领导及其安排的任务,表现出对领导的高度忠诚和信心,效法其价值观和行为,并且从自身与领导的关系中获得自尊。故此题选 C。【注意区分变革型领导和魅力型领导】",
+          "points": 1,
+          "options": [
+            {
+              "id": "hr600-master-q006-a",
+              "label": "A",
+              "content": "魅力型领导",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q006-b",
+              "label": "B",
+              "content": "交易型领导",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q006-c",
+              "label": "C",
+              "content": "变革型领导",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q006-d",
+              "label": "D",
+              "content": "权变型领导",
+              "correct": false
+            }
+          ]
+        },
+        {
+          "id": "hr600-master-q007",
+          "type": "single",
+          "section": "standard",
+          "prompt": "ERG 理论的（）尤其有助于说明在文化、环境背景的差异下，个体需求的差异。",
+          "explanation": "相比马斯洛的需要层次理论，ERG 理论更为灵活变通，其变通性尤其有助于说明在文化、环境背景的差异下，个体需求的差异。",
+          "points": 1,
+          "options": [
+            {
+              "id": "hr600-master-q007-a",
+              "label": "A",
+              "content": "差异性",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q007-b",
+              "label": "B",
+              "content": "一致性",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q007-c",
+              "label": "C",
+              "content": "变通性",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q007-d",
+              "label": "D",
+              "content": "稳定性",
+              "correct": false
+            }
+          ]
+        },
+        {
+          "id": "hr600-master-q008",
+          "type": "multiple",
+          "section": "standard",
+          "prompt": "（)作为公务员考核的内容和任职、晋升的依据之一。",
+          "explanation": "公务员培训情况、学习成绩作为公务员考核的内容和任职、晋升的依据之一。",
+          "points": 2,
+          "options": [
+            {
+              "id": "hr600-master-q008-a",
+              "label": "A",
+              "content": "公务员培训情况",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q008-b",
+              "label": "B",
+              "content": "学习成绩",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q008-c",
+              "label": "C",
+              "content": "实践锻炼",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q008-d",
+              "label": "D",
+              "content": "思想淬炼",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q008-e",
+              "label": "E",
+              "content": "专业训练",
+              "correct": false
+            }
+          ]
+        },
+        {
+          "id": "hr600-master-q009",
+          "type": "multiple",
+          "section": "standard",
+          "prompt": "衡量职业化程度高低的指标包括（）。",
+          "explanation": "职业化程度是指企业员工为了掌握其本职工作，需要接受正规教育和培训的程度。通常可以将员工的平均文化程度或上岗职业培训期限作为衡量职业化程度高低的指标。",
+          "points": 2,
+          "options": [
+            {
+              "id": "hr600-master-q009-a",
+              "label": "A",
+              "content": "平均文化程度",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q009-b",
+              "label": "B",
+              "content": "上岗职业培训期限",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q009-c",
+              "label": "C",
+              "content": "管理人员比率",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q009-d",
+              "label": "D",
+              "content": "技术人员比率",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q009-e",
+              "label": "E",
+              "content": "专业化程度",
+              "correct": false
+            }
+          ]
+        },
+        {
+          "id": "hr600-master-q010",
+          "type": "multiple",
+          "section": "standard",
+          "prompt": "与甄选工作有关的效标包括（）以及组织认为代表绩效的其他一些指标。",
+          "explanation": "与甄选工作有关的效标包括目标人员产出数量或质量、缺勤率、事故发生率、销售额，上级对其的评价结果，以及组织认为能够代表绩效的其他一些指标。",
+          "points": 2,
+          "options": [
+            {
+              "id": "hr600-master-q010-a",
+              "label": "A",
+              "content": "产出数量或质量",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q010-b",
+              "label": "B",
+              "content": "上级对其的评价结果",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q010-c",
+              "label": "C",
+              "content": "缺勤率",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q010-d",
+              "label": "D",
+              "content": "事故发生率",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q010-e",
+              "label": "E",
+              "content": "领导力",
+              "correct": false
+            }
+          ]
+        },
+        {
+          "id": "hr600-master-q011",
+          "type": "multiple",
+          "section": "standard",
+          "prompt": "不能申请行政复议范围的是（）。",
+          "explanation": "选项 D、E 属于人力资源行政争议的范围。公民、法人或者其他组织对下列事项，不能申请行政复议： （1）人力资源社会保障部门做出的行政处分或者其他人事处理决定；（2）劳动者与用人单位之间发生的劳动人力资源争议；（3）劳动能力鉴定委员会的行为； （4）劳动人事争议仲裁委员会的仲裁、调解等行为；（5）已就同一事项向其他有权受理的行政机关申请行政复议的；（6）向人民法院提起行政诉讼，人民法院已经依法受理的。",
+          "points": 2,
+          "options": [
+            {
+              "id": "hr600-master-q011-a",
+              "label": "A",
+              "content": "用人单位和劳动者之间发生的人力资源争议",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q011-b",
+              "label": "B",
+              "content": "劳动能力鉴定委员会的行为",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q011-c",
+              "label": "C",
+              "content": "向人民法院提起行政诉讼，人民法院已经依法受理的",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q011-d",
+              "label": "D",
+              "content": "对人力资源社会保障部门作出的行政确认不服的",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q011-e",
+              "label": "E",
+              "content": "认为人力资源社会保障部门不履行法定职责的",
+              "correct": false
+            }
+          ]
+        },
+        {
+          "id": "hr600-master-q012",
+          "type": "multiple",
+          "section": "standard",
+          "prompt": "下列属于在职培训成本的有（）。",
+          "explanation": "本题考查在职培训的成本。选项 C 属于在职培训的收益。",
+          "points": 2,
+          "options": [
+            {
+              "id": "hr600-master-q012-a",
+              "label": "A",
+              "content": "教师的培训讲课费",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q012-b",
+              "label": "B",
+              "content": "职工因上培训课路程远而提前下班",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q012-c",
+              "label": "C",
+              "content": "受训者生产率的提高",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q012-d",
+              "label": "D",
+              "content": "为培训而租用的设备与场地",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q012-e",
+              "label": "E",
+              "content": "因为参加培训导致员工常常不能全力工作",
+              "correct": true
+            }
+          ]
+        },
+        {
+          "id": "hr600-master-q013",
+          "type": "multiple",
+          "section": "standard",
+          "prompt": "公平理论认为，当员工通过比较感到不公平时，用来恢复公平感的途径有（）。",
+          "explanation": "本题考查公平理论中恢复公平的方法。恢复公平的方法有：（1）改变自己的投入或产出；（2）改变对照者的投入或产出；（3）改变对投入或产出的知觉（包括对自己的知觉和对对照者的知觉）；（4）改变参照对象；（5）辞职。所以选项 D 不选。",
+          "points": 2,
+          "options": [
+            {
+              "id": "hr600-master-q013-a",
+              "label": "A",
+              "content": "改变对照者的投入或产出",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q013-b",
+              "label": "B",
+              "content": "改变参照对象",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q013-c",
+              "label": "C",
+              "content": "改变自我对投入或产出的知觉",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q013-d",
+              "label": "D",
+              "content": "停职或休假",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q013-e",
+              "label": "E",
+              "content": "改变自己的投入或产出",
+              "correct": true
+            }
+          ]
+        },
+        {
+          "id": "hr600-master-q014",
+          "type": "multiple",
+          "section": "standard",
+          "prompt": "人民法院对劳动争议仲裁委员会做出的生效的（）有权予以强制执行。",
+          "explanation": "本题考查劳动争议诉讼。 强制执行是指人民法院根据当事人的请求，依照法律规定的程序，运用国家强制力，强制对方当事人履行已生效的民事判决、裁定和调解书，刑事判决、裁定中的财产部分以及法律规定的其他法律文书所规定的义务，保证这些判决、裁定及其他法律文书规定的内容得以实现的司法活动。",
+          "points": 2,
+          "options": [
+            {
+              "id": "hr600-master-q014-a",
+              "label": "A",
+              "content": "裁决书",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q014-b",
+              "label": "B",
+              "content": "调解书",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q014-c",
+              "label": "C",
+              "content": "开庭通知",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q014-d",
+              "label": "D",
+              "content": "补正通知",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q014-e",
+              "label": "E",
+              "content": "协议书",
+              "correct": false
+            }
+          ]
+        },
+        {
+          "id": "hr600-master-q015",
+          "type": "multiple",
+          "section": "standard",
+          "prompt": "根据弗罗姆期望理论的说法，正确的是（）。",
+          "explanation": "本题考查期望理论的内容。弗罗姆的期望理论认为动机是三种因素的产物，即效价、期望和工具性。其中，效价是个体对所获报酬的偏好程度，它是对个体得到报酬的愿望的数量表示。期望是员工对努力工作能够完成任务的信念强度。工具性是员工对一旦完成任务就可以获得报酬的信念。期望理论强调情境性。",
+          "points": 2,
+          "options": [
+            {
+              "id": "hr600-master-q015-a",
+              "label": "A",
+              "content": "动机是三种因素的产物，即效价、期望和工具性",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q015-b",
+              "label": "B",
+              "content": "效价是个体对所获报酬的偏好程度，它是对个体得到报酬的愿望的数量表示",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q015-c",
+              "label": "C",
+              "content": "期望是指员工对努力工作能够完成任务的信念强度",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q015-d",
+              "label": "D",
+              "content": "如果员工发现报酬是以绩效数据为基础的，那么工具性的估值就会低",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q015-e",
+              "label": "E",
+              "content": "强调情境性",
+              "correct": true
+            }
+          ]
+        },
+        {
+          "id": "hr600-master-q016",
+          "type": "multiple",
+          "section": "standard",
+          "prompt": "下列关于矩阵组织形式的论述，正确的有（）。",
+          "explanation": "本题考查矩阵组织形式的相关内容。矩阵组织形式有利于减轻高层管理人员的负担，所以选项 C 不选。",
+          "points": 2,
+          "options": [
+            {
+              "id": "hr600-master-q016-a",
+              "label": "A",
+              "content": "一名员工会有两个领导",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q016-b",
+              "label": "B",
+              "content": "组织内部会有两个层次的协调",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q016-c",
+              "label": "C",
+              "content": "相对增加高层管理人员的负担",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q016-d",
+              "label": "D",
+              "content": "多应用于军事工业以及航天工业类公司",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q016-e",
+              "label": "E",
+              "content": "产品部门（或项目小组）所形成的横向联系灵活多样",
+              "correct": true
+            }
+          ]
+        },
+        {
+          "id": "hr600-master-q017",
+          "type": "multiple",
+          "section": "standard",
+          "prompt": "我国劳动争议处理的法律依据包括（）。",
+          "explanation": "我国劳动争议处理的法律依据还包括：《劳动争议调解仲裁法》、《劳动法》、《劳动合同法》、《中华人民共和国民事诉讼法》、《最高人民法院关于审理劳动争议案件适用法律问题的解释》以及国务院劳动行政部门依照《劳动争议调解仲裁法》有关规定制定的《劳动人事争议仲裁办案规则》。",
+          "points": 2,
+          "options": [
+            {
+              "id": "hr600-master-q017-a",
+              "label": "A",
+              "content": "《劳动法》",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q017-b",
+              "label": "B",
+              "content": "《劳动争议仲裁委员会办案规则》",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q017-c",
+              "label": "C",
+              "content": "《民事诉讼法》",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q017-d",
+              "label": "D",
+              "content": "《刑事诉讼法》",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q017-e",
+              "label": "E",
+              "content": "《就业促进法》",
+              "correct": false
+            }
+          ]
+        },
+        {
+          "id": "hr600-master-q018",
+          "type": "single",
+          "section": "standard",
+          "prompt": "小李和小陈是某公司的销售主管。两人在工作中的表现都很优秀。小李年富力强，豁达开朗，对工作较为投入，希望从工作中实现和体现出个人价值，他最大的梦想是能够独自驱车横穿撒哈拉沙漠，游遍整个非洲。小陈则喜欢对人指手划脚，发号施令，一直渴望有朝一日能独挡一面，到公司在某国的销售分公司担任领导职务。 后来，公司因业务拓展打算在销售部内部公开选拔一名分公司经理前往突尼斯，但分公司的条件、待遇都比总公司差。小李和小陈均申请了这一职务，但后来小陈考虑到独自一人在异地开拓业务的困难，主动撤回了申请，小李如愿以偿地到了非洲，一边开拓业务，一边体验非洲风情。根据弗罗姆的期望理论，小李为了实现自己的梦想而强烈要求去突尼斯，说明去突尼斯工作对其具有（）。",
+          "explanation": "在弗罗姆的期望理论中： ①效价是指个体对所获报酬的偏好程度,它是对个体得到报酬的愿望的数量表示。例如,如果-名员工强烈希望得到升职,那么,升职这种需要就对这名员工具有高效价。根据材料中的资料可以得知，小李他最大的梦想是能够独自驱车横穿撒哈拉沙漠，游遍整个非洲。为了实现梦想去突尼斯是一件高效价的事情。所以 D 正确。【注：高效价不一定指的高工资】②期望是指员工对努力工作能够完成任务的信念强度。",
+          "points": 1,
+          "options": [
+            {
+              "id": "hr600-master-q018-a",
+              "label": "A",
+              "content": "高期望",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q018-b",
+              "label": "B",
+              "content": "低效价",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q018-c",
+              "label": "C",
+              "content": "低期望",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q018-d",
+              "label": "D",
+              "content": "高效价",
+              "correct": true
+            }
+          ]
+        },
+        {
+          "id": "hr600-master-q019",
+          "type": "multiple",
+          "section": "standard",
+          "prompt": "关于职业歧视，下列说法中正确的有（）。",
+          "explanation": "本题考查工资性报酬差别与劳动力市场歧视。如果两种性别的劳动力在各种职业中的分布是完全相同的，则差异指数的值为零。E 选项错误:如果男女劳动力在各种职业中的分布是完全相同的，差异指数为 0。",
+          "points": 2,
+          "options": [
+            {
+              "id": "hr600-master-q019-a",
+              "label": "A",
+              "content": "在现实中，难以衡量有多少是由职业歧视导致的工资差别",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q019-b",
+              "label": "B",
+              "content": "职业隔离是指一个人口群体内部的职业分布与其他人口群体内部的职业分布存在很大差异的情况",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q019-c",
+              "label": "C",
+              "content": "衡量职业隔离的指标是差异指数",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q019-d",
+              "label": "D",
+              "content": "如果所有职业都是完全隔离的，差异指数为 100",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q019-e",
+              "label": "E",
+              "content": "如果男女劳动力在各种职业中的分布是完全相同的，差异指数为负数",
+              "correct": false
+            }
+          ]
+        },
+        {
+          "id": "hr600-master-q020",
+          "type": "single",
+          "section": "standard",
+          "prompt": "下列关于内源性动机和外源性动机的陈述正确的是（）。",
+          "explanation": "本题考查内源性动机与外源性动机。内源性动机是指人做出某种行为是因为行为本身，因为这种行为可以带来成就感，或者个体认为这种行为是有价值的；选项 A 错误。外源性动机是指人为了获得物质或社会报酬，或为了避免惩罚而作出某种行为，做出这种行为是为了行为的结果，而不是行为本身。而出于外源性动机的员工更看重工作所带来的报偿，如工资、奖金、表扬、社会地位等；选项 B 错误，选项 C 正确。寻求挑战性的工作属于内源性动机，选项 D 错误。",
+          "points": 1,
+          "options": [
+            {
+              "id": "hr600-master-q020-a",
+              "label": "A",
+              "content": "外源性动机注重的是行为的本身，而非行为的结果",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q020-b",
+              "label": "B",
+              "content": "内源性动机比较注重社会报酬，诸如表扬、社会地位等",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q020-c",
+              "label": "C",
+              "content": "外源性动机往往是为了逃避惩罚而去完成某种行为",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q020-d",
+              "label": "D",
+              "content": "寻求挑战性的工作属于外源性动机",
+              "correct": false
+            }
+          ]
+        },
+        {
+          "id": "hr600-master-q021",
+          "type": "single",
+          "section": "standard",
+          "prompt": "比较常见的行业市场劳动力供给状况的劳动力供给曲线是（）。",
+          "explanation": "市场劳动力供给曲线包括三种类型。分别是向右上倾斜的市场劳动力供给曲线、垂直形状的劳动力供给曲线和水平形状的劳动力供给曲线。向上倾斜的劳动力供给曲线，即市场劳动力供给随工资率同向变动，是常见的情况。",
+          "points": 1,
+          "options": [
+            {
+              "id": "hr600-master-q021-a",
+              "label": "A",
+              "content": "向后弯曲的劳动力供给曲线",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q021-b",
+              "label": "B",
+              "content": "向上倾斜的劳动力供给曲线",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q021-c",
+              "label": "C",
+              "content": "垂直形状的劳动力供给曲线",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q021-d",
+              "label": "D",
+              "content": "水平形状的劳动力供给曲线",
+              "correct": false
+            }
+          ]
+        },
+        {
+          "id": "hr600-master-q022",
+          "type": "multiple",
+          "section": "standard",
+          "prompt": "劳动监察处罚的方式包括（）。",
+          "explanation": "本题考查劳动监察处罚的方式。劳动监察处罚的方式主要有五种：责令用人单位改正，警告，罚款，没收违法所得，吊销许可证。",
+          "points": 2,
+          "options": [
+            {
+              "id": "hr600-master-q022-a",
+              "label": "A",
+              "content": "警告",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q022-b",
+              "label": "B",
+              "content": "通报",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q022-c",
+              "label": "C",
+              "content": "罚款",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q022-d",
+              "label": "D",
+              "content": "没收违法所得",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q022-e",
+              "label": "E",
+              "content": "吊销许可证",
+              "correct": true
+            }
+          ]
+        },
+        {
+          "id": "hr600-master-q023",
+          "type": "multiple",
+          "section": "standard",
+          "prompt": "小吕大学毕业找工作时不仅考虑到工资水平，而且还考虑到职业发展前途、企业声誉等因素。他在求职过程中发现，有些企业坚持支付超过市场工资水平的高工资，而不像以前想象的那样，按照通行市场水平支付工资。此外，他去求职的一些企业面对人工成本不断上涨的情况，开始用机器人替代一些人工操作。让他没想到的是，大学同班同学小王由于一时找不到好工作，家庭经济状况又不好，先选择去一家快递公司当快递员了。关于企业支付的超过市场均衡水平的高工资的说法，正确的是（）。",
+          "explanation": "本题考查效率工资的内容。选项 A 说法错误，企业提供的一种高于市场均衡水平的工资是效率工资。",
+          "points": 2,
+          "options": [
+            {
+              "id": "hr600-master-q023-a",
+              "label": "A",
+              "content": "企业支付的这种高工资称为绩效工资",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q023-b",
+              "label": "B",
+              "content": "这种高工资有助于吸引生产率高的员工",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q023-c",
+              "label": "C",
+              "content": "这种高工资有助于降低员工的离职率",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q023-d",
+              "label": "D",
+              "content": "这种做法在员工期望与企业保持长期雇佣关系的情况下更有意义",
+              "correct": true
+            }
+          ]
+        },
+        {
+          "id": "hr600-master-q024",
+          "type": "multiple",
+          "section": "standard",
+          "prompt": "以结构为中心的变革包括（）",
+          "explanation": "组织以结构为中心的变革包括重新划分和合并新的部门、调整管理层次和管理幅度、任免责任人、明确责任和权力等，故本题选 ACD。B 选项属于以技术为中心的变革；E 选项属于以人为中心的变革。",
+          "points": 2,
+          "options": [
+            {
+              "id": "hr600-master-q024-a",
+              "label": "A",
+              "content": "合并新的部门",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q024-b",
+              "label": "B",
+              "content": "工作流程的再设计",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q024-c",
+              "label": "C",
+              "content": "调整管理层次",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q024-d",
+              "label": "D",
+              "content": "任免责任人",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q024-e",
+              "label": "E",
+              "content": "改变人的态度",
+              "correct": false
+            }
+          ]
+        },
+        {
+          "id": "hr600-master-q025",
+          "type": "multiple",
+          "section": "standard",
+          "prompt": "岗位绩效工资由（）部分组成。",
+          "explanation": "岗位绩效工资由岗位工资、薪级工资、绩效工资和津贴补贴四部分组成，其中岗位工资和薪级工资为基本工资。",
+          "points": 2,
+          "options": [
+            {
+              "id": "hr600-master-q025-a",
+              "label": "A",
+              "content": "岗位工资",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q025-b",
+              "label": "B",
+              "content": "薪级工资",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q025-c",
+              "label": "C",
+              "content": "绩效工资",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q025-d",
+              "label": "D",
+              "content": "津贴补贴",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q025-e",
+              "label": "E",
+              "content": "岗位福利",
+              "correct": false
+            }
+          ]
+        },
+        {
+          "id": "hr600-master-q026",
+          "type": "multiple",
+          "section": "standard",
+          "prompt": "下列选项中，属于变革型领导者的特征的有（）。",
+          "explanation": "本题考查变革型领导理论。A、B、D 项都属于变革型领导者的特征。选项 C、E 为交易型领导者的特征。",
+          "points": 2,
+          "options": [
+            {
+              "id": "hr600-master-q026-a",
+              "label": "A",
+              "content": "提升智慧，理性和谨慎地解决问题",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q026-b",
+              "label": "B",
+              "content": "持续的高期望，鼓励努力，用简单的手段表达重要的意图",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q026-c",
+              "label": "C",
+              "content": "观察和寻找对于标准的背离，采取修正行动",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q026-d",
+              "label": "D",
+              "content": "提供任务的愿景，潜移默化的自豪感，获得尊敬和信任",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q026-e",
+              "label": "E",
+              "content": "仅在背离标准时进行干涉",
+              "correct": false
+            }
+          ]
+        },
+        {
+          "id": "hr600-master-q027",
+          "type": "multiple",
+          "section": "standard",
+          "prompt": "高等教育的私人收益低估偏差主要表现在（）。",
+          "explanation": "本题考查高等教育的低估偏差。受过良好教育的人往往有机会从事具有较高职业声望和社会地位的工作；在大学里结交的朋友、参与的社团活动以及大学期间文艺鉴赏能力和音乐欣赏水平的提高等，都属于消费性收益。这些收益往往因为无法衡量而被有意忽略。",
+          "points": 2,
+          "options": [
+            {
+              "id": "hr600-master-q027-a",
+              "label": "A",
+              "content": "有更多的机会从事具有较高职业声望和社会地位的工作",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q027-b",
+              "label": "B",
+              "content": "大学里结交的朋友",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q027-c",
+              "label": "C",
+              "content": "大学里参与的社团活动",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q027-d",
+              "label": "D",
+              "content": "大学里文艺鉴赏能力和音乐欣赏水平的提高",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q027-e",
+              "label": "E",
+              "content": "个人能力",
+              "correct": false
+            }
+          ]
+        },
+        {
+          "id": "hr600-master-q028",
+          "type": "multiple",
+          "section": "standard",
+          "prompt": "工伤保险的原则包括（）。",
+          "explanation": "本题考查工伤保险的原则。工伤保险的原则包括无过失责任原则，损害补偿原则，预防、补偿和康复相结合的原则。",
+          "points": 2,
+          "options": [
+            {
+              "id": "hr600-master-q028-a",
+              "label": "A",
+              "content": "过失原则",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q028-b",
+              "label": "B",
+              "content": "成本效益原则",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q028-c",
+              "label": "C",
+              "content": "损害补偿原则",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q028-d",
+              "label": "D",
+              "content": "社会救济原则",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q028-e",
+              "label": "E",
+              "content": "预防、补偿和康复相结合的原则",
+              "correct": true
+            }
+          ]
+        },
+        {
+          "id": "hr600-master-q029",
+          "type": "multiple",
+          "section": "standard",
+          "prompt": "下列关于公平理论中的纵向比较的正确表述是（）。",
+          "explanation": "本题考查公平理论。纵向比较包括组织自我比较——员工在同一组织中把自己现在的工作和待遇与过去的相比较，也包括组织外自我比较——员工将自己在不同组织的工作和待遇进行比较。一般说来，薪资水准、教育水平较高的员工，视野较为开阔，依据的信息比较全面，常常以他人为比较对象。进行横向比较。而薪资水准、教育水平较低的员工则常常作纵向的自我比较。选项 BD 属于公平理论中的横向比较。",
+          "points": 2,
+          "options": [
+            {
+              "id": "hr600-master-q029-a",
+              "label": "A",
+              "content": "员工在同一组织中把自己的工作和待遇与过去的相比较",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q029-b",
+              "label": "B",
+              "content": "员工在本组织中将自己的工作和报酬与其他人相比较",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q029-c",
+              "label": "C",
+              "content": "员工将自己在不同组织中的待遇进行比较",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q029-d",
+              "label": "D",
+              "content": "员工将自己的工作和报酬与其他组织的员工进行比较",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q029-e",
+              "label": "E",
+              "content": "一般而言，薪资水准、教育水平较低的员工，习惯采用纵向的自我比较",
+              "correct": true
+            }
+          ]
+        },
+        {
+          "id": "hr600-master-q030",
+          "type": "single",
+          "section": "standard",
+          "prompt": "（）是劳动力市场联系和经济联系的纽带。",
+          "explanation": "一国的劳动力市场是由各个地方劳动力市场所构成的。从本质上讲，将各个地方的劳动力市场紧密地联系在一起形成完整的全国劳动力市场的，不是法令和规章，不是国家统一的工资制度，而是劳动力在不同的地方劳动力市场之间的自由流动迁移。劳动力地区流动是劳动力市场联系和经济联系的纽带。",
+          "points": 1,
+          "options": [
+            {
+              "id": "hr600-master-q030-a",
+              "label": "A",
+              "content": "劳动力地区流动",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q030-b",
+              "label": "B",
+              "content": "劳动力跨职业流动",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q030-c",
+              "label": "C",
+              "content": "产业流动",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q030-d",
+              "label": "D",
+              "content": "产业内流动",
+              "correct": false
+            }
+          ]
+        },
+        {
+          "id": "hr600-master-q031",
+          "type": "multiple",
+          "section": "standard",
+          "prompt": "根据双因素理论，下列选项中属于激励因素的是（）。",
+          "explanation": "双因素理论区分了激励因素和保健因素。激励因素包括成就感、别人的认可、工作性质、责任和晋升等因素；保健因素包括组织政策、监督方式、人际关系、工作环境和工资等因素。",
+          "points": 2,
+          "options": [
+            {
+              "id": "hr600-master-q031-a",
+              "label": "A",
+              "content": "工作环境",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q031-b",
+              "label": "B",
+              "content": "别人的认可",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q031-c",
+              "label": "C",
+              "content": "晋升",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q031-d",
+              "label": "D",
+              "content": "人际关系",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q031-e",
+              "label": "E",
+              "content": "工作性质",
+              "correct": true
+            }
+          ]
+        },
+        {
+          "id": "hr600-master-q032",
+          "type": "single",
+          "section": "standard",
+          "prompt": "对人力资源社会保障行政部门的具体行政行为不服，应在知道该行为（）日内申请行政复议。",
+          "explanation": "公民、法人或其他组织对人力资源社会保障行政部门作出的具体行政行为不服，应当在知道侵害其合法权益的具体行政行为之日起 60 日内，向上一级人力资源社会保障行政部门申请复议，也可以向同级人民政府申请复议；对社会保险经办机构作出的具体行政行为不服，可以向直接管理该经办机构的人力资源社会保障行政部门申请复议，但不能向上一级人力资源社会保障行政部门申请复议。",
+          "points": 1,
+          "options": [
+            {
+              "id": "hr600-master-q032-a",
+              "label": "A",
+              "content": "15",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q032-b",
+              "label": "B",
+              "content": "30",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q032-c",
+              "label": "C",
+              "content": "60",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q032-d",
+              "label": "D",
+              "content": "20",
+              "correct": false
+            }
+          ]
+        },
+        {
+          "id": "hr600-master-q033",
+          "type": "multiple",
+          "section": "standard",
+          "prompt": "下列关于组织结构的论述，正确的有（）。",
+          "explanation": "企业的组织结构，又称权责结构，是指为实现企业目标，企业全体员工进行分工协作，在职务范围、责任、权力方面所形成的结构体系。E 项描述的是组织结构体系中的职权结构。故 E 选项错误。其内涵包括： ①组织结构的本质是企业员工的分工协作关系；②设计组织结构的目的是为了实现组织的目标，组织结构是实现组织目标的一种手段； ③组织结构的内涵是企业员工在职、权、责三方面的结构体系。组织结构包含复杂性、规范性、集权度三个要素，故 C选项错误。",
+          "points": 2,
+          "options": [
+            {
+              "id": "hr600-master-q033-a",
+              "label": "A",
+              "content": "组织结构的本质是企业员工的分工协作关系",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q033-b",
+              "label": "B",
+              "content": "组织结构又可称为权责结构",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q033-c",
+              "label": "C",
+              "content": "组织结构包含复杂性、规范性、层次性三个要素",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q033-d",
+              "label": "D",
+              "content": "组织结构的内涵是企业员工在职、权、责三方面的结构体系",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q033-e",
+              "label": "E",
+              "content": "企业的组织结构是指各管理层次、部门在权利和责任方面的分工和相互关系",
+              "correct": false
+            }
+          ]
+        },
+        {
+          "id": "hr600-master-q034",
+          "type": "multiple",
+          "section": "standard",
+          "prompt": "关于组织结构设计的描述，正确的是（）。",
+          "explanation": "组织结构的本质是企业员工的分工协作关系。设计组织结构的目的是实现组织的目标。组织结构是实现组织目标的一种手段。组织结构又称权责结构，包括职能结构、层次结构、部门结构和职权结构，层次结构反映的是组织结构的纵向结构。组织结构包括复杂性、规范性和集权度三个要素。选项 C 错误，部门结构：各管理部门的构成，又称组织的横向结构。职能结构是达到企业目标所需要完成的各项业务工作及其比例和关系。",
+          "points": 2,
+          "options": [
+            {
+              "id": "hr600-master-q034-a",
+              "label": "A",
+              "content": "组织结构的本质是企业员工的分工协作关系",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q034-b",
+              "label": "B",
+              "content": "组织结构是实现组织目标的一种手段",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q034-c",
+              "label": "C",
+              "content": "职能结构反映的是组织结构的横向结构",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q034-d",
+              "label": "D",
+              "content": "层次结构反映的是组织结构的纵向结构",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q034-e",
+              "label": "E",
+              "content": "组织结构包括复杂性、规范性和集权度三个要素",
+              "correct": true
+            }
+          ]
+        },
+        {
+          "id": "hr600-master-q035",
+          "type": "single",
+          "section": "standard",
+          "prompt": "近年来，一个高中毕业生所能赚得的月收入平均为 800 元，而在五年前，同样一个高中生的月平均收入是 600 元，这表明（）。",
+          "explanation": "本题考查高等教育投资决策的基本模型。高中毕业后参加工作获得的收入增加，那么其上大学的机会成本也是增加的。",
+          "points": 1,
+          "options": [
+            {
+              "id": "hr600-master-q035-a",
+              "label": "A",
+              "content": "上大学的心理成本降低",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q035-b",
+              "label": "B",
+              "content": "上大学的机会成本增加",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q035-c",
+              "label": "C",
+              "content": "上大学的净现值减少",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q035-d",
+              "label": "D",
+              "content": "愿意上大学的人会更多",
+              "correct": false
+            }
+          ]
+        },
+        {
+          "id": "hr600-master-q036",
+          "type": "multiple",
+          "section": "standard",
+          "prompt": "下列选项中，属于引起劳动争议内容的是（）。",
+          "explanation": "劳动争议的内容必须与劳动权利和义务有关。引起劳动争议的内容主要是劳动就业、劳动合同、劳动报酬、工作时间和休息休假、劳动安全与卫生、社会保险与福利、培训、奖惩等方面。",
+          "points": 2,
+          "options": [
+            {
+              "id": "hr600-master-q036-a",
+              "label": "A",
+              "content": "国家最低工资标准",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q036-b",
+              "label": "B",
+              "content": "劳动报酬",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q036-c",
+              "label": "C",
+              "content": "劳动安全与卫生",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q036-d",
+              "label": "D",
+              "content": "社会保险",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q036-e",
+              "label": "E",
+              "content": "培训服务期限",
+              "correct": true
+            }
+          ]
+        },
+        {
+          "id": "hr600-master-q037",
+          "type": "single",
+          "section": "standard",
+          "prompt": "关于双因素理论，下列说法不正确的是（）。",
+          "explanation": "本题考查双因素理论的相关内容。激励因素有成就感、别人的认可、工作性质、责任和晋升等，保健因素有组织政策、监督方式、人际关系、工作环境和工资等。选项 C 中“别人的认可”属于激励因素而非保健因素，因此选 C。",
+          "points": 1,
+          "options": [
+            {
+              "id": "hr600-master-q037-a",
+              "label": "A",
+              "content": "保健因素不能起到激励员工的作用",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q037-b",
+              "label": "B",
+              "content": "激励因素包括成就感、晋升、工作性质",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q037-c",
+              "label": "C",
+              "content": "保健因素包括别人的认可、人际关系、工资等",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q037-d",
+              "label": "D",
+              "content": "双因素理论又称激励-保健因素理论，认为激励因素和保健因素影响着员工的工作态度",
+              "correct": false
+            }
+          ]
+        },
+        {
+          "id": "hr600-master-q038",
+          "type": "single",
+          "section": "standard",
+          "prompt": "有关权变理论的表述错误的是（）。",
+          "explanation": "本题考查权变理论。费德勒将领导方式分为工作取向和关系取向两类，所以选项 C 说法错误。",
+          "points": 1,
+          "options": [
+            {
+              "id": "hr600-master-q038-a",
+              "label": "A",
+              "content": "权变理论认为团队绩效取决于领导者与情景因素之间是否搭配",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q038-b",
+              "label": "B",
+              "content": "在高度非结构化环境下，结构化的方法更能得到员工的喜爱",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q038-c",
+              "label": "C",
+              "content": "费德勒将领导方式分为关心人和工作管理两类",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q038-d",
+              "label": "D",
+              "content": "情景性的因素分为三个维度，即领导与下属的关系、工作结构和职权",
+              "correct": false
+            }
+          ]
+        },
+        {
+          "id": "hr600-master-q039",
+          "type": "multiple",
+          "section": "standard",
+          "prompt": "最好的甄选方法是多种方法的综合测试，其效度系数往往超过 0.60。下列选项中，属于综合测验的是（）。",
+          "explanation": "研究表明，最好的甄选方法是包括工作样本测试、高度结构化的面试以及认知能力测试在内的综合测试，这样一套测试组合的效度系数往往超过 0.60。",
+          "points": 2,
+          "options": [
+            {
+              "id": "hr600-master-q039-a",
+              "label": "A",
+              "content": "非结构化面试",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q039-b",
+              "label": "B",
+              "content": "工作样本测试",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q039-c",
+              "label": "C",
+              "content": "高度结构化的面试",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q039-d",
+              "label": "D",
+              "content": "认知能力测试",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q039-e",
+              "label": "E",
+              "content": "职业兴趣测试",
+              "correct": false
+            }
+          ]
+        },
+        {
+          "id": "hr600-master-q040",
+          "type": "multiple",
+          "section": "standard",
+          "prompt": "下列关于六种基本的职业兴趣类型的说法中，正确的有（）。",
+          "explanation": "本题考查职业兴趣测试。社会型的人适合从事教育、咨询等方面的工作，所以选项 C 错误。",
+          "points": 2,
+          "options": [
+            {
+              "id": "hr600-master-q040-a",
+              "label": "A",
+              "content": "现实型的人适合从事技能性和技术性的职业",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q040-b",
+              "label": "B",
+              "content": "艺术型的人适合从事文学艺术方面的工作",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q040-c",
+              "label": "C",
+              "content": "常规型的人适合从事社会、教育、咨询等方面的工作",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q040-d",
+              "label": "D",
+              "content": "企业型的人不喜欢从事研究性的活动",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q040-e",
+              "label": "E",
+              "content": "常规型的人看重商业和经济方面的具体成就，看重财富和地位",
+              "correct": true
+            }
+          ]
+        },
+        {
+          "id": "hr600-master-q041",
+          "type": "multiple",
+          "section": "standard",
+          "prompt": "我国人才评价机制的改革包括（）。",
+          "explanation": "为了解决人才评价存在的突出问题，创新人才评价机制，发挥人才评价指挥棒作用，我国进行了人才评价机制的改革。1、分类健全人才评价标准；2、改进和创新人才评价方式；3、加快推进重点领域人才评价改革；4、健全完善人才评价管理服务制度。",
+          "points": 2,
+          "options": [
+            {
+              "id": "hr600-master-q041-a",
+              "label": "A",
+              "content": "分类健全人才评价标准",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q041-b",
+              "label": "B",
+              "content": "改进和创新人才评价方式",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q041-c",
+              "label": "C",
+              "content": "加快推进重点领域人才评价改革",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q041-d",
+              "label": "D",
+              "content": "健全完善人才评价管理服务制度",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q041-e",
+              "label": "E",
+              "content": "改善创新并完善社会科学等人才服务制度",
+              "correct": false
+            }
+          ]
+        },
+        {
+          "id": "hr600-master-q042",
+          "type": "multiple",
+          "section": "standard",
+          "prompt": "申请组建高级职称评审委员会应当具备（）的条件。",
+          "explanation": "职称评审委员会分为高级、中级、初级职称评审委员会。申请组建高级职称评审委员会应当具备下列条件： (1)拟评审的职称系列或者专业为职称评审委员会组建单位主体职称系列或者专业。 (2)拟评审的职称系列或者专业在行业内具有重要影响力，能够代表本领域的专业发展水平。 (3)具有一定数量的专业技术人才和符合条件的高级职称评审专家。 (4)具有开展高级职称评审的能力。",
+          "points": 2,
+          "options": [
+            {
+              "id": "hr600-master-q042-a",
+              "label": "A",
+              "content": "拟评审的职称系列或者专业为职称评审委员会组建单位主体职称系列或者专业",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q042-b",
+              "label": "B",
+              "content": "拟评审的职称系列或者专业在行业内具有重要影响力，能够代表本领域的专业发展水平",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q042-c",
+              "label": "C",
+              "content": "具有一定数量的专业技术人才和符合条件的高级职称评审专家",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q042-d",
+              "label": "D",
+              "content": "具有开展高级职称评审的能力",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q042-e",
+              "label": "E",
+              "content": "具有开展中级及以上的职称评审的能力",
+              "correct": false
+            }
+          ]
+        },
+        {
+          "id": "hr600-master-q043",
+          "type": "multiple",
+          "section": "standard",
+          "prompt": "根据《中华人民共和国劳动争议调解仲裁法》，属于仲裁时效中断情形的是（）。",
+          "explanation": "本题考查劳动争议仲裁时效中断的内容。选项 C、E 为劳动争议仲裁时效中止的情形。",
+          "points": 2,
+          "options": [
+            {
+              "id": "hr600-master-q043-a",
+              "label": "A",
+              "content": "对方当事人同意履行义务",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q043-b",
+              "label": "B",
+              "content": "—方当事人向有关部门请求权利救济",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q043-c",
+              "label": "C",
+              "content": "限制民事行为能力劳动者的法定代理人尚未确定",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q043-d",
+              "label": "D",
+              "content": "一方当事人向对方当事人主张权利",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q043-e",
+              "label": "E",
+              "content": "不可抗力的原因",
+              "correct": false
+            }
+          ]
+        },
+        {
+          "id": "hr600-master-q044",
+          "type": "single",
+          "section": "standard",
+          "prompt": "下列选项中，不属于引起一个地区就业增长的要素是（）。",
+          "explanation": "本题考查劳动力的跨地区流动。从一个地区来看，引起就业增长的要素有三个：第一，与全国经济增长率相比的预期地区增长率；第二，地区工业组合；第三，地区优势和地区劣势。",
+          "points": 1,
+          "options": [
+            {
+              "id": "hr600-master-q044-a",
+              "label": "A",
+              "content": "地区工业组合",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q044-b",
+              "label": "B",
+              "content": "地区劳动力人口",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q044-c",
+              "label": "C",
+              "content": "与全国经济增长率相比的预期地区增长率",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q044-d",
+              "label": "D",
+              "content": "地区优势和地区劣势",
+              "correct": false
+            }
+          ]
+        },
+        {
+          "id": "hr600-master-q045",
+          "type": "single",
+          "section": "standard",
+          "prompt": "社会保险法律适用的特征不包括（）。",
+          "explanation": "本题考查社会保险法律适用的特征。社会保险法律适用的特征：（1）具有主体的特殊性；（2）具有专业性；（3）具有国家强制性；（4）具有程序性；（5）具有明确性。",
+          "points": 1,
+          "options": [
+            {
+              "id": "hr600-master-q045-a",
+              "label": "A",
+              "content": "具有平等性",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q045-b",
+              "label": "B",
+              "content": "具有国家强制性",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q045-c",
+              "label": "C",
+              "content": "具有专业性",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q045-d",
+              "label": "D",
+              "content": "具有主体的特殊性",
+              "correct": false
+            }
+          ]
+        },
+        {
+          "id": "hr600-master-q046",
+          "type": "multiple",
+          "section": "standard",
+          "prompt": "提任县处级领导职务的，应当具有（）。",
+          "explanation": "提任县处级领导职务的，应当具有 5 年以上工龄和 2 年以上基层工作经历。",
+          "points": 2,
+          "options": [
+            {
+              "id": "hr600-master-q046-a",
+              "label": "A",
+              "content": "5 年以上工龄",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q046-b",
+              "label": "B",
+              "content": "2 年以上基层工作经历",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q046-c",
+              "label": "C",
+              "content": "有在下一级 2 个以上职位任职的经历",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q046-d",
+              "label": "D",
+              "content": "8 年以上工龄",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q046-e",
+              "label": "E",
+              "content": "5 年以上基层工作经历",
+              "correct": false
+            }
+          ]
+        },
+        {
+          "id": "hr600-master-q047",
+          "type": "single",
+          "section": "standard",
+          "prompt": "在组织设计中，将组成部分连成整体，保证整个组织结构协调一致、有效运行的关键是（）。",
+          "explanation": "本题考查组织设计中联系方式的设计。联系方式是指企业中纵向管理层次之间、横向管理部门之间的协调方式和控制手段，联系方式的设计是保证整个组织结构协调一致、有效运作的关键。",
+          "points": 1,
+          "options": [
+            {
+              "id": "hr600-master-q047-a",
+              "label": "A",
+              "content": "联系方式的设计",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q047-b",
+              "label": "B",
+              "content": "管理规范的设计",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q047-c",
+              "label": "C",
+              "content": "人员配备和培训体系的设计",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q047-d",
+              "label": "D",
+              "content": "各类运行制度的设计",
+              "correct": false
+            }
+          ]
+        },
+        {
+          "id": "hr600-master-q048",
+          "type": "multiple",
+          "section": "standard",
+          "prompt": "不纳入基本医疗保险基金支付范围的医疗费用有（）。",
+          "explanation": "本题考查基本医疗保险基金的支付。《中华人民共和国社会保险法》规定，符合基本医疗保险药品目录、诊疗项目、医疗服务设施标准以及急诊、抢救的医疗费用，按照国家规定从基本医疗保险基金中支付。但下列医疗费用不纳入基本医疗保险基金支付范围： (1)应当从工伤保险基金中支付的； (2)应当由第三人负担的； (3)应当由公共卫生负担的； (4)在境外就医的。",
+          "points": 2,
+          "options": [
+            {
+              "id": "hr600-master-q048-a",
+              "label": "A",
+              "content": "在境外就医的",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q048-b",
+              "label": "B",
+              "content": "由社会保险经办机构支付的",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q048-c",
+              "label": "C",
+              "content": "应当由第三人负担的",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q048-d",
+              "label": "D",
+              "content": "应当由公共卫生负担的",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q048-e",
+              "label": "E",
+              "content": "应当从工伤保险基金中支付的",
+              "correct": true
+            }
+          ]
+        },
+        {
+          "id": "hr600-master-q049",
+          "type": "multiple",
+          "section": "standard",
+          "prompt": "下列关于斯坎伦计划的说法中，正确的有（）。",
+          "explanation": "本题考查斯坎伦计划的内容。斯坎伦计划融合了参与管理和绩效薪金制两种概念。斯坎伦计划的主张是：组织应结合为一体，不可分崩离析；员工是有能力而且愿意贡献出他们的想法和建议的；效率提高后所增加的获利，应与员工共同分享。斯坎伦计划内有两项不可缺少的要素：设置一个委员会；制订一套分享成本降低所带来利益的计算方法。",
+          "points": 2,
+          "options": [
+            {
+              "id": "hr600-master-q049-a",
+              "label": "A",
+              "content": "设置一个委员会",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q049-b",
+              "label": "B",
+              "content": "组织应结合为一体，不可分崩离析",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q049-c",
+              "label": "C",
+              "content": "效率提高后所增加的获利，应与员工分享",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q049-d",
+              "label": "D",
+              "content": "融合了目标管理和绩效薪金制两种概念",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q049-e",
+              "label": "E",
+              "content": "制订一套分享成本降低所带来利益的计算方法",
+              "correct": true
+            }
+          ]
+        },
+        {
+          "id": "hr600-master-q050",
+          "type": "multiple",
+          "section": "standard",
+          "prompt": "职业技能等级认定要坚持（）的原则，认定结果要经得起市场检验、为社会广泛认可。",
+          "explanation": "职业技能等级认定要坚持客观、公正、科学、规范的原则，认定结果要经得起市场检验、为社会广泛认可。",
+          "points": 2,
+          "options": [
+            {
+              "id": "hr600-master-q050-a",
+              "label": "A",
+              "content": "客观",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q050-b",
+              "label": "B",
+              "content": "公正",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q050-c",
+              "label": "C",
+              "content": "科学",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q050-d",
+              "label": "D",
+              "content": "规范",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q050-e",
+              "label": "E",
+              "content": "公平",
+              "correct": false
+            }
+          ]
+        },
+        {
+          "id": "hr600-master-q051",
+          "type": "single",
+          "section": "standard",
+          "prompt": "设区的市级劳动能力鉴定委员会应当自收到劳动能力鉴定申请之日起()内做出劳动能力鉴定结论，必要时，劳动能力鉴定结论的期限可以延长()。",
+          "explanation": "本题考查劳动能力鉴定。设区的市级劳动能力鉴定委员会应当自收到劳动能力鉴定申请之日起 60 日内做出劳动能力鉴定结论，必要时，劳动能力鉴定结论的期限可以延长 30 日。",
+          "points": 1,
+          "options": [
+            {
+              "id": "hr600-master-q051-a",
+              "label": "A",
+              "content": "30 日，15 日",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q051-b",
+              "label": "B",
+              "content": "30 日，30 日",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q051-c",
+              "label": "C",
+              "content": "60 日，15 日",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q051-d",
+              "label": "D",
+              "content": "60 日，30 日",
+              "correct": true
+            }
+          ]
+        },
+        {
+          "id": "hr600-master-q052",
+          "type": "single",
+          "section": "standard",
+          "prompt": "关于劳动力市场的基本概念，下列说法错误的是（）。",
+          "explanation": "本题考查劳动力市场的基本概念。劳动力市场是进行劳动力交易的一种要素市场。",
+          "points": 1,
+          "options": [
+            {
+              "id": "hr600-master-q052-a",
+              "label": "A",
+              "content": "劳动力市场是进行劳动力交易的一种资本市场",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q052-b",
+              "label": "B",
+              "content": "劳动力市场是对劳动力这种生产性资源进行，有效配置的根本手段",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q052-c",
+              "label": "C",
+              "content": "宏观上，劳动力市场是由各种各样的局部性或单一性劳动力市场构成的一个总劳动力市场体系",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q052-d",
+              "label": "D",
+              "content": "微观上，劳动力市场是指特定的劳动力供求双方在通过自由谈判达成劳动力使用权转让的合约时所处的市场环境",
+              "correct": false
+            }
+          ]
+        },
+        {
+          "id": "hr600-master-q053",
+          "type": "multiple",
+          "section": "standard",
+          "prompt": "下列关于竞业限制描述正确的是（）。",
+          "explanation": "本题考查劳动合同解除与终止。在解除竞业限制协议时，劳动者请求用人单位额外支付劳动者 3 个月的竞业限制经济补偿的，人民法院应予以支持。",
+          "points": 2,
+          "options": [
+            {
+              "id": "hr600-master-q053-a",
+              "label": "A",
+              "content": "高级管理人员属于竞业限制人员",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q053-b",
+              "label": "B",
+              "content": "竞业限制的范围、地域、期限由用人单位与劳动者约定，竞业限制的约定不得违反法律法规的规定",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q053-c",
+              "label": "C",
+              "content": "在解除或者终止劳动合同后，自己开业生产或者经营同类产品、从事同类业务的竞业限制期限，不得超过 2 年",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q053-d",
+              "label": "D",
+              "content": "在竞业限制期限内，用人单位请求解除竞业限制协议时，人民法院应予支持",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q053-e",
+              "label": "E",
+              "content": "在解除竞业限制协议时，劳动者请求用人单位额外支付劳动者 6 个月的竞业限制经济补偿的，人民法院应予以支持",
+              "correct": false
+            }
+          ]
+        },
+        {
+          "id": "hr600-master-q054",
+          "type": "multiple",
+          "section": "standard",
+          "prompt": "关于职工因工致残被鉴定为一级至四级伤残的说法，正确的是（）。",
+          "explanation": "职工因工致残被鉴定为一级至四级伤残的，保留劳动关系、退出工作岗位，从工伤保险基金按月支付伤残津贴，不需要用人单位支付；用人单位和职工个人要以伤残津贴为基数，缴纳基本医疗保险费。",
+          "points": 2,
+          "options": [
+            {
+              "id": "hr600-master-q054-a",
+              "label": "A",
+              "content": "保留劳动关系、退出工作岗位",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q054-b",
+              "label": "B",
+              "content": "从工伤保险基金按照伤残等级支付一次性伤残补助金",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q054-c",
+              "label": "C",
+              "content": "企业按月支付伤残津贴",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q054-d",
+              "label": "D",
+              "content": "从工伤保险基金按月支付伤残津贴",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q054-e",
+              "label": "E",
+              "content": "工伤职工达到法定退休年龄并办理退休手续后，停发伤残津贴，按照国家有关规定享受基本养老保险待遇",
+              "correct": true
+            }
+          ]
+        },
+        {
+          "id": "hr600-master-q055",
+          "type": "multiple",
+          "section": "standard",
+          "prompt": "下列属于绩效薪金制方式的有（）。",
+          "explanation": "本题考查绩效薪金制。绩效薪金制指将绩效与报酬相结合的激励措施，通常采用的方式有计件工资、工作奖金、利润分成、按利分红等。",
+          "points": 2,
+          "options": [
+            {
+              "id": "hr600-master-q055-a",
+              "label": "A",
+              "content": "计件工资",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q055-b",
+              "label": "B",
+              "content": "计时工资",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q055-c",
+              "label": "C",
+              "content": "按利分红",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q055-d",
+              "label": "D",
+              "content": "利润分成",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q055-e",
+              "label": "E",
+              "content": "工作奖金",
+              "correct": true
+            }
+          ]
+        },
+        {
+          "id": "hr600-master-q056",
+          "type": "multiple",
+          "section": "standard",
+          "prompt": "能够促使魅力归因的领导特质包括（）。",
+          "explanation": "本题考查魅力型领导理论。能够促使魅力归因的领导特质包括：自信、印象管理技能、社会敏感性和共情等。",
+          "points": 2,
+          "options": [
+            {
+              "id": "hr600-master-q056-a",
+              "label": "A",
+              "content": "感情",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q056-b",
+              "label": "B",
+              "content": "社会敏感性",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q056-c",
+              "label": "C",
+              "content": "自信",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q056-d",
+              "label": "D",
+              "content": "印象管理技能",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q056-e",
+              "label": "E",
+              "content": "共情",
+              "correct": true
+            }
+          ]
+        },
+        {
+          "id": "hr600-master-q057",
+          "type": "multiple",
+          "section": "standard",
+          "prompt": "在中国境内就业的外国人，关于参加我国的社会保险说法正确的有（）。",
+          "explanation": "在中国境内就业的外国人，也应当参照《社会保险法》规定参加我国的社会保险。其中，具有与我国签订社会保险缴费双边或多边协议国家国籍的就业人员，在其依法获得在我国境内就业证件 3 个月内提供协议国出具参保证明的，应按协议规定免除其规定险种在规定期限内的缴费义务。对于依法获得在我国境内就业证件 3 个月后不能提供协议国出具的参保证明的，应按规定征收社会保险费并收取相应的滞纳金（故 C 选项错误，除了保险费还需要征收滞纳金）。对于协议之外的险种以及协议规定险种超过规定期限的，应要求其按规定缴纳社会保险费。",
+          "points": 2,
+          "options": [
+            {
+              "id": "hr600-master-q057-a",
+              "label": "A",
+              "content": "应当参照规定参加我国的社会保险",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q057-b",
+              "label": "B",
+              "content": "依法获得在我国境内就业证件 3 个月内提供协议国出具参保证明的，免除其规定险种在规定期限内的缴费义务",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q057-c",
+              "label": "C",
+              "content": "依法获得在我国境内就业证件 3 个月内不能提供协议国出具的参保证明的，征收社会保险费",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q057-d",
+              "label": "D",
+              "content": "依法获得在我国境内就业证件 3 个月后不能提供协议国出具的参保证明的，征收社会保险费并收取相应的滞纳金",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q057-e",
+              "label": "E",
+              "content": "对于协议之外的险种超过规定期限的，应要求其按规定缴纳社会保险费",
+              "correct": true
+            }
+          ]
+        },
+        {
+          "id": "hr600-master-q058",
+          "type": "multiple",
+          "section": "standard",
+          "prompt": "人力资源管理实践中，劳工关系与员工关系的备选内容包括（）。",
+          "explanation": "本题考查人力资源战略与人力资源管理实践选择。人力资源管理实践中，劳工关系与员工关系的备选内容包括：集体／个人谈判；自上而下／员工参与决策；正规／无正规既定程序；将员工看成是费用支付项目/将员工看成是财富。C 选项属于绩效管理的内容。",
+          "points": 2,
+          "options": [
+            {
+              "id": "hr600-master-q058-a",
+              "label": "A",
+              "content": "谈判方式",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q058-b",
+              "label": "B",
+              "content": "自上而下／员工参与决策",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q058-c",
+              "label": "C",
+              "content": "行为／结果标准",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q058-d",
+              "label": "D",
+              "content": "既定程序",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q058-e",
+              "label": "E",
+              "content": "将员工看成是费用支付项目/将员工看成是财富",
+              "correct": true
+            }
+          ]
+        },
+        {
+          "id": "hr600-master-q059",
+          "type": "single",
+          "section": "standard",
+          "prompt": "员工的能力和天赋的发挥在很大程度上取决于其（）水平的高低。",
+          "explanation": "员工的能力和天赋并不能直接给组织带来相应的价值，只有当能力与天赋发挥出来后才能够为组织带来益处，而员工能力与天赋的发挥在很大程度上取决于其动机水平的高低。",
+          "points": 1,
+          "options": [
+            {
+              "id": "hr600-master-q059-a",
+              "label": "A",
+              "content": "需要",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q059-b",
+              "label": "B",
+              "content": "动机",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q059-c",
+              "label": "C",
+              "content": "激励",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q059-d",
+              "label": "D",
+              "content": "努力",
+              "correct": false
+            }
+          ]
+        },
+        {
+          "id": "hr600-master-q060",
+          "type": "single",
+          "section": "standard",
+          "prompt": "2018 年，某地区青年劳动力的工资率上涨 2％会导致老年劳动力需求量下降0.8％，在其他条件不变的情况下，表明该地区这两种劳动力之间存在（）关系。",
+          "explanation": "如果两种劳动力的交叉工资弹性值为负，则意味着一种劳动力的工资率提高会促使另一种劳动力的需求数量减少，这说明两者之间是一种总互补关系。",
+          "points": 1,
+          "options": [
+            {
+              "id": "hr600-master-q060-a",
+              "label": "A",
+              "content": "替代",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q060-b",
+              "label": "B",
+              "content": "互补",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q060-c",
+              "label": "C",
+              "content": "总替代",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q060-d",
+              "label": "D",
+              "content": "总互补",
+              "correct": true
+            }
+          ]
+        },
+        {
+          "id": "hr600-master-q061",
+          "type": "single",
+          "section": "standard",
+          "prompt": "高等教育的信号模型认为（）。",
+          "explanation": "本题考查高等教育信号模型。高等教育本身并没有导致生产率的提高，但是它却表明了一个受过高等教育的人是一个具有较高生产率的人，即高等教育只不过是一种高生产率的信号而已，它表明，能够完成高等教育的人通常是生产率比较高的人。",
+          "points": 1,
+          "options": [
+            {
+              "id": "hr600-master-q061-a",
+              "label": "A",
+              "content": "高等教育不仅提高了受教育者的生产率，而且向雇主证明了受教育者具有高生产率",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q061-b",
+              "label": "B",
+              "content": "高等教育并没有提高受教育者的生产率，但是向客户证明了受教育者具有高生产率",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q061-c",
+              "label": "C",
+              "content": "高等教育并没有提高受教育者的生产率，但是向雇主证明了受教育者具有高生产率",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q061-d",
+              "label": "D",
+              "content": "高等教育不仅提高了受教育者的生产率，而且向客户证明了受教育者具有高生产率",
+              "correct": false
+            }
+          ]
+        },
+        {
+          "id": "hr600-master-q062",
+          "type": "single",
+          "section": "standard",
+          "prompt": "有心理学研究表明，出色经理人的成就需要、权力需要和亲和需要的特点是（）。",
+          "explanation": "本题考查三重需要理论。麦克里兰认为出色经理人往往都有较高的权力欲望，以希望获得更高的职位；在成就需要动机方面，杰出经理们为了关心下属以提高他们的业绩，就会降低自己的成就需要；在亲和需要动机方面，杰出经理们为了避免由于亲和下属可能导致管理效力的下降，会自觉降低自己的亲和需要。因此选 B。",
+          "points": 1,
+          "options": [
+            {
+              "id": "hr600-master-q062-a",
+              "label": "A",
+              "content": "成就需要较低、权力需要较低、亲和需要较高",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q062-b",
+              "label": "B",
+              "content": "成就需要较低、权力需要较高、亲和需要较低",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q062-c",
+              "label": "C",
+              "content": "成就需要较高、权力需要较高、亲和需要较低",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q062-d",
+              "label": "D",
+              "content": "成就需要较高、权力需要较低、亲和需要较高",
+              "correct": false
+            }
+          ]
+        },
+        {
+          "id": "hr600-master-q063",
+          "type": "multiple",
+          "section": "standard",
+          "prompt": "某 IT 业的高科技公司，选择激励对象时非常明显向研发技术人员倾斜，这次的激励对象超过 65%是以研发为主的有技术背景的人员，其次才是管理和市场这些要害部门的高级别人员，这样的选择应该是来源于该公司通讯研发技术领先的战略定位。作为激励理论在实践中的应用的目标管理，其要素有（）。",
+          "explanation": "目标管理有四个要素： ①目标具体化，指要求明确、具体地描述预期的结果； ②参与决策，指在制定工作目标时，要求涉及目标的所有群体共同制定目标，并共同规定如何衡量目标的实现程度，而不是由上级单方面地指定下级的工作目标； ③限期完成，指规定目标完成的时间期限，以及每一阶段任务完成的期限； ④绩效反馈，指不断给予员工关于目标实现程度或接近目标程度的反馈，使员工能及时了解工作的进展，掌握工作的进度，从而及时地进行自我督促和行为矫正，最终如期完成目标。",
+          "points": 2,
+          "options": [
+            {
+              "id": "hr600-master-q063-a",
+              "label": "A",
+              "content": "目标具体化",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q063-b",
+              "label": "B",
+              "content": "上级决策",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q063-c",
+              "label": "C",
+              "content": "限期完成",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q063-d",
+              "label": "D",
+              "content": "质量监督",
+              "correct": false
+            }
+          ]
+        },
+        {
+          "id": "hr600-master-q064",
+          "type": "multiple",
+          "section": "standard",
+          "prompt": "评价中心技术可能会用到的甄选技术包括（）。",
+          "explanation": "评价中心技术实际上是综合运用若干种不同的测试手段对管理类职位候选人进行甄选的过程，其中可能会用到面试、心理测试、主题演讲、角色扮演、公文筐测试以及无领导小组讨论等多种甄选技术。",
+          "points": 2,
+          "options": [
+            {
+              "id": "hr600-master-q064-a",
+              "label": "A",
+              "content": "面试",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q064-b",
+              "label": "B",
+              "content": "角色扮演",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q064-c",
+              "label": "C",
+              "content": "兴趣测试",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q064-d",
+              "label": "D",
+              "content": "心理测试",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q064-e",
+              "label": "E",
+              "content": "主题演讲",
+              "correct": true
+            }
+          ]
+        },
+        {
+          "id": "hr600-master-q065",
+          "type": "single",
+          "section": "standard",
+          "prompt": "期望模型中，（）是员工对自己所付出的努力可以在多大程度上决定绩效的估计值，用概率表示。",
+          "explanation": "期望理论认为，动机取决于效价、期望和工具性，效价×期望×工具性=动机。期望是员工对自己所付出的努力可以在多大程度上决定绩效的估计值。",
+          "points": 1,
+          "options": [
+            {
+              "id": "hr600-master-q065-a",
+              "label": "A",
+              "content": "效价",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q065-b",
+              "label": "B",
+              "content": "期望",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q065-c",
+              "label": "C",
+              "content": "激励",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q065-d",
+              "label": "D",
+              "content": "工具性",
+              "correct": false
+            }
+          ]
+        },
+        {
+          "id": "hr600-master-q066",
+          "type": "single",
+          "section": "standard",
+          "prompt": "下列各项中，（）是由于缺乏或者期待某种结果而产生的心理状态。",
+          "explanation": "需要是指当缺乏或期待某种结果而产生的心理状态，包括对食物、水、空气等物质需要及对归属、爱等社会需要。需要未能满足的状态，会产生一种驱动人采取行动来满足需要的压力，这种压力只有在达到目标、满足需要时才会缓解或消除。",
+          "points": 1,
+          "options": [
+            {
+              "id": "hr600-master-q066-a",
+              "label": "A",
+              "content": "需要",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q066-b",
+              "label": "B",
+              "content": "动机",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q066-c",
+              "label": "C",
+              "content": "激励",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q066-d",
+              "label": "D",
+              "content": "兴趣",
+              "correct": false
+            }
+          ]
+        },
+        {
+          "id": "hr600-master-q067",
+          "type": "multiple",
+          "section": "standard",
+          "prompt": "组织需要在（）等各种人力资源管理手段来帮助组织获得所需的人力资源。",
+          "explanation": "人力资源管理职能部门要利用职位分析与设计、员工招募与甄选、培训开发、绩效管理、薪酬福利、员工关系等各种人力资源管理手段来帮助组织获得所需的人力资源。",
+          "points": 2,
+          "options": [
+            {
+              "id": "hr600-master-q067-a",
+              "label": "A",
+              "content": "员工招募与甄选",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q067-b",
+              "label": "B",
+              "content": "培训开发",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q067-c",
+              "label": "C",
+              "content": "绩效管理",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q067-d",
+              "label": "D",
+              "content": "人力资源管理信息化",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q067-e",
+              "label": "E",
+              "content": "职位分析与设计",
+              "correct": true
+            }
+          ]
+        },
+        {
+          "id": "hr600-master-q068",
+          "type": "multiple",
+          "section": "standard",
+          "prompt": "关于失业保险金标准的说法，正确的有（）。",
+          "explanation": "本题考查失业保险金。失业保险金的标准，由省、自治区、直辖市人民政府确定，不得低于城市居民最低生活保障标准。",
+          "points": 2,
+          "options": [
+            {
+              "id": "hr600-master-q068-a",
+              "label": "A",
+              "content": "失业保险金标准由省、自治区、直辖市人民政府确定",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q068-b",
+              "label": "B",
+              "content": "失业保险金标准不得低于最低工资标准",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q068-c",
+              "label": "C",
+              "content": "失业保险金标准应相当于城镇居民最低生活保障标准",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q068-d",
+              "label": "D",
+              "content": "失业保险金标准应相当于社会平均工资水平",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q068-e",
+              "label": "E",
+              "content": "失业保险金标准不得低于城市居民最低生活保障标准",
+              "correct": true
+            }
+          ]
+        },
+        {
+          "id": "hr600-master-q069",
+          "type": "single",
+          "section": "standard",
+          "prompt": "劳动监察是由法定的专门机关对劳动和社会保险法律法规的实施情况进行的监督检查，体现了劳动监察的（）。",
+          "explanation": "本题考查劳动监察。劳动监察的专门性：劳动监察是由法定的专门机关对劳动和社会保险法律法规的实施情况进行的监督检查。",
+          "points": 1,
+          "options": [
+            {
+              "id": "hr600-master-q069-a",
+              "label": "A",
+              "content": "法定性",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q069-b",
+              "label": "B",
+              "content": "行政性",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q069-c",
+              "label": "C",
+              "content": "专门性",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q069-d",
+              "label": "D",
+              "content": "强制性",
+              "correct": false
+            }
+          ]
+        },
+        {
+          "id": "hr600-master-q070",
+          "type": "multiple",
+          "section": "standard",
+          "prompt": "亚当·斯密认为不同职业之间工资差别形成的原因包括（）。",
+          "explanation": "本题考查不同职业之间工资差别形成的原因。亚当·斯密认为，不同职业之间工资差别形成的原因包括五点，除了选项 BCDE 外，还包括“不同职业要求从业者所承担的责任程度是有差别的”。选项 A 是不同产业部门间工资差别形成的原因之一。",
+          "points": 2,
+          "options": [
+            {
+              "id": "hr600-master-q070-a",
+              "label": "A",
+              "content": "工会化程度高低不同",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q070-b",
+              "label": "B",
+              "content": "不同职业在劳动强度和劳动条件方面的差别",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q070-c",
+              "label": "C",
+              "content": "不同职业引起的愉快或不愉快程度有差别",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q070-d",
+              "label": "D",
+              "content": "不同职业具备从业能力的难易程度有差别",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q070-e",
+              "label": "E",
+              "content": "不同职业所具有的社会安全程度即工作保障和职业稳定程度不同",
+              "correct": true
+            }
+          ]
+        },
+        {
+          "id": "hr600-master-q071",
+          "type": "single",
+          "section": "standard",
+          "prompt": "政府力劝劳动者约束自己提高工资以及企业提高价格的动机，一般是（）最普遍的做法。",
+          "explanation": "充分就业是现代宏观经济管理的重要目标。政府促进就业的宏观经济政策主要包括货币政策、财政政策、收入政策、人力政策和产业政策。 题干所述为收入政策的内容。收入政策实际上是一种工资、物价管理政策。工资管理的目标是对劳动力市场、劳动者的收入水平实施控制；价格管理的目标是使企业能获得必要的利润，又能对价格水平实施控制。收入政策最普遍的做法是，政府力劝劳动者约束自己提高工资以及企业提高价格的动机。",
+          "points": 1,
+          "options": [
+            {
+              "id": "hr600-master-q071-a",
+              "label": "A",
+              "content": "货币政策",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q071-b",
+              "label": "B",
+              "content": "工资政策",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q071-c",
+              "label": "C",
+              "content": "人力政策",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q071-d",
+              "label": "D",
+              "content": "收入政策",
+              "correct": true
+            }
+          ]
+        },
+        {
+          "id": "hr600-master-q072",
+          "type": "multiple",
+          "section": "standard",
+          "prompt": "职业技能培训以（）为主要形式，构建资源充足、布局合理、结构优化、载体多元、方式科学的培训组织实施体系。",
+          "explanation": "职业技能培训以就业技能培训、岗位技能提升培训和创业创新培训为主要形式，构建资源充足、布局合理、结构优化、载体多元、方式科学的培训组织实施体系。",
+          "points": 2,
+          "options": [
+            {
+              "id": "hr600-master-q072-a",
+              "label": "A",
+              "content": "公共实训机构",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q072-b",
+              "label": "B",
+              "content": "就业技能培训",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q072-c",
+              "label": "C",
+              "content": "岗位技能提升培训",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q072-d",
+              "label": "D",
+              "content": "创业创新培训",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q072-e",
+              "label": "E",
+              "content": "职业培训机构",
+              "correct": false
+            }
+          ]
+        },
+        {
+          "id": "hr600-master-q073",
+          "type": "single",
+          "section": "standard",
+          "prompt": "下列关于经济中的劳动力供给总量的说法中，错误的是（）。",
+          "explanation": "本题考查劳动力供给总量。劳动力供给数量方面的因素主要取决于人口总量、劳动力参与率以及劳动者的平均周工作时间三个因素。因此 A 项说法错误。",
+          "points": 1,
+          "options": [
+            {
+              "id": "hr600-master-q073-a",
+              "label": "A",
+              "content": "劳动力供给数量方面的因素主要取决于人口总量、劳动力参与率以及劳动者的月平均工作时间三个因素",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q073-b",
+              "label": "B",
+              "content": "劳动力供给质量方面的因素可以通过人力资本投资理论加以解释",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q073-c",
+              "label": "C",
+              "content": "劳动力参与率为实际劳动力人口与潜在劳动力人口之比",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q073-d",
+              "label": "D",
+              "content": "16 岁以上的总人口为潜在的劳动力人口",
+              "correct": false
+            }
+          ]
+        },
+        {
+          "id": "hr600-master-q074",
+          "type": "single",
+          "section": "standard",
+          "prompt": "某 IT 业的高科技公司，选择激励对象时非常明显向研发技术人员倾斜，这次的激励对象超过 65%是以研发为主的有技术背景的人员，其次才是管理和市场这些要害部门的高级别人员，这样的选择应该是来源于该公司通讯研发技术领先的战略定位。 （1）下列关于激励的陈述正确的是（）。",
+          "explanation": "B 项，动机分为内源性动机和外源性动机。出于内源性动机的员工看重的是工作本身，诸如寻求挑战性的工作，获得为工作和组织多作贡献的机会以及充分实现个人潜力的机会。而处于外源性动机的员工更看重工作所带来的报偿，诸如工资、奖金、表扬、社会地位等。D 项，从激励内容的角度可以将激励分为物质激励和精神激励。C 选项应该是外源性动机的人可以通过满足员工外在物质或社会报酬等需要而使其努力工作。故 A 选项正确。",
+          "points": 1,
+          "options": [
+            {
+              "id": "hr600-master-q074-a",
+              "label": "A",
+              "content": "激励就是通过满足员工的需要而使其努力工作，从而实现组织目标的过程",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q074-b",
+              "label": "B",
+              "content": "员工更看重工作本身所带来的社会地位属于内源性动机",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q074-c",
+              "label": "C",
+              "content": "内源性动机的人可以通过满足员工外在物质或社会报酬等需要而使其努力工作",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q074-d",
+              "label": "D",
+              "content": "从激励作用的角度可以将激励分为物质激励和精神激励",
+              "correct": false
+            }
+          ]
+        },
+        {
+          "id": "hr600-master-q075",
+          "type": "single",
+          "section": "standard",
+          "prompt": "2014 年 1 月 10 日，某地知名广告公司设计部设计师吴某离职。2015 年 2月 5 日，吴某与原公司同事张某一起吃饭时，得知该广告公司在 2014 年 1 月 20日发放了 2013 年度的年终奖。于是，吴某在 2015 年 2 月 6 日向该公司人力资源部查询年终奖事宜，人力资源部回复“时间已经过去一年，已经超过时效”。吴某并不认同,当日向劳动争议仲裁委员会提起了劳动争议仲裁申请。下列关于吴某的仲裁请求的说法，正确的是（）。",
+          "explanation": "本题考查劳动争议申请仲裁时效。《中华人民共和国劳动争议调解仲裁法》规定，仲裁时效期间从当事人知道或者应当知道其权利被侵害之日起计算。吴某是在 2015 年 2 月 5 日才知晓年终奖的事情，将其作为计算时效的起点，2015年 2 月 6 日提起劳动争议仲裁申请，并未超过 1 年，因此没有超过仲裁时效。",
+          "points": 1,
+          "options": [
+            {
+              "id": "hr600-master-q075-a",
+              "label": "A",
+              "content": "仲裁请求超过时效",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q075-b",
+              "label": "B",
+              "content": "仲裁请求没有超过时效",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q075-c",
+              "label": "C",
+              "content": "不清楚是否超过时效",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q075-d",
+              "label": "D",
+              "content": "需要进一步调查是否超过时效",
+              "correct": false
+            }
+          ]
+        },
+        {
+          "id": "hr600-master-q076",
+          "type": "multiple",
+          "section": "standard",
+          "prompt": "补充医疗保险主要包括（）。",
+          "explanation": "本题考查补充医疗保险。补充医疗保险主要包括：职工大额医疗费用补助；企业补充医疗保险；商业医疗保险。",
+          "points": 2,
+          "options": [
+            {
+              "id": "hr600-master-q076-a",
+              "label": "A",
+              "content": "企业年金",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q076-b",
+              "label": "B",
+              "content": "职工大额医疗费用补助",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q076-c",
+              "label": "C",
+              "content": "企业补充医疗保险",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q076-d",
+              "label": "D",
+              "content": "商业医疗保险",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q076-e",
+              "label": "E",
+              "content": "基本医疗保险",
+              "correct": false
+            }
+          ]
+        },
+        {
+          "id": "hr600-master-q077",
+          "type": "single",
+          "section": "standard",
+          "prompt": "《社会保险法》规定，国有企业、事业单位职工参加基本养老保险前，视同缴费年限期间应当缴纳的基本养老保险费由（）承担。",
+          "explanation": "《社会保险法》规定，国有企业、事业单位职工参加基本养老保险前，视同缴费年限期间应当缴纳的基本养老保险费由政府承担。",
+          "points": 1,
+          "options": [
+            {
+              "id": "hr600-master-q077-a",
+              "label": "A",
+              "content": "个人",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q077-b",
+              "label": "B",
+              "content": "政府",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q077-c",
+              "label": "C",
+              "content": "单位补缴",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q077-d",
+              "label": "D",
+              "content": "慈善组织",
+              "correct": false
+            }
+          ]
+        },
+        {
+          "id": "hr600-master-q078",
+          "type": "single",
+          "section": "standard",
+          "prompt": "下列理论中，（）主要通过“最不喜欢的工作伙伴”量表测量领导风格。",
+          "explanation": "费德勒的权变理论认为，团队绩效的高低取决于领导者与情景因素之间是否搭配。费德勒将领导方式区分为工作取向和关系取向两类。为了测量一个人的领导风格属于工作取向还是关系取向，费德勒发明了“最不喜欢的工作伙伴”量表。",
+          "points": 1,
+          "options": [
+            {
+              "id": "hr600-master-q078-a",
+              "label": "A",
+              "content": "特质理论",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q078-b",
+              "label": "B",
+              "content": "领导—成员交换理论",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q078-c",
+              "label": "C",
+              "content": "路径—目标理论",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q078-d",
+              "label": "D",
+              "content": "权变理论",
+              "correct": true
+            }
+          ]
+        },
+        {
+          "id": "hr600-master-q079",
+          "type": "single",
+          "section": "standard",
+          "prompt": "下列不属于参与管理形式的是（）。",
+          "explanation": "参与管理有多种形式，如共同设定目标、集体解决问题、直接参与工作决策、参加咨询委员会、参加政策制定小组、参与新员工甄选等。",
+          "points": 1,
+          "options": [
+            {
+              "id": "hr600-master-q079-a",
+              "label": "A",
+              "content": "共同设定目标",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q079-b",
+              "label": "B",
+              "content": "直接参与工作决策",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q079-c",
+              "label": "C",
+              "content": "参与薪酬制定",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q079-d",
+              "label": "D",
+              "content": "参加咨询委员会",
+              "correct": false
+            }
+          ]
+        },
+        {
+          "id": "hr600-master-q080",
+          "type": "multiple",
+          "section": "standard",
+          "prompt": "下列选项中，属于人力资源管理计分卡中量化处理的是（）。",
+          "explanation": "在人力资源管理计分卡的设计过程中，通常需要对以下三个因素及其相互之间的关系进行量化处理：一是各种人力资源管理活动（如甄选测试以及培训的数量等），二是人力资源管理活动所产生的员工行为（如客户服务表现等），三是员工的行为所产生的公司战略后果及绩效（如客户满意度和利润率等）。",
+          "points": 2,
+          "options": [
+            {
+              "id": "hr600-master-q080-a",
+              "label": "A",
+              "content": "甄选测试的数量",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q080-b",
+              "label": "B",
+              "content": "培训的数量",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q080-c",
+              "label": "C",
+              "content": "客户服务表现",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q080-d",
+              "label": "D",
+              "content": "客户满意度",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q080-e",
+              "label": "E",
+              "content": "薪酬范围",
+              "correct": false
+            }
+          ]
+        },
+        {
+          "id": "hr600-master-q081",
+          "type": "multiple",
+          "section": "standard",
+          "prompt": "下列属于影响劳动力流动的劳动者因素的是（）。",
+          "explanation": "本题考查劳动力流动。影响劳动力流动的劳动者因素包括：劳动者的年龄、劳动者的任职年限、劳动者的性别。",
+          "points": 2,
+          "options": [
+            {
+              "id": "hr600-master-q081-a",
+              "label": "A",
+              "content": "劳动者的年龄",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q081-b",
+              "label": "B",
+              "content": "劳动者的任职年限",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q081-c",
+              "label": "C",
+              "content": "社会环境",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q081-d",
+              "label": "D",
+              "content": "劳动者的性别",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q081-e",
+              "label": "E",
+              "content": "地理位置",
+              "correct": false
+            }
+          ]
+        },
+        {
+          "id": "hr600-master-q082",
+          "type": "multiple",
+          "section": "standard",
+          "prompt": "从保险业务划分，社会保险法律关系的主体包括（）。",
+          "explanation": "从社会保险责任划分，社会保险法律关系主体包括： ①国家； ②社会保险的管理和经办机构； ③用人单位； ④劳动者及其家庭。 从保险业务分，社会保险法律关系主体包括： ①保险人； ②投保人； ③被保险人； ④受益人；⑤管理人； ⑥监督人。",
+          "points": 2,
+          "options": [
+            {
+              "id": "hr600-master-q082-a",
+              "label": "A",
+              "content": "保险人",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q082-b",
+              "label": "B",
+              "content": "被保险人",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q082-c",
+              "label": "C",
+              "content": "受益人",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q082-d",
+              "label": "D",
+              "content": "国家",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q082-e",
+              "label": "E",
+              "content": "管理人",
+              "correct": true
+            }
+          ]
+        },
+        {
+          "id": "hr600-master-q083",
+          "type": "single",
+          "section": "standard",
+          "prompt": "企业在制定自己的工资制度、确定企业工资水平时，必须要对（）有正确的了解。",
+          "explanation": "本题考查工资水平。企业在制定自己的工资制度、确定企业工资水平时，必须要对实际工资有正确的了解。",
+          "points": 1,
+          "options": [
+            {
+              "id": "hr600-master-q083-a",
+              "label": "A",
+              "content": "货币工资",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q083-b",
+              "label": "B",
+              "content": "实际工资",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q083-c",
+              "label": "C",
+              "content": "物价指数",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q083-d",
+              "label": "D",
+              "content": "恩格尔系数",
+              "correct": false
+            }
+          ]
+        },
+        {
+          "id": "hr600-master-q084",
+          "type": "multiple",
+          "section": "standard",
+          "prompt": "根据双因素理论，下列选项中，属于保健因素的是（）。",
+          "explanation": "保健因素是指组织政策、监督方式、人际关系、工作环境和工资等因素。具备这些因素只能使员工不产生不满情绪，但不能起到激励作用。",
+          "points": 2,
+          "options": [
+            {
+              "id": "hr600-master-q084-a",
+              "label": "A",
+              "content": "工作环境",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q084-b",
+              "label": "B",
+              "content": "别人的认可",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q084-c",
+              "label": "C",
+              "content": "工作本身",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q084-d",
+              "label": "D",
+              "content": "人际关系",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q084-e",
+              "label": "E",
+              "content": "监督方式",
+              "correct": true
+            }
+          ]
+        },
+        {
+          "id": "hr600-master-q085",
+          "type": "single",
+          "section": "standard",
+          "prompt": "小李和小陈是某公司的销售主管。两人在工作中的表现都很优秀。小李年富力强，豁达开朗，对工作较为投入，希望从工作中实现和体现出个人价值，他最大的梦想是能够独自驱车横穿撒哈拉沙漠，游遍整个非洲。小陈则喜欢对人指手划脚，发号施令，一直渴望有朝一日能独挡一面，到公司在某国的销售分公司担任领导职务。 后来，公司因业务拓展打算在销售部内部公开选拔一名分公司经理前往突尼斯，但分公司的条件、待遇都比总公司差。小李和小陈均申请了这一职务，但后来小陈考虑到独自一人在异地开拓业务的困难，主动撤回了申请，小李如愿以偿地到了非洲，一边开拓业务，一边体验非洲风情。根据弗罗姆的期望理论，小陈开始强烈要求去突尼斯销售分公司，后来又担心独自面对在异地开拓业务的困难，主动撤回了申请。这一现象说明了（）。",
+          "explanation": "期望理论认为动机是效价、期望和工具性三种因素的产物。效价是指个体对所获报酬的偏好程度，它是对个体得到报酬的愿望的数量表示；期望是指员工对努力工作能够完成任务的信念强度；工具性是指员工对一旦完成任务就可以获得报酬的信念。小陈开始强烈要求去突尼斯销售分公司，说明这项工作对其也具有高效价；但又担心自己不能胜任，可见其对完成任务的信念强度不高，对这个工作的期望比较低。",
+          "points": 1,
+          "options": [
+            {
+              "id": "hr600-master-q085-a",
+              "label": "A",
+              "content": "效价高，期望高",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q085-b",
+              "label": "B",
+              "content": "效价低，期望高",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q085-c",
+              "label": "C",
+              "content": "效价高，期望低",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q085-d",
+              "label": "D",
+              "content": "效价低，期望低",
+              "correct": false
+            }
+          ]
+        },
+        {
+          "id": "hr600-master-q086",
+          "type": "single",
+          "section": "standard",
+          "prompt": "（），国务院发布《关于建立统一的城乡居民基本养老保险制度的意见》，决定建立统一的城乡居民基本养老保险制度。",
+          "explanation": "2014 年 2 月，国务院发布《关于建立统一的城乡居民基本养老保险制度的意见》，决定建立统一的城乡居民基本养老保险制度。",
+          "points": 1,
+          "options": [
+            {
+              "id": "hr600-master-q086-a",
+              "label": "A",
+              "content": "2014 年 2 月",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q086-b",
+              "label": "B",
+              "content": "2012 年 4 月",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q086-c",
+              "label": "C",
+              "content": "2004 年 2 月",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q086-d",
+              "label": "D",
+              "content": "2012 年 2 月",
+              "correct": false
+            }
+          ]
+        },
+        {
+          "id": "hr600-master-q087",
+          "type": "multiple",
+          "section": "standard",
+          "prompt": "比较常用的效标效度是（）。",
+          "explanation": "两种比较常用的效标效度是预测效度和同时效度。",
+          "points": 2,
+          "options": [
+            {
+              "id": "hr600-master-q087-a",
+              "label": "A",
+              "content": "评分者效度",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q087-b",
+              "label": "B",
+              "content": "构想效度",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q087-c",
+              "label": "C",
+              "content": "预测效度",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q087-d",
+              "label": "D",
+              "content": "同时效度",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q087-e",
+              "label": "E",
+              "content": "内容效度",
+              "correct": false
+            }
+          ]
+        },
+        {
+          "id": "hr600-master-q088",
+          "type": "single",
+          "section": "standard",
+          "prompt": "下列关于激励的陈述不正确的是（）。",
+          "explanation": "本题考查激励的相关内容。从激励内容的角度可将激励分为物质激励和精神激励，从激励对象的角度可将激励分为他人激励和自我激励。所以选项 B错误。",
+          "points": 1,
+          "options": [
+            {
+              "id": "hr600-master-q088-a",
+              "label": "A",
+              "content": "激励就是通过满足员工的需要而使其努力工作，从而实现组织目标的过程",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q088-b",
+              "label": "B",
+              "content": "从激励对象的角度可分为物质激励和精神激励",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q088-c",
+              "label": "C",
+              "content": "从激励作用的角度可以分为正向激励和负向激励",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q088-d",
+              "label": "D",
+              "content": "激励对于调动人们潜在的积极性、出色地完成工作目标以及不断提高工作绩效具有十分重要的作用",
+              "correct": false
+            }
+          ]
+        },
+        {
+          "id": "hr600-master-q089",
+          "type": "multiple",
+          "section": "standard",
+          "prompt": "下列属于建立企业年金，企业需要符合（）条件",
+          "explanation": "本题考查企业补充保险。符合下列条件的企业，可以建立企业年金：(1)依法参加基本养老保险并履行缴费义务（故 A 正确）； (2)具有相应的经济负担能力（故 C 正确）。E 选项：企业应当与职工一方通过集体协商确定,并制定企业年金方案。企业年金方案应当提交职工代表大会或者全体职工讨论通过，故 E选项错误。举办或参加的一种补充性医疗保险形式。参加企业补充医疗保险的条件是 1.参加了基本医疗保险,2.足额发放职工工资和 3.缴纳社会保险费用,有能力主办或参加企业补充医疗保险。故 BD 选项错误。",
+          "points": 2,
+          "options": [
+            {
+              "id": "hr600-master-q089-a",
+              "label": "A",
+              "content": "依法参加基本养老保险并履行缴费义务",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q089-b",
+              "label": "B",
+              "content": "参加了基本医疗保险",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q089-c",
+              "label": "C",
+              "content": "具有相应的经济负担能力",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q089-d",
+              "label": "D",
+              "content": "足额发放职工工资和缴纳社会保险费用",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q089-e",
+              "label": "E",
+              "content": "已建立集体协商机制",
+              "correct": false
+            }
+          ]
+        },
+        {
+          "id": "hr600-master-q090",
+          "type": "multiple",
+          "section": "standard",
+          "prompt": "应当认定为工伤或视同工伤的情形包括（）。",
+          "explanation": "本题考查工伤认定范围。《工伤保险条例》明确了认定工伤的七种情形和视同工伤的三种情形。在视同工伤的三种情形中，明确在工作时间和工作岗位，突发疾病死亡或者在 48 小时内经抢救无效死亡的，才能视同工伤。选项 B是丧失劳动能力，不符合相关规定。",
+          "points": 2,
+          "options": [
+            {
+              "id": "hr600-master-q090-a",
+              "label": "A",
+              "content": "劳动者患职业病的",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q090-b",
+              "label": "B",
+              "content": "劳动者在工作时间和工作岗位，突发疾病丧失劳动能力的",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q090-c",
+              "label": "C",
+              "content": "劳动者在工作时间和工作场所内，因履行工作职责受到暴力等意外伤害的",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q090-d",
+              "label": "D",
+              "content": "劳动者在抢险救灾活动中受到伤害的",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q090-e",
+              "label": "E",
+              "content": "因工外出期间，由于工作原因受到伤害或者发生事故下落不明的",
+              "correct": true
+            }
+          ]
+        },
+        {
+          "id": "hr600-master-q091",
+          "type": "multiple",
+          "section": "standard",
+          "prompt": "下列各项属于双因素理论中保健因素的有（）。",
+          "explanation": "本题考查双因素理论中的保健因素。激励因素是指成就感、别人的认可、工作性质、责任和晋升等因素。保健因素是指组织政策、监督方式、人际关系、工作环境和工资等因素。选项 ACE 属于激励因素。",
+          "points": 2,
+          "options": [
+            {
+              "id": "hr600-master-q091-a",
+              "label": "A",
+              "content": "晋升",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q091-b",
+              "label": "B",
+              "content": "工资",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q091-c",
+              "label": "C",
+              "content": "成就感",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q091-d",
+              "label": "D",
+              "content": "人际关系",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q091-e",
+              "label": "E",
+              "content": "工作性质",
+              "correct": false
+            }
+          ]
+        },
+        {
+          "id": "hr600-master-q092",
+          "type": "single",
+          "section": "standard",
+          "prompt": "某公司是一家由事业单位转制成的股份制企业。在转制之前，员工的薪酬基本上是按照职务、技术职称和工龄等来确定的，员工的工资差别不大，所以干多和干少一个样，尽管单位的效率不高，但大家觉得挺满足。但改制以后，由于企业要直接面对激烈的市场竞争，所以公司的领导层决定打破传统的薪酬体制，实行绩效薪金制，如今两年过去了，该公司的产值翻了两番，员工的收入也大大增加，大家觉得比以前更满足了。 （1）绩效薪金制度的主要优点是（）。",
+          "explanation": "绩效薪金制是指将绩效与报酬相结合的激励措施，通常采用的方式有计件工资、工作奖金、利润分成、按利分红等。其主要优点在于它可以减少管理者的工作量，因为员工为了获得更高的薪金会自发地努力工作，而不需要管理者的监督。",
+          "points": 1,
+          "options": [
+            {
+              "id": "hr600-master-q092-a",
+              "label": "A",
+              "content": "减少管理人员的工作量",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q092-b",
+              "label": "B",
+              "content": "为企业节省成本",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q092-c",
+              "label": "C",
+              "content": "使管理者的监督职能加强",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q092-d",
+              "label": "D",
+              "content": "使员工的晋升和产品质量挂钩",
+              "correct": false
+            }
+          ]
+        },
+        {
+          "id": "hr600-master-q093",
+          "type": "single",
+          "section": "standard",
+          "prompt": "斯坎伦计划中，节约成本的（）归员工。",
+          "explanation": "斯坎伦计划中，委员会负责计算节约成本，并按照 75％归员工、25％归公司的方式分配节省下来的成本。",
+          "points": 1,
+          "options": [
+            {
+              "id": "hr600-master-q093-a",
+              "label": "A",
+              "content": "25％",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q093-b",
+              "label": "B",
+              "content": "50％",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q093-c",
+              "label": "C",
+              "content": "75％",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q093-d",
+              "label": "D",
+              "content": "100％",
+              "correct": false
+            }
+          ]
+        },
+        {
+          "id": "hr600-master-q094",
+          "type": "single",
+          "section": "standard",
+          "prompt": "（）认定的依据是国家职业技能标准和行业、企业评价规范。",
+          "explanation": "职业技能等级认定的依据是国家职业技能标准和行业、企业评价规范。",
+          "points": 1,
+          "options": [
+            {
+              "id": "hr600-master-q094-a",
+              "label": "A",
+              "content": "职业技能等级",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q094-b",
+              "label": "B",
+              "content": "职业技能标准",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q094-c",
+              "label": "C",
+              "content": "组织职称评审",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q094-d",
+              "label": "D",
+              "content": "职称申报审核",
+              "correct": false
+            }
+          ]
+        },
+        {
+          "id": "hr600-master-q095",
+          "type": "single",
+          "section": "standard",
+          "prompt": "关于竞业限制的说法，错误的是（）。",
+          "explanation": "劳动合同解除或终止后，因用人单位的原因导致 3 个月未支付经济补偿，劳动者请求解除竞业限制协议时，人民法院应予支持。",
+          "points": 1,
+          "options": [
+            {
+              "id": "hr600-master-q095-a",
+              "label": "A",
+              "content": "竞业限制的范围、地域、期限由用人单位和劳动者约定",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q095-b",
+              "label": "B",
+              "content": "劳动合同解除或终止后，因用人单位的原因导致 6 个月未支付经济补偿，劳动者请求解除竞业限制协议时，人民法院应予支持",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q095-c",
+              "label": "C",
+              "content": "在竞业限制期限内，用人单位请求解除竞业限制协议时，人民法院应予支持",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q095-d",
+              "label": "D",
+              "content": "在竞业限制期限内，用人单位请求解除竞业限制协议时，劳动者请求用人单位额外支付劳动者 3 个月的竞业限制经济补偿的，人民法院应予支持",
+              "correct": false
+            }
+          ]
+        },
+        {
+          "id": "hr600-master-q096",
+          "type": "single",
+          "section": "standard",
+          "prompt": "失业前用人单位和本人累计缴费满 5 年不足 10 年的，领取失业保险金的期限最长为（）个月。",
+          "explanation": "本题考查领取失业保险待遇的内容。失业人员失业前用人单位和本人累计缴费年限会影响到领取失业保险金的期限，其中，累计缴费满 1 年不足 5年的，领取失业保险金的期限最长为 12 个月；累计缴费满 5 年不足 10 年的，期限最长为 18 个月；累计缴费 10 年以上的，期限最长为 24 个月。",
+          "points": 1,
+          "options": [
+            {
+              "id": "hr600-master-q096-a",
+              "label": "A",
+              "content": "6",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q096-b",
+              "label": "B",
+              "content": "12",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q096-c",
+              "label": "C",
+              "content": "18",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q096-d",
+              "label": "D",
+              "content": "24",
+              "correct": false
+            }
+          ]
+        },
+        {
+          "id": "hr600-master-q097",
+          "type": "single",
+          "section": "standard",
+          "prompt": "（）所涉职业（工种）应具有较强的专业性和社会通用性，技术技能要求较高，行业管理和人才队伍建设确实需要。",
+          "explanation": "水平评价类职业资格。所涉职业（工种）应具有较强的专业性和社会通用性，技术技能要求较高，行业管理和人才队伍建设确实需要。",
+          "points": 1,
+          "options": [
+            {
+              "id": "hr600-master-q097-a",
+              "label": "A",
+              "content": "准入类职业资格",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q097-b",
+              "label": "B",
+              "content": "水平评价类职业资格",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q097-c",
+              "label": "C",
+              "content": "非准入类职业资格",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q097-d",
+              "label": "D",
+              "content": "人才评价类职业资格",
+              "correct": false
+            }
+          ]
+        },
+        {
+          "id": "hr600-master-q098",
+          "type": "multiple",
+          "section": "standard",
+          "prompt": "决定维持具体行政行为必须符合的条件包括（）。",
+          "explanation": "本题考查行政争议处理。决定维持具体行政行为必须符合四个条件：一是事实清楚、证据充分；二是适用依据正确；三是程序合法；四是内容适当。",
+          "points": 2,
+          "options": [
+            {
+              "id": "hr600-master-q098-a",
+              "label": "A",
+              "content": "适用依据正确",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q098-b",
+              "label": "B",
+              "content": "程序合法",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q098-c",
+              "label": "C",
+              "content": "内容适当",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q098-d",
+              "label": "D",
+              "content": "存在争议",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q098-e",
+              "label": "E",
+              "content": "事实清楚、证据充分",
+              "correct": true
+            }
+          ]
+        },
+        {
+          "id": "hr600-master-q099",
+          "type": "multiple",
+          "section": "standard",
+          "prompt": "关于质量监督小组的说法，正确的是（）。",
+          "explanation": "本题考查质量监督小组的内容。质量监督小组是一种常见的参与管理的模式。质量监督小组通常由八位到十位员工及一名督导员组成，小组成员定期集会，通常每周一次，占用工作时间讨论质量方面的难题,分析问题出现的原因，并提出解决方案，然后监督实施。当然对于小组提出的各种建议，管理层有最后决定权。而且作为小组成员的前提条件是必须具备分析和解决质量问题的能力，还要擅长与他人沟通并宣传各种策略。",
+          "points": 2,
+          "options": [
+            {
+              "id": "hr600-master-q099-a",
+              "label": "A",
+              "content": "质量监督小组是一种常见的参与管理模式",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q099-b",
+              "label": "B",
+              "content": "通常由 8〜10 名员工及 1 名督导员组成",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q099-c",
+              "label": "C",
+              "content": "掌握最后决定权",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q099-d",
+              "label": "D",
+              "content": "若想成为质量监督小组的成员，需具备分析和解决质量问题的能力",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q099-e",
+              "label": "E",
+              "content": "主要研究经营方面的难题，分析问题的原因并提出解决方案",
+              "correct": false
+            }
+          ]
+        },
+        {
+          "id": "hr600-master-q100",
+          "type": "multiple",
+          "section": "standard",
+          "prompt": "公民、法人或者其他组织不能申请行政复议的事项有（）。",
+          "explanation": "本题考查不能申请行政复议的情形。公民、法人或者其他组织对下列事项不能申请行政复议： （1）人力资源社会保障部门做出的行政处分或者其他人事处理决定； （2）劳动者与用人单位之间发生的人力资源争议； （3）劳动能力鉴定委员会的行为； （4）劳动人事争议仲裁委员会的仲裁、调解等行为；（5）已就同一事项向其他有权受理的行政机关申请行政复议的； （6）向人民法院提起行政诉讼，人民法院已经依法受理的。",
+          "points": 2,
+          "options": [
+            {
+              "id": "hr600-master-q100-a",
+              "label": "A",
+              "content": "人力资源社会保障部门做出的行政处分",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q100-b",
+              "label": "B",
+              "content": "劳动人事争议仲裁委员会作出的调解协议",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q100-c",
+              "label": "C",
+              "content": "劳动能力鉴定委员会作出的鉴定结论",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q100-d",
+              "label": "D",
+              "content": "社会保险经办机构核定的社会保险缴费基数",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q100-e",
+              "label": "E",
+              "content": "劳动行政部门工伤认定决定",
+              "correct": false
+            }
+          ]
+        },
+        {
+          "id": "hr600-master-q101",
+          "type": "single",
+          "section": "standard",
+          "prompt": "决定结构性失业严重程度的因素不包括（）。",
+          "explanation": "本题考查结构性失业。决定结构性失业严重程度的因素包括： ①对劳动力需求转变的快慢； ②劳动力供给能否适应需求的变化； ③技术替代的灵活性大小； ④人们学会另一种技能或职业的速度快慢； ⑤地理状况的差异。",
+          "points": 1,
+          "options": [
+            {
+              "id": "hr600-master-q101-a",
+              "label": "A",
+              "content": "对劳动者需求转变的快慢",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q101-b",
+              "label": "B",
+              "content": "劳动力供给能否适应需要的变化",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q101-c",
+              "label": "C",
+              "content": "地理状况的差异",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q101-d",
+              "label": "D",
+              "content": "获取信息的能力",
+              "correct": true
+            }
+          ]
+        },
+        {
+          "id": "hr600-master-q102",
+          "type": "multiple",
+          "section": "standard",
+          "prompt": "报考公务员，应当具备下列资格条件（）。",
+          "explanation": "报考公务员，应当具备下列资格条件： ①具有中华人民共和国国籍；②年龄为十八周岁以上，三十五周岁以下； ③拥护中华人民共和国宪法，拥护中国共产党领导和社会主义制度； ④具有良好的政治素质和道德品行； ⑤具有正常履行职责的身体条件和心理素质； ⑥具有符合职位要求的工作能力； ⑦具有大学专科以上文化程度； ⑧省级以上公务员主管部门规定的拟任职位所要求的资格条件； ⑨法律、法规规定的其他条件。",
+          "points": 2,
+          "options": [
+            {
+              "id": "hr600-master-q102-a",
+              "label": "A",
+              "content": "具有中华人民共和国国籍",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q102-b",
+              "label": "B",
+              "content": "年龄为十八周岁以上，三十五周岁以下",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q102-c",
+              "label": "C",
+              "content": "具有大学本科以上文化程度",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q102-d",
+              "label": "D",
+              "content": "省级以上公务员主管部门规定的拟任职位所要求的资格条件",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q102-e",
+              "label": "E",
+              "content": "具有正常履行职责的身体条件和心理素质",
+              "correct": true
+            }
+          ]
+        },
+        {
+          "id": "hr600-master-q103",
+          "type": "single",
+          "section": "standard",
+          "prompt": "战略性人力资源管理过程中，确定战略所要求的各项组织成果，组织需要回答的问题是（）。",
+          "explanation": "本题考查战略性人力资源管理的过程。战略性人力资源管理过程中，确定战略所要求的各项组织成果，组织需要回答的问题是：我们怎样才能衡量驱动组织战略目标实现的各项重要元素或活动已经达到了既定要求或目标?",
+          "points": 1,
+          "options": [
+            {
+              "id": "hr600-master-q103-a",
+              "label": "A",
+              "content": "我们的战略目标是什么?我们准备通过何种方式获得竞争优势，从而实现我们的战略目标?",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q103-b",
+              "label": "B",
+              "content": "我们在为客户创造价值的时候，需要完成哪些最为关键的活动，同时需要完成哪些对关键活动提供支持的其他重要活动?",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q103-c",
+              "label": "C",
+              "content": "为了实现组织的整体战略目标需要完成的各种重要活动之间存在怎样的驱动关系?驱动组织战略实现的源泉在哪里?",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q103-d",
+              "label": "D",
+              "content": "我们怎样才能衡量驱动组织战略目标实现的各项重要元素或活动已经达到了既定要求或目标?",
+              "correct": true
+            }
+          ]
+        },
+        {
+          "id": "hr600-master-q104",
+          "type": "single",
+          "section": "standard",
+          "prompt": "劳动监察的主体必须严格依据法律进行监察活动，被监察对象不得以任何方式规避监察执法活动，体现了劳动监察的（）。",
+          "explanation": "劳动监察的属性包括法定性、行政性、专门性和强制性。其中，行政性强调劳动监察属于行政执法范畴，是行使行政权力的具体行政行为；专门性强调劳动监察是由法定的专门机关对劳动和社会保险法律法规的实施情况进行的监督检查；强制性强调劳动监察代表国家强制力，被监察主体不能拒绝。题干所表述的是劳动监察的法定性的内容。",
+          "points": 1,
+          "options": [
+            {
+              "id": "hr600-master-q104-a",
+              "label": "A",
+              "content": "行政性",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q104-b",
+              "label": "B",
+              "content": "法定性",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q104-c",
+              "label": "C",
+              "content": "专门性",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q104-d",
+              "label": "D",
+              "content": "强制性",
+              "correct": false
+            }
+          ]
+        },
+        {
+          "id": "hr600-master-q105",
+          "type": "multiple",
+          "section": "standard",
+          "prompt": "下列关于失业的说法中，正确的有（）。",
+          "explanation": "摩擦性失业是竞争性劳动力市场的一个自然特征，它不是由于工作岗位缺乏而造成的，而是由于寻找工作、达成就业协议的时滞所引起的。故 A 项错误。结构性失业中最主要的是技术性失业,即由于劳动力需求方需要的技术和劳动力供给方能够提供的技术之间存在差异或错位而导致的失业现象。技术性失业通常是由于生产技术变化引起的,即在生产中采用了节省劳动力的新技术后所造成的失业。故 B 选项正确。摩擦性失业是由寻找工作、达成就业协议的时滞所引起的。注意加强劳动力市场的情报工作,加快劳动力市场的信息传递速度和加大其扩散范围,疏通信息渠道,就可以在某种程度上减少劳动者寻找工作的时间,使其尽快就业。故 C 选项正确。技术性失业的形成原因自然失业率在 4％～6％，它的存在不影响充分就业的实现。故 D 项错误。对于耐用消费品制造业言,由于其产品可以延期购买,所以周期性的波动较大;相反,对非耐用消费品的购买时间不太可能推迟,其需求收入弹性不大,因此非耐用消费品制造业的周期性波动较小。故 E 正确。",
+          "points": 2,
+          "options": [
+            {
+              "id": "hr600-master-q105-a",
+              "label": "A",
+              "content": "摩擦性失业是由于工作岗位缺乏造成的",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q105-b",
+              "label": "B",
+              "content": "生产技术变化容易引起技术性失业",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q105-c",
+              "label": "C",
+              "content": "加强劳动力市场的情报工作可缓和摩擦性失业",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q105-d",
+              "label": "D",
+              "content": "自然失业率在 5％～8％时不影响充分就业的实现",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q105-e",
+              "label": "E",
+              "content": "非耐用品行业的劳动者不容易受到周期性失业打击",
+              "correct": true
+            }
+          ]
+        },
+        {
+          "id": "hr600-master-q106",
+          "type": "multiple",
+          "section": "standard",
+          "prompt": "创业创新培训的重点群体为（）。",
+          "explanation": "创业创新培训以高等学校和职业院校毕业生、科技人员、留学回国人员、退役军人、农村转移就业和返乡下乡创业人员、失业人员和转岗职工等群体为重点。",
+          "points": 2,
+          "options": [
+            {
+              "id": "hr600-master-q106-a",
+              "label": "A",
+              "content": "退役军人",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q106-b",
+              "label": "B",
+              "content": "科技人员",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q106-c",
+              "label": "C",
+              "content": "留学回国人员",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q106-d",
+              "label": "D",
+              "content": "农村转移就业和返乡下乡创业人员",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q106-e",
+              "label": "E",
+              "content": "在校大学生",
+              "correct": false
+            }
+          ]
+        },
+        {
+          "id": "hr600-master-q107",
+          "type": "multiple",
+          "section": "standard",
+          "prompt": "关于劳动争议仲裁时效的说法，正确的是（）。",
+          "explanation": "本题考查劳动争议仲裁时效。因不可抗力，或有无民事行为能力或限制民事行为能力劳动者的法定代理人未确定等其他正当理由，当事人不能在法定1 年的仲裁时间期间申请仲裁的，仲裁时效中止。从中止时效的原因消除之日起，仲裁时效期间继续计算。",
+          "points": 2,
+          "options": [
+            {
+              "id": "hr600-master-q107-a",
+              "label": "A",
+              "content": "劳动争议仲裁的时效期间为 1 年",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q107-b",
+              "label": "B",
+              "content": "仲裁时效中断，则意味着仲裁时效期间重新计算",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q107-c",
+              "label": "C",
+              "content": "仲裁时效中止，则意味着仲裁时效期间重新计算",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q107-d",
+              "label": "D",
+              "content": "劳动关系存续期间因拖欠劳动报酬发生争议的，劳动者申请仲裁不受 1 年仲裁时效期的限制",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q107-e",
+              "label": "E",
+              "content": "因解除或者终止劳动关系产生的争议，用人单位不能证明劳动者收到解除或者终止劳动关系书面通知时间的，劳动者主张权利之日为劳动争议发生之日",
+              "correct": true
+            }
+          ]
+        },
+        {
+          "id": "hr600-master-q108",
+          "type": "single",
+          "section": "standard",
+          "prompt": "关于需要、动机与激励的说法，错误的是（）。",
+          "explanation": "激励对于调动人们潜在的积极性，使员工出色地完成工作目标以及不断提高工作绩效具有十分重要的作用。",
+          "points": 1,
+          "options": [
+            {
+              "id": "hr600-master-q108-a",
+              "label": "A",
+              "content": "需要是指人们缺乏或期待某种结果而产生的心理状态",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q108-b",
+              "label": "B",
+              "content": "动机是指人们从事某种活动、为实现某一目标付出努力的意愿",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q108-c",
+              "label": "C",
+              "content": "管理的深处是激励",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q108-d",
+              "label": "D",
+              "content": "需要对于调动人们潜在的积极性，使员工出色地完成工作目标以及不断提高工作绩效具有十分重要的作用",
+              "correct": true
+            }
+          ]
+        },
+        {
+          "id": "hr600-master-q109",
+          "type": "multiple",
+          "section": "standard",
+          "prompt": "生育医疗费用包括（）。",
+          "explanation": "生育医疗费用包括下列各项： ①生育的医疗费用； ②计划生育的医疗费用； ③法律、法规规定的其他项目费用。",
+          "points": 2,
+          "options": [
+            {
+              "id": "hr600-master-q109-a",
+              "label": "A",
+              "content": "生育的医疗费用",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q109-b",
+              "label": "B",
+              "content": "计划生育的医疗费用",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q109-c",
+              "label": "C",
+              "content": "法律、法规规定的其他项目费用",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q109-d",
+              "label": "D",
+              "content": "享受计划生育手术休假",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q109-e",
+              "label": "E",
+              "content": "法律、法规规定的其他情形",
+              "correct": false
+            }
+          ]
+        },
+        {
+          "id": "hr600-master-q110",
+          "type": "multiple",
+          "section": "standard",
+          "prompt": "关于劳动力供给弹性的说法，正确的是（）。",
+          "explanation": "本题考查市场劳动力供给弹性的内容。劳动力供给弹性分为五类，分别是富有弹性、缺乏弹性、具有单位弹性、无弹性和具有无限弹性。分别对应的是劳动力供给弹性的绝对值大于 1、小于 1、等于 1、等于 0 和无穷大的情况。",
+          "points": 2,
+          "options": [
+            {
+              "id": "hr600-master-q110-a",
+              "label": "A",
+              "content": "如果劳动力供给弹性等于 0，在图形上表现为垂直的劳动力供给曲线",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q110-b",
+              "label": "B",
+              "content": "劳动力供给弹性大于 1，则称劳动力供给曲线富有弹性",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q110-c",
+              "label": "C",
+              "content": "劳动力供给弹性小于 1，则称劳动力供给曲线缺乏弹性",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q110-d",
+              "label": "D",
+              "content": "劳动力供给弹性等于 1，则称劳动力供给曲线具有单位弹性",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q110-e",
+              "label": "E",
+              "content": "劳动力供给弹性等于 0，则称劳动力供给曲线具有无限弹性",
+              "correct": false
+            }
+          ]
+        },
+        {
+          "id": "hr600-master-q111",
+          "type": "single",
+          "section": "standard",
+          "prompt": "关于失业，下列说法错误的是（）。",
+          "explanation": "本题考查失业与失业统计的内容。我国从 1994 年起正式使用“失业”和“失业率”的概念。",
+          "points": 1,
+          "options": [
+            {
+              "id": "hr600-master-q111-a",
+              "label": "A",
+              "content": "2003 年，在我国关于失业人员的统计中，失业人员是指在法定劳动年龄内，有工作能力，无业且要求就业而未能就业的人员",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q111-b",
+              "label": "B",
+              "content": "2003 年，在我国关于失业人员的统计中，虽然从事一定社会劳动，但劳动报酬低于当地城市居民最低生活保障标准的情况视同失业",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q111-c",
+              "label": "C",
+              "content": "从 1995 年起正式使用“失业”和“失业率”的概念",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q111-d",
+              "label": "D",
+              "content": "我国计划经济时期的待业的概念只适用于城镇人口",
+              "correct": false
+            }
+          ]
+        },
+        {
+          "id": "hr600-master-q112",
+          "type": "multiple",
+          "section": "standard",
+          "prompt": "公务员培训主要分为（）等。",
+          "explanation": "公务员培训主要分为初任培训、任职培训、专门业务培训和在职培训等。",
+          "points": 2,
+          "options": [
+            {
+              "id": "hr600-master-q112-a",
+              "label": "A",
+              "content": "初任培训",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q112-b",
+              "label": "B",
+              "content": "任职培训",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q112-c",
+              "label": "C",
+              "content": "专门业务培训",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q112-d",
+              "label": "D",
+              "content": "在职培训",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q112-e",
+              "label": "E",
+              "content": "脱岗培训",
+              "correct": false
+            }
+          ]
+        },
+        {
+          "id": "hr600-master-q113",
+          "type": "multiple",
+          "section": "standard",
+          "prompt": "小罗于 2013 年从一所工科大学硕士毕业,刚毕业没有找到理想的工作，收入比本科毕业就参加工作的同学还低。积累了一些工作经验后，小罗在 2014 年换到一家薪酬水平比较高的民营公司，但很快他就发现这家公司的组织文化不是很好，领导对知识型员工比较简单粗暴，不够尊重。于是，他在 2015 年跳槽去了第三家公司。这家公司尽管起薪不如第二家公司，但重视员工培训，除了正式培训课程外，工作经验丰富的同事也会在工作中给予小罗很多指导。另外，这家公司还鼓励有潜力的技术型人员在业余时间攻读工商管理硕士学位（以下简称MBA 学位），公司规定，只要员工能够顺利拿到 MBA 学位，且承诺此后继续为公司服务三年，公司会给员工报销一半的学费。 （1）关于小罗从第二家公司离职的说法，正确的是（）。",
+          "explanation": "本题考查影响劳动力流动的企业因素。小罗在 2014 年换到一家薪酬水平较高的民营公司，但很快他就发现这家公司的组织文化不是很好，领导对知识型员工比较简单粗暴，不够尊重。于是，他在 2015 年跳槽去了第三家公司。这反映了企业的组织文化以及领导风格对劳动力流动的影响。",
+          "points": 2,
+          "options": [
+            {
+              "id": "hr600-master-q113-a",
+              "label": "A",
+              "content": "劳动者在决定是否流动时并不把工资水平当成重要的考虑因素",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q113-b",
+              "label": "B",
+              "content": "决定劳动力流动的最重要因素是工资水平",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q113-c",
+              "label": "C",
+              "content": "组织文化会对劳动力流动产生影响",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q113-d",
+              "label": "D",
+              "content": "领导风格会对劳动力流动产生影响",
+              "correct": true
+            }
+          ]
+        },
+        {
+          "id": "hr600-master-q114",
+          "type": "multiple",
+          "section": "standard",
+          "prompt": "关于公平理论的陈述，正确的是（）。",
+          "explanation": "本题考查公平理论。公平理论中，员工比较的是其对投入、产出的自我知觉，而非投入、产出的客观测量结果，所以选项 B 错误。选项 C 属于横向比较，选项 D 属于纵向比较，因此选 AE。",
+          "points": 2,
+          "options": [
+            {
+              "id": "hr600-master-q114-a",
+              "label": "A",
+              "content": "员工不仅关心自己的绝对报酬，而且关心自己和他人在工作和报酬上的相对关系",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q114-b",
+              "label": "B",
+              "content": "员工比较的是其投入与产出的客观测量结果",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q114-c",
+              "label": "C",
+              "content": "员工将自己的工作和报酬与其他组织的员工进行比较，这属于纵向比较",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q114-d",
+              "label": "D",
+              "content": "员工将自己在不同组织中的待遇进行比较，这属于横向比较",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q114-e",
+              "label": "E",
+              "content": "辞职也是一种恢复公平的方法",
+              "correct": true
+            }
+          ]
+        },
+        {
+          "id": "hr600-master-q115",
+          "type": "single",
+          "section": "standard",
+          "prompt": "某市对汽车生产工人的劳动力需求是单位弹性的，该市企业目前雇用的汽车生产工人总人数为 25000 人，工人的市场工资率是 25 元／小时，如果工资率上升为 30 元／小时，则该市企业愿意雇用的汽车生产工人总人数将变成（）））人。",
+          "explanation": "本题考查劳动力需求弹性。题目已知劳动力需求是单位弹性的，即为1，劳动力需求弹性=劳动力需求量变动％／工资率变动％=（△L／L）÷（△W／W）=[（△L／25000）×100％]÷[（30—25）／25×100％]=1，△L=5000（人）。则总人数变为 25000—5000=20000（人）。",
+          "points": 1,
+          "options": [
+            {
+              "id": "hr600-master-q115-a",
+              "label": "A",
+              "content": "15000",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q115-b",
+              "label": "B",
+              "content": "20000",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q115-c",
+              "label": "C",
+              "content": "25000",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q115-d",
+              "label": "D",
+              "content": "30000",
+              "correct": false
+            }
+          ]
+        },
+        {
+          "id": "hr600-master-q116",
+          "type": "multiple",
+          "section": "standard",
+          "prompt": "关于外源性动机的说法，正确的是（）。",
+          "explanation": "本题考查外源性动机的内容。外源性动机是指人为了获得物质或社会报酬，或为了避免惩罚而做出某种行为，做出这种行为是为了行为的结果，而不是行为本身。而出于外源性动机的员工更看重工作所带来的报偿，如工资、奖金、表扬、社会地位等。出于内源性动机的员工看重的是工作本身，如寻求挑战性的工作，获得为工作和组织多做贡献的机会以及充分实现个人潜力的机会；选项 C、E 是出于内源性动机的员工的特点。",
+          "points": 2,
+          "options": [
+            {
+              "id": "hr600-master-q116-a",
+              "label": "A",
+              "content": "出于外源性动机的人完成某种工作是为了行为的结果",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q116-b",
+              "label": "B",
+              "content": "出于外源性动机的人会为了避免惩罚而去完成某种行为",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q116-c",
+              "label": "C",
+              "content": "出于外源性动机的员工看重的是工作本身",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q116-d",
+              "label": "D",
+              "content": "出于外源性动机的员工比较注重工作所带来的报偿，如表扬、社会地位等",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q116-e",
+              "label": "E",
+              "content": "出于外源性动机的员工比较注重充分实现个人潜力的机会",
+              "correct": false
+            }
+          ]
+        },
+        {
+          "id": "hr600-master-q117",
+          "type": "single",
+          "section": "standard",
+          "prompt": "从理论上来说，如果雇主存在歧视行为，则说明雇主追求的是（）。",
+          "explanation": "如果雇主存在歧视行为，则说明雇主追求的是效用最大化，即满足他们带有偏见的个人偏好。",
+          "points": 1,
+          "options": [
+            {
+              "id": "hr600-master-q117-a",
+              "label": "A",
+              "content": "利润最大化",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q117-b",
+              "label": "B",
+              "content": "效用最大化",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q117-c",
+              "label": "C",
+              "content": "收益最大化",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q117-d",
+              "label": "D",
+              "content": "成本最大化",
+              "correct": false
+            }
+          ]
+        },
+        {
+          "id": "hr600-master-q118",
+          "type": "single",
+          "section": "standard",
+          "prompt": "根据路径—目标理论，如果下属的类型属于相信自己能够控制命运的内控型，则其对（）更为满意。",
+          "explanation": "本题考查路径—目标理论。不同的领导行为适合于不同的环境因素和个人特征。例如，下属的工作是结构化的,则支持型的领导可以带来高的绩效和满意度;而对于能力强或经验丰富的下属,指导式的领导则可能被视为是多余的;相信自已能够控制命运的内控型下属对参与式领导更为满意,而外控型下属对指导式领导更为满意。",
+          "points": 1,
+          "options": [
+            {
+              "id": "hr600-master-q118-a",
+              "label": "A",
+              "content": "指导式领导",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q118-b",
+              "label": "B",
+              "content": "支持型领导",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q118-c",
+              "label": "C",
+              "content": "参与式领导",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q118-d",
+              "label": "D",
+              "content": "成就取向式领导",
+              "correct": false
+            }
+          ]
+        },
+        {
+          "id": "hr600-master-q119",
+          "type": "single",
+          "section": "standard",
+          "prompt": "组织设计程序中属于组织结构的细化并起到稳定组织结构作用的是（）。",
+          "explanation": "管理规范的设计是进一步确定各项管理业务的工作程序、管理工作应达到的要求（管理工作的标准）和管理人员应采用的管理方法等管理规范。这个步骤是组织结构的细化，它可以起到使组织结构合法化、规范化，巩固和稳定组织结构的作用。",
+          "points": 1,
+          "options": [
+            {
+              "id": "hr600-master-q119-a",
+              "label": "A",
+              "content": "管理规范的设计",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q119-b",
+              "label": "B",
+              "content": "确定组织设计的基本方针和原则",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q119-c",
+              "label": "C",
+              "content": "设计组织结构的框架",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q119-d",
+              "label": "D",
+              "content": "人员配备",
+              "correct": false
+            }
+          ]
+        },
+        {
+          "id": "hr600-master-q120",
+          "type": "multiple",
+          "section": "standard",
+          "prompt": "某公司先后招聘了两位行政助理，结果都失败了。该公司的招聘流程是：（1）在互联网上发布招聘信息。 （2）总经理亲自筛选简历。筛选标准是：名校本科应届毕业生，年轻，长相漂亮。 （3）面试。如果总经理有时间就由总经理直接面试；如果总经理没时间，先由人力资源部进行初步面试，再由总经理进行最终面试。 （4）面试合格后直接签订劳动合同。新员工的工作岗位、职责、薪酬、入职时间都由总经理决定。公司招聘的第一位行政助理小马的工作职责是负责前台接待，入职的第二天就没来上班。小马自述的辞职原因是：工作内容和自己预期不一样，琐碎繁杂，觉得自己无法胜任。人力资源部对她的印象是：内向，有想法，不甘于做琐碎、接待人的工作，对批评（即使是善意的）非常敏感。公司招聘的第二位行政助理小王在工作十天后辞职。小王的工作职责是负责前台接待、出纳、办公用品采购、公司证照办理与变更等。小王自述的辞职原因是：不适应工作环境，与同事合不来。人力资源部对她的印象是：形象极好、思路清晰、写作能力强，争强好胜，易与他人冲突。总经理对她的印象是：不太懂商务礼仪，有时像小孩，需要进行商务礼仪培训。由于招聘行政助理的工作连续两次失败，作为公司的总经理和人力资源部觉得这不是偶然现象，肯定存在严重问题。（1）在招聘过程中，总经理存在的问题是（）。",
+          "explanation": "在招聘过程中，总经理存在的问题是：包办了简历筛选任务，简历筛选标准过于简单，没有发挥人力资源部门的专业作用。",
+          "points": 2,
+          "options": [
+            {
+              "id": "hr600-master-q120-a",
+              "label": "A",
+              "content": "对招聘活动不够重视",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q120-b",
+              "label": "B",
+              "content": "包办了简历筛选任务",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q120-c",
+              "label": "C",
+              "content": "没有发挥人力资源部门的专业作用",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q120-d",
+              "label": "D",
+              "content": "简历筛选标准过于简单",
+              "correct": true
+            }
+          ]
+        },
+        {
+          "id": "hr600-master-q121",
+          "type": "single",
+          "section": "standard",
+          "prompt": "劳动力市场上供求双方之间很难匹配是因为（）。",
+          "explanation": "劳动力市场的特征包括： ①劳动力市场的特殊性； ②劳动力市场的多样性； ③劳动力市场的不确定性和劳动力市场的交易对象的难以衡量性； ④劳动力市场交易的延续性； ⑤劳动力市场交易条件的复杂性； ⑥劳动力的出售者地位的不利性。其中，在劳动力市场的不确定性中，劳动力供求双方之间的接触非常分散，劳动力市场的这种分散性和难以辨认性导致劳动力供求双方之间的匹配变得更为困难。无论是劳动力供求双方之间的相互搜寻，还是一方的单向搜寻，都是需要付出成本的。",
+          "points": 1,
+          "options": [
+            {
+              "id": "hr600-master-q121-a",
+              "label": "A",
+              "content": "劳动力市场的集中性",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q121-b",
+              "label": "B",
+              "content": "劳动力价格的同一性",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q121-c",
+              "label": "C",
+              "content": "劳动力市场的分散性和难以辨认性",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q121-d",
+              "label": "D",
+              "content": "劳动力的多样性",
+              "correct": false
+            }
+          ]
+        },
+        {
+          "id": "hr600-master-q122",
+          "type": "multiple",
+          "section": "standard",
+          "prompt": "下列关于魅力型领导理论的说法中，正确的是（）。",
+          "explanation": "本题考查魅力型领导理论。当追随者显示出更高水平的自我意识和自我管理时，魅力型领导者的效果将会得到进一步强化。为个人利益使用权力，是魅力型领导者的非道德特征之一。故排除 B、C 两项。",
+          "points": 2,
+          "options": [
+            {
+              "id": "hr600-master-q122-a",
+              "label": "A",
+              "content": "魅力型领导者是指具有自信并且信任下属，对下属有高的期望，有理想化的愿景和个性化风格的领导者",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q122-b",
+              "label": "B",
+              "content": "魅力型领导者一般不会为个人利益使用权力",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q122-c",
+              "label": "C",
+              "content": "在追随者自我意识和自我管理水平较低的情况下，魅力型领导更加有效",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q122-d",
+              "label": "D",
+              "content": "魅力本身是一个归因现象，会随情境发生变化",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q122-e",
+              "label": "E",
+              "content": "魅力型领导者会对追随者产生影响，促使追随者产生高于期望的绩效以及强烈的归属感",
+              "correct": true
+            }
+          ]
+        },
+        {
+          "id": "hr600-master-q123",
+          "type": "single",
+          "section": "standard",
+          "prompt": "（）允许组织在整个战略规划过程中都将人力资源问题考虑在内。",
+          "explanation": "本题考查人力资源管理与战略规划之间的联系。双向联系允许组织在整个战略规划过程中都将人力资源问题考虑在内。一体化联系是建立在战略规划和人力资源管理之间的持续互动基础之上，而不是有一定先后顺序的单方面推进过程。故本题选 C.",
+          "points": 1,
+          "options": [
+            {
+              "id": "hr600-master-q123-a",
+              "label": "A",
+              "content": "行政管理联系",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q123-b",
+              "label": "B",
+              "content": "单项联系",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q123-c",
+              "label": "C",
+              "content": "双向联系",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q123-d",
+              "label": "D",
+              "content": "一体化联系",
+              "correct": false
+            }
+          ]
+        },
+        {
+          "id": "hr600-master-q124",
+          "type": "multiple",
+          "section": "standard",
+          "prompt": "下列选项中，属于在职培训成本中直接成本的是（）。",
+          "explanation": "在职培训成本包括直接成本和机会成本，其中，选项 ABDE 为直接成本，选项 C 为机会成本。",
+          "points": 2,
+          "options": [
+            {
+              "id": "hr600-master-q124-a",
+              "label": "A",
+              "content": "教师的讲课费",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q124-b",
+              "label": "B",
+              "content": "培训场地的租金",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q124-c",
+              "label": "C",
+              "content": "受训者因脱产参加培训而产生的损失",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q124-d",
+              "label": "D",
+              "content": "受训者的工资",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q124-e",
+              "label": "E",
+              "content": "培训设备的费用",
+              "correct": true
+            }
+          ]
+        },
+        {
+          "id": "hr600-master-q125",
+          "type": "multiple",
+          "section": "standard",
+          "prompt": "适合离岸经营的工作岗位包括（）。",
+          "explanation": "离岸经营是一种特殊的外包形式。最初被以离岸经营方式外包出去的许多工作岗位，其工作范围比较窄、工作内容比较简单，如生产岗位、呼叫中心的服务岗位等，现在已经延伸到很多高技能的工作岗位，如证券分析、技术研发等。",
+          "points": 2,
+          "options": [
+            {
+              "id": "hr600-master-q125-a",
+              "label": "A",
+              "content": "生产岗位",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q125-b",
+              "label": "B",
+              "content": "呼叫中心的服务岗位",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q125-c",
+              "label": "C",
+              "content": "证券分析岗位",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q125-d",
+              "label": "D",
+              "content": "技术研发岗位",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q125-e",
+              "label": "E",
+              "content": "管理岗位",
+              "correct": false
+            }
+          ]
+        },
+        {
+          "id": "hr600-master-q126",
+          "type": "multiple",
+          "section": "standard",
+          "prompt": "人员甄选的效度主要分为（）。",
+          "explanation": "本题考查效度。效度主要分为三类，即内容效度、效标效度和构想效度。效标效度也称效标关联效度。",
+          "points": 2,
+          "options": [
+            {
+              "id": "hr600-master-q126-a",
+              "label": "A",
+              "content": "内容效度",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q126-b",
+              "label": "B",
+              "content": "分半信度",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q126-c",
+              "label": "C",
+              "content": "效标效度",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q126-d",
+              "label": "D",
+              "content": "构想效度",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q126-e",
+              "label": "E",
+              "content": "效标关联效度",
+              "correct": true
+            }
+          ]
+        },
+        {
+          "id": "hr600-master-q127",
+          "type": "multiple",
+          "section": "standard",
+          "prompt": "关于实施探索者战略的企业的战略性绩效管理说法正确的有（）。",
+          "explanation": "在绩效考核中，管理者应当选择以结果为导向的评价方法，选项 B错误。绩效考核的结果应当更多地应用于薪酬分配，激励员工最大限度地发挥潜能，选项 C 错误。",
+          "points": 2,
+          "options": [
+            {
+              "id": "hr600-master-q127-a",
+              "label": "A",
+              "content": "在绩效考核中，管理者应当选择以结果为导向的评价方法",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q127-b",
+              "label": "B",
+              "content": "在绩效考核中，组织应选择那些以行为为导向的评价方法",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q127-c",
+              "label": "C",
+              "content": "绩效考核提供的丰富反馈信息应当更多地运用到员工的开发、培训、职业生涯规划中",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q127-d",
+              "label": "D",
+              "content": "在绩效管理的各种沟通环节中，管理者的重点是将组织目标融入员工的个人发展目标",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q127-e",
+              "label": "E",
+              "content": "绩效考核的结果应当更多地应用于薪酬分配，激励员工最大限度地发挥潜能",
+              "correct": true
+            }
+          ]
+        },
+        {
+          "id": "hr600-master-q128",
+          "type": "single",
+          "section": "standard",
+          "prompt": "公务员津贴补贴制度不包括（）。",
+          "explanation": "特殊岗位津贴补贴属于事业单位津贴补贴。",
+          "points": 1,
+          "options": [
+            {
+              "id": "hr600-master-q128-a",
+              "label": "A",
+              "content": "地区附加津贴制度",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q128-b",
+              "label": "B",
+              "content": "艰苦边远地区津贴制度",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q128-c",
+              "label": "C",
+              "content": "岗位津贴制度",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q128-d",
+              "label": "D",
+              "content": "特殊岗位津贴补贴",
+              "correct": true
+            }
+          ]
+        },
+        {
+          "id": "hr600-master-q129",
+          "type": "single",
+          "section": "standard",
+          "prompt": "在其他条件一定的情况下，若（），则劳动力需求的自身工资弹性就越小。",
+          "explanation": "本题考查派生需求定理。ABC 选项都会使劳动力需求的自身工资弹性增大",
+          "points": 1,
+          "options": [
+            {
+              "id": "hr600-master-q129-a",
+              "label": "A",
+              "content": "劳动力所生产的最终产品的需求价格弹性越大",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q129-b",
+              "label": "B",
+              "content": "其他生产要素替代劳动力的难度越小",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q129-c",
+              "label": "C",
+              "content": "其他生产要素的供给弹性越大",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q129-d",
+              "label": "D",
+              "content": "劳动力成本在总成本中所占的比重越小",
+              "correct": true
+            }
+          ]
+        },
+        {
+          "id": "hr600-master-q130",
+          "type": "multiple",
+          "section": "standard",
+          "prompt": "在需要与动机的理论中，动机的要素包括（）。",
+          "explanation": "本题考查动机的三要素。动机有三个要素：决定人行为的方向，即选择做出什么样的行为；努力的水平，即行为的实施程度；坚持的水平，即遇到阻碍时付出多大努力坚持自己的行为。",
+          "points": 2,
+          "options": [
+            {
+              "id": "hr600-master-q130-a",
+              "label": "A",
+              "content": "决定人心理的方向",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q130-b",
+              "label": "B",
+              "content": "决定人行为的方向",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q130-c",
+              "label": "C",
+              "content": "心理的努力程度",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q130-d",
+              "label": "D",
+              "content": "行为的实施程度",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q130-e",
+              "label": "E",
+              "content": "遇到阻碍时会付出多大努力来坚持自己的行为",
+              "correct": true
+            }
+          ]
+        },
+        {
+          "id": "hr600-master-q131",
+          "type": "multiple",
+          "section": "standard",
+          "prompt": "职工应当参加基本养老保险，由（）共同缴纳基本养老保险费。",
+          "explanation": "职工应当参加基本养老保险，由用人单位和职工共同缴纳基本养老保险费。",
+          "points": 2,
+          "options": [
+            {
+              "id": "hr600-master-q131-a",
+              "label": "A",
+              "content": "用人单位",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q131-b",
+              "label": "B",
+              "content": "职工",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q131-c",
+              "label": "C",
+              "content": "政府补贴",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q131-d",
+              "label": "D",
+              "content": "慈善组织",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q131-e",
+              "label": "E",
+              "content": "社会团体",
+              "correct": false
+            }
+          ]
+        },
+        {
+          "id": "hr600-master-q132",
+          "type": "single",
+          "section": "standard",
+          "prompt": "2018 年 3 月 7 日，人力资源社会保障部对《国家职业技能标准编制技术规程》（2012 年版）进行了全面修订，主要修改内容不包括（）。",
+          "explanation": "2018 年 3 月 7 日，人力资源社会保障部对《国家职业技能标准编制技术规程》（2012 年版）进行了全面修订，主要修改内容为： (1)强调工匠精神和敬业精神。将工匠精神和敬业精神内涵融入国家职业技能标准中，作为职业道德要求的重要内容。 (2)落实“考培分离”“鉴培分离”。在职业技能鉴定申报条件中，对申请参加职业技能鉴定人员必须具备培训经历的条件予以删除，以斩断利益链条，避免强制培训之嫌。 (3)支持技能人才成长。将职业技能鉴定申报条件中“连续从事本职业工作年限”要求修改为“累计从事本职业或相关职业工作年限”，打破（职业）资历、工作年限等的制约，提高人才的社会流动性，促进人才特别是技能人才合理流动、有效配置，同时也契合以人为本精神，畅通劳动者职业生涯通道。 (4)突出安全生产。在职业技能标准中标注涉及安全生产或操作的关键技能要求，关键技能考核不合格的，则技能考核成绩为不合格。",
+          "points": 1,
+          "options": [
+            {
+              "id": "hr600-master-q132-a",
+              "label": "A",
+              "content": "强调工匠精神和敬业精神",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q132-b",
+              "label": "B",
+              "content": "落实“考培分离”“鉴培分离”",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q132-c",
+              "label": "C",
+              "content": "支持技能人才成长",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q132-d",
+              "label": "D",
+              "content": "突出职业技能培训",
+              "correct": true
+            }
+          ]
+        },
+        {
+          "id": "hr600-master-q133",
+          "type": "multiple",
+          "section": "standard",
+          "prompt": "劳动争议仲裁委员会的职责包括（）。",
+          "explanation": "本题考查劳动争议仲裁委员会的职责。劳动争议仲裁委员会的职责包括： （1）聘任、解聘专职或者兼职仲裁员 （2）受理劳动争议案件； （3）讨论重大或者疑难的劳动争议案件； （4）对仲裁活动进行监督。",
+          "points": 2,
+          "options": [
+            {
+              "id": "hr600-master-q133-a",
+              "label": "A",
+              "content": "提起劳动仲裁诉讼",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q133-b",
+              "label": "B",
+              "content": "讨论重大或者疑难的劳动仲裁案件",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q133-c",
+              "label": "C",
+              "content": "受理劳动争议案件",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q133-d",
+              "label": "D",
+              "content": "聘任、解聘专职或者兼职仲裁员",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q133-e",
+              "label": "E",
+              "content": "对仲裁活动进行监督",
+              "correct": true
+            }
+          ]
+        },
+        {
+          "id": "hr600-master-q134",
+          "type": "single",
+          "section": "standard",
+          "prompt": "在完全竞争条件下，一些工作条件很好的劳动者的工资水平却高于很多工作条件差的劳动者，这时存在的工资差别是（）差别。",
+          "explanation": "竞争性工资差别，指的是在劳动力和生产资料可以充分流动的竞争条件下，劳动者之间所存在的工资差别。在外部环境和机会一致的条件下，劳动者之间的这种工资差别显然只能归结于不同劳动者的劳动力在质上的差异。",
+          "points": 1,
+          "options": [
+            {
+              "id": "hr600-master-q134-a",
+              "label": "A",
+              "content": "补偿性",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q134-b",
+              "label": "B",
+              "content": "非市场性",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q134-c",
+              "label": "C",
+              "content": "竞争性",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q134-d",
+              "label": "D",
+              "content": "垄断性",
+              "correct": false
+            }
+          ]
+        },
+        {
+          "id": "hr600-master-q135",
+          "type": "multiple",
+          "section": "standard",
+          "prompt": "一个组织的战略管理过程主要包括（）核心阶段。",
+          "explanation": "本题考查战略的基本模型。一个组织的战略管理过程主要包括战略规划和战略执行两个核心阶段。",
+          "points": 2,
+          "options": [
+            {
+              "id": "hr600-master-q135-a",
+              "label": "A",
+              "content": "战略规划",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q135-b",
+              "label": "B",
+              "content": "战略审查",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q135-c",
+              "label": "C",
+              "content": "战略审核",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q135-d",
+              "label": "D",
+              "content": "战略执行",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q135-e",
+              "label": "E",
+              "content": "战略反馈",
+              "correct": false
+            }
+          ]
+        },
+        {
+          "id": "hr600-master-q136",
+          "type": "multiple",
+          "section": "standard",
+          "prompt": "下列选项中，属于补偿性工资差别的是（）。",
+          "explanation": "补偿性工资差别是指在知识和技能上无质的差别的劳动者，因从事职业的工作条件和社会环境的不同而产生的工资差别。亚当·斯密提及的引起职业间工资差别的五个原因中，有四个是属于工作条件和社会环境不同而引起的，分别是选项 ABCD。",
+          "points": 2,
+          "options": [
+            {
+              "id": "hr600-master-q136-a",
+              "label": "A",
+              "content": "劳动强度和劳动条件",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q136-b",
+              "label": "B",
+              "content": "从业时的不愉快程度",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q136-c",
+              "label": "C",
+              "content": "工作保障和职业稳定程度",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q136-d",
+              "label": "D",
+              "content": "责任大小程度",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q136-e",
+              "label": "E",
+              "content": "从业能力的难易程度",
+              "correct": false
+            }
+          ]
+        },
+        {
+          "id": "hr600-master-q137",
+          "type": "multiple",
+          "section": "standard",
+          "prompt": "下列关于期望理论的说法中，正确的是（）。",
+          "explanation": "本题考查期望理论。弗罗姆认为：效价×期望×工具性=动机。如果得到报酬的愿望高，但是另外两个估计的概率值都很低，则动机很可能最多也只是中等水平。也就是说，如果期望和工具性都很低，那么即使报酬的效价很高，动机也会很弱。",
+          "points": 2,
+          "options": [
+            {
+              "id": "hr600-master-q137-a",
+              "label": "A",
+              "content": "强调情境性",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q137-b",
+              "label": "B",
+              "content": "效价×期望×工具性=动机",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q137-c",
+              "label": "C",
+              "content": "工具性是指员工对一旦完成任务就可以获得报酬的信念",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q137-d",
+              "label": "D",
+              "content": "如果得到的报酬愿望高，那么即使期望和工具性都比较低，但是产生的动机也会比较强",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q137-e",
+              "label": "E",
+              "content": "认为没有放之四海而皆准的单一原则可以用来解释每一个人的动机",
+              "correct": true
+            }
+          ]
+        },
+        {
+          "id": "hr600-master-q138",
+          "type": "multiple",
+          "section": "standard",
+          "prompt": "吉伯的特质理论认为，卓越的领导者应当具备（）特质。",
+          "explanation": "本题考查特质理论。吉伯的特质理论认为，卓越的领导者必须具备身强力壮、聪明但不过分聪明、外向有支配欲，有良好的调适能力，自信。选项 B属于斯道格迪尔在特质理论中的观点。",
+          "points": 2,
+          "options": [
+            {
+              "id": "hr600-master-q138-a",
+              "label": "A",
+              "content": "身强力壮",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q138-b",
+              "label": "B",
+              "content": "勇于冒险",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q138-c",
+              "label": "C",
+              "content": "聪明但不过分聪明",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q138-d",
+              "label": "D",
+              "content": "外向有支配欲",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q138-e",
+              "label": "E",
+              "content": "自信",
+              "correct": true
+            }
+          ]
+        },
+        {
+          "id": "hr600-master-q139",
+          "type": "single",
+          "section": "standard",
+          "prompt": "《中华人民共和国职业病防治法》规定，职业病诊断、鉴定过程中，当事人对工作岗位有争议的，可向当地的劳动人事争议仲裁委员会申请仲裁，接到申请的劳动人事争议仲裁委员会应当受理，并在（）内做出裁决。",
+          "explanation": "本题考查《中华人民共和国劳动争议调解仲裁法》的适用范围。《中华人民共和国职业病防治法》规定，职业病诊断、鉴定过程中，当事人对劳动关系、工种、工作岗位或者在岗时间有争议的，可向当地的劳动人事争议仲裁委员会申请仲裁，接到申请的劳动人事争议仲裁委员会应当受理．并在 30 日内做出裁决。",
+          "points": 1,
+          "options": [
+            {
+              "id": "hr600-master-q139-a",
+              "label": "A",
+              "content": "10 日",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q139-b",
+              "label": "B",
+              "content": "15 日",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q139-c",
+              "label": "C",
+              "content": "20 日",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q139-d",
+              "label": "D",
+              "content": "30 日",
+              "correct": true
+            }
+          ]
+        },
+        {
+          "id": "hr600-master-q140",
+          "type": "single",
+          "section": "standard",
+          "prompt": "对于整个社会而言，在物力资本投资和人力资本投资之间进行平衡便意味着使两个方面投资的（）达到相等。",
+          "explanation": "由于教育有着巨大的外部性，或者无法将教育的收益完全私人化，因此从社会的角度来说，教育的私人投资水平总会是不足的，所以世界各国政府以及各种社会组织对教育都极为重视，对教育，尤其是大学之前的义务教育，给予了大量的投资。因为在上大学之前的受到的教育所产生的那些收益中，社会收益所占的比重可能更大。对于整个社会而言，它必须在人力资本投资和物力资本投资之间进行平衡，以使人力资本投资的社会收益率与物力资本投资的社会收益率之间达到平衡。",
+          "points": 1,
+          "options": [
+            {
+              "id": "hr600-master-q140-a",
+              "label": "A",
+              "content": "社会收益",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q140-b",
+              "label": "B",
+              "content": "社会成本",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q140-c",
+              "label": "C",
+              "content": "投资金额",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q140-d",
+              "label": "D",
+              "content": "社会收益率",
+              "correct": true
+            }
+          ]
+        },
+        {
+          "id": "hr600-master-q141",
+          "type": "multiple",
+          "section": "standard",
+          "prompt": "下列选项中，属于组织文化内容的是（）。",
+          "explanation": "组织文化的内容可以分为创新与冒险、注重细节、结果导向、人际导向、团队导向、进取心、稳定性七个方面。",
+          "points": 2,
+          "options": [
+            {
+              "id": "hr600-master-q141-a",
+              "label": "A",
+              "content": "创新与冒险",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q141-b",
+              "label": "B",
+              "content": "注重细节",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q141-c",
+              "label": "C",
+              "content": "进取心",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q141-d",
+              "label": "D",
+              "content": "稳定性",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q141-e",
+              "label": "E",
+              "content": "职业道德",
+              "correct": false
+            }
+          ]
+        },
+        {
+          "id": "hr600-master-q142",
+          "type": "multiple",
+          "section": "standard",
+          "prompt": "关于马斯洛的需要层次理论的说法，错误的有（）.",
+          "explanation": "本题考查马斯洛的需要层次理论。已获得基本满足的需要不再具有激励作用。所以选项 B 错误。基本需要主要靠外部条件或因素，高级需要主要靠内在因素满足：所以选项 C 错误。",
+          "points": 2,
+          "options": [
+            {
+              "id": "hr600-master-q142-a",
+              "label": "A",
+              "content": "未被满足的需要是行为的主要激励源",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q142-b",
+              "label": "B",
+              "content": "获得基本满足的需要具有强的激励作用",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q142-c",
+              "label": "C",
+              "content": "基本需要主要靠内部条件满足，高级需要主要靠外在条件满足",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q142-d",
+              "label": "D",
+              "content": "管理者在进行激励时，需要考虑每个员工的特殊需要以及占主导地位的需要层次",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q142-e",
+              "label": "E",
+              "content": "组织用于满足员工的低层次需要的投入效益是递减的",
+              "correct": false
+            }
+          ]
+        },
+        {
+          "id": "hr600-master-q143",
+          "type": "multiple",
+          "section": "standard",
+          "prompt": "关于员工恢复公平的说法，正确的是（）。",
+          "explanation": "感到不公平的员工恢复公平可采用改变自己的投入或产出、改变对照者的投入或产出、改变对投入或产出的知觉、改变参照对象、辞职等方式。感到薪酬不足的员工认为对照者比原先想象的要好一些时才能恢复公平；感到薪酬过度的员工可以认为自己的工作量更大，工作难度更高。不公平包括薪酬不足，也包括薪酬过度。故 A 选项错误。感到薪酬不足的员工可以认为自己的工作量更小，工作难度更低。故 E 选项错误。",
+          "points": 2,
+          "options": [
+            {
+              "id": "hr600-master-q143-a",
+              "label": "A",
+              "content": "不公平只包括薪酬不足",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q143-b",
+              "label": "B",
+              "content": "感到薪酬不足的员工降低自己工作努力程度或要求加薪",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q143-c",
+              "label": "C",
+              "content": "感到薪酬不足的员工认为对照者比原先想象的要更差一些",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q143-d",
+              "label": "D",
+              "content": "辞职是感到薪酬不足的员工恢复平衡的方式之一",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q143-e",
+              "label": "E",
+              "content": "感到薪酬不足的员工可以认为自己的工作量更大，工作难度更高",
+              "correct": false
+            }
+          ]
+        },
+        {
+          "id": "hr600-master-q144",
+          "type": "multiple",
+          "section": "standard",
+          "prompt": "美国管理心理学家斯道格迪尔认为，领导的特质包括（）。",
+          "explanation": "斯道格迪尔认为领导者的特质包括对所完成的工作具有责任感，在追求目标的过程中充满热情并且能够持之以恒，解决问题时勇于冒险并富有创新精神，勇于实践，有自信，能很好地处理人际关系并能够忍受挫折。选项 E 是美国心理学家吉伯认为的领导特质之一。",
+          "points": 2,
+          "options": [
+            {
+              "id": "hr600-master-q144-a",
+              "label": "A",
+              "content": "责任感",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q144-b",
+              "label": "B",
+              "content": "充满热情",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q144-c",
+              "label": "C",
+              "content": "勇于冒险",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q144-d",
+              "label": "D",
+              "content": "自信",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q144-e",
+              "label": "E",
+              "content": "身体强壮",
+              "correct": false
+            }
+          ]
+        },
+        {
+          "id": "hr600-master-q145",
+          "type": "single",
+          "section": "standard",
+          "prompt": "转岗培训一般应当在岗位类型或者岗位职责任务发生变化前完成，根据工作需要，也可在发生变化后（）内完成。",
+          "explanation": "转岗培训一般应当在岗位类型或者岗位职责任务发生变化前完成，根据工作需要，也可在发生变化后 3 个月内完成，累计时间不少于 40 学时或者 5天。",
+          "points": 1,
+          "options": [
+            {
+              "id": "hr600-master-q145-a",
+              "label": "A",
+              "content": "1 个月",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q145-b",
+              "label": "B",
+              "content": "2 个月",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q145-c",
+              "label": "C",
+              "content": "3 个月",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q145-d",
+              "label": "D",
+              "content": "6 个月",
+              "correct": false
+            }
+          ]
+        },
+        {
+          "id": "hr600-master-q146",
+          "type": "single",
+          "section": "standard",
+          "prompt": "进行教育和培训选择时，通常通过对（）比较来判断人力资本投资是否值得。",
+          "explanation": "本题考查人力资本投资模型的假定。人力资本投资模型假定，人们在进行教育和培训选择时都是以终身收入为依据来对近期的投资成本和未来的收益现值之间进行的比较。",
+          "points": 1,
+          "options": [
+            {
+              "id": "hr600-master-q146-a",
+              "label": "A",
+              "content": "未来的预期收益与近期投资成本",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q146-b",
+              "label": "B",
+              "content": "未来的预期收益与预期成本",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q146-c",
+              "label": "C",
+              "content": "未来的收益现值与近期投资成本",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q146-d",
+              "label": "D",
+              "content": "未来的收益现值与预期成本",
+              "correct": false
+            }
+          ]
+        },
+        {
+          "id": "hr600-master-q147",
+          "type": "single",
+          "section": "standard",
+          "prompt": "（）是开展职业教育培训和人才技能鉴定评价的基本依据。",
+          "explanation": "职业技能标准是指在职业分类的基础上，根据职业活动内容对从业人员的理论知识和操作技能提出的综合性水平规定。它是开展职业教育培训和人才技能鉴定评价的基本依据。",
+          "points": 1,
+          "options": [
+            {
+              "id": "hr600-master-q147-a",
+              "label": "A",
+              "content": "职业技能等级",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q147-b",
+              "label": "B",
+              "content": "职业技能标准",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q147-c",
+              "label": "C",
+              "content": "职业技能等级认定",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q147-d",
+              "label": "D",
+              "content": "职业技能等级与职称的贯通",
+              "correct": false
+            }
+          ]
+        },
+        {
+          "id": "hr600-master-q148",
+          "type": "single",
+          "section": "standard",
+          "prompt": "《中华人民共和国社会保险法》的立法依据不包括（）。",
+          "explanation": "本题考查《中华人民共和国社会保险法》的立法依据则。《中华人民共和国社会保险法》的立法依据包括： ①贯彻落实党中央的重大决策部署； ②使广大人民群众共享改革发展成果； ③公平与效率相结合，权利与义务相适应；④确立框架，循序渐进。",
+          "points": 1,
+          "options": [
+            {
+              "id": "hr600-master-q148-a",
+              "label": "A",
+              "content": "落实党中央的重大决策部署",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q148-b",
+              "label": "B",
+              "content": "确立框架，循序渐进",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q148-c",
+              "label": "C",
+              "content": "符合国情",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q148-d",
+              "label": "D",
+              "content": "公平与效率相结合，权利与义务相适应",
+              "correct": false
+            }
+          ]
+        },
+        {
+          "id": "hr600-master-q149",
+          "type": "multiple",
+          "section": "standard",
+          "prompt": "如果某公司的一位员工因为薪酬不足感觉到不公平，那么他可以采用（）的方式来恢复平衡。",
+          "explanation": "本题考查公平理论。感到不公平的员工可以通过以下几种方式来恢复平衡：改变自己的投入或产出（E 项）；改变对照者的投入或产出（A 项）；改变对投入或产出的知觉；改变参照对象（D 项）；辞职（C 项）。",
+          "points": 2,
+          "options": [
+            {
+              "id": "hr600-master-q149-a",
+              "label": "A",
+              "content": "向上级汇报某同事工作不够努力，让上司降低该同事的薪酬",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q149-b",
+              "label": "B",
+              "content": "提高自己的工作努力程度",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q149-c",
+              "label": "C",
+              "content": "跳槽到另一家公司",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q149-d",
+              "label": "D",
+              "content": "选择一个待遇工资各方面不如自己的再比较",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q149-e",
+              "label": "E",
+              "content": "要求加薪",
+              "correct": true
+            }
+          ]
+        },
+        {
+          "id": "hr600-master-q150",
+          "type": "multiple",
+          "section": "standard",
+          "prompt": "W 公司是一家外资公司，主要是从事海外贸易。由于受国际竞争形势的影响，公司董事长为了提高员工的工作效率，决定在公司内部引入绩效管理来代替多年的单纯职级工资制度。公司在当月的生产效率就有了比较明显的提高，但是随着新制度逐渐被人认识，人力资源部门面临的压力也越来越大，首先是有相当一部分普通员工抵制对其进行绩效考评，接着出现新来销售人员（公司销售队伍一直都很不稳定）离职。主管层人员也有了不满情绪。最后在董事长的亲自干预之下，不断与员工沟通和许诺才稳住了这壶“沸腾的开水”，责令人力资源部门停止实施新制度并对其进行修改和完善。 （1）绩效优化体系的作用是（）。",
+          "explanation": "绩效管理的主要目的是建立客观、简洁的绩效优化体系，实现组织与个人绩效的紧密融合。绩效优化体系可以保留、激励员工，持续地培养和发展员工，依据组织需要调整人员配置，从而提升企业的核心竞争力。",
+          "points": 2,
+          "options": [
+            {
+              "id": "hr600-master-q150-a",
+              "label": "A",
+              "content": "实现个人绩效",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q150-b",
+              "label": "B",
+              "content": "持续地培养和发展员工",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q150-c",
+              "label": "C",
+              "content": "保留、激励员工",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q150-d",
+              "label": "D",
+              "content": "用于调整人员配置",
+              "correct": true
+            }
+          ]
+        },
+        {
+          "id": "hr600-master-q151",
+          "type": "multiple",
+          "section": "standard",
+          "prompt": "战略人力资源管理活动应当能够规范员工的（），从而帮助组织实现经营战略，达成经营目标。",
+          "explanation": "战略人力资源管理活动应当能够规范员工的态度、行为和能力，从而帮助组织实现经营战略，达成经营目标。",
+          "points": 2,
+          "options": [
+            {
+              "id": "hr600-master-q151-a",
+              "label": "A",
+              "content": "态度",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q151-b",
+              "label": "B",
+              "content": "行为",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q151-c",
+              "label": "C",
+              "content": "思想",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q151-d",
+              "label": "D",
+              "content": "能力",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q151-e",
+              "label": "E",
+              "content": "心理",
+              "correct": false
+            }
+          ]
+        },
+        {
+          "id": "hr600-master-q152",
+          "type": "multiple",
+          "section": "standard",
+          "prompt": "海上假日系三星级酒店。该酒店人力资源管理部门近日通过调查发现：酒店基层员工近期工作效率下滑、缺勤率上升、工作积极性下降，基层员工与客户的不和谐事件也凸显上升趋势。下面是该人力资源部门究其原因所做的定性分析。根据上述分析，人力资源部建议酒店管理施行以下正确措施（）。",
+          "explanation": "麦克里兰认为人有三种重要的需要：成就需要、权力需要和亲和需要。选项 A 属于必要的法定强制基本措施。选项 B，亲和需求高的人在组织中往往充当被管理者的角色。选项 C、D 分别对麦克里兰的三重需要进行辨析。",
+          "points": 2,
+          "options": [
+            {
+              "id": "hr600-master-q152-a",
+              "label": "A",
+              "content": "酒店为所有签订劳动合同职工建立养老和医疗保险，解除员工后顾之忧",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q152-b",
+              "label": "B",
+              "content": "对具备高亲和需要的员工予以重用，并在组织中培养提拔充当管理者的角色",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q152-c",
+              "label": "C",
+              "content": "对具备高成就需要的员工予以宣传表扬，并在业务上为其安排轻松简单的工作",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q152-d",
+              "label": "D",
+              "content": "对可能成为未来优秀管理者的员工，要培养他们相对适中的成就动机、较高的权力欲望以及相对较弱的亲和需要",
+              "correct": true
+            }
+          ]
+        },
+        {
+          "id": "hr600-master-q153",
+          "type": "multiple",
+          "section": "standard",
+          "prompt": "关于劳动争议调解的说法，正确的是（）。",
+          "explanation": "企业应当依法设立调解委员会，其中调解委员会主任由工会委员会成员或者双方推举的人员担任，而不是由企业方代表担任。",
+          "points": 2,
+          "options": [
+            {
+              "id": "hr600-master-q153-a",
+              "label": "A",
+              "content": "劳动争议调解应当遵循自愿原则和民主说服原则",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q153-b",
+              "label": "B",
+              "content": "企业应当依法设立调解委员会，由职工代表和企业代表组成，人数由双方协商确定",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q153-c",
+              "label": "C",
+              "content": "企业调解委员会主任应当由企业方代表担任",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q153-d",
+              "label": "D",
+              "content": "调解委员会调解劳动争议，应当在受理调解申请之日起 15 日内结束",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q153-e",
+              "label": "E",
+              "content": "生效的调解协议对双方当事人有约束力，当事人应当履行",
+              "correct": true
+            }
+          ]
+        },
+        {
+          "id": "hr600-master-q154",
+          "type": "multiple",
+          "section": "standard",
+          "prompt": "下列选项中，属于战略管理中的 SWOT 评估内容的是（）。",
+          "explanation": "在确定了组织的愿景、使命和价值观以及长期目标之后，组织还必须对自己所处的外部环境和内部环境进行评估。这种评估就是 SWOT 分析，主要包括内部优势、内部劣势、外部机会、外部威胁四个方面。",
+          "points": 2,
+          "options": [
+            {
+              "id": "hr600-master-q154-a",
+              "label": "A",
+              "content": "内部优势",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q154-b",
+              "label": "B",
+              "content": "外部优势",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q154-c",
+              "label": "C",
+              "content": "战略规划",
+              "correct": false
+            },
+            {
+              "id": "hr600-master-q154-d",
+              "label": "D",
+              "content": "外部机会",
+              "correct": true
+            },
+            {
+              "id": "hr600-master-q154-e",
+              "label": "E",
+              "content": "内部机会",
+              "correct": false
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
