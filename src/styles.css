@@ -1852,6 +1852,8 @@ img {
 }
 
 .question-map > div { display: flex; justify-content: space-between; gap: 10px; font-size: 12px; }
+.question-map-summary { display: flex; align-items: center; gap: 10px; }
+.question-map-toggle { display: none; }
 .question-map nav { display: grid; grid-template-columns: repeat(5, 1fr); gap: 7px; margin-top: 15px; }
 
 .question-map button {
@@ -2058,7 +2060,24 @@ img {
   .intro-facts svg { grid-row: auto; }
   .exam-layout { display: block; }
   .question-map { position: static; margin-bottom: 14px; }
-  .question-map nav { grid-template-columns: repeat(10, 1fr); }
+  .question-map nav { display: none; grid-template-columns: repeat(10, 1fr); }
+  .question-map > p { display: none; }
+  .question-map.expanded nav { display: grid; }
+  .question-map.expanded > p { display: flex; }
+  .question-map-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    padding: 0;
+    border: 0;
+    color: #315f54;
+    background: transparent;
+    font-size: 11px;
+    font-weight: 800;
+    cursor: pointer;
+  }
+  .question-map-toggle svg { transition: transform 180ms ease; }
+  .question-map.expanded .question-map-toggle svg { transform: rotate(180deg); }
   .question-card { min-height: 0; padding: 23px 18px; }
   .question-card h1 { font-size: 23px; }
 }

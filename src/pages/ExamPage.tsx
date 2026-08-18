@@ -4,6 +4,7 @@ import {
   ArrowRight,
   Check,
   CheckCircle2,
+  ChevronDown,
   Clock3,
   ListChecks,
   Send,
@@ -34,6 +35,7 @@ export function ExamPage() {
   const [startedAt, setStartedAt] = useState<number | null>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [showReview, setShowReview] = useState(false);
+  const [showQuestionMap, setShowQuestionMap] = useState(false);
   const submittedRef = useRef(false);
 
   const answeredCount = useMemo(
@@ -167,17 +169,32 @@ export function ExamPage() {
       ) : null}
 
       <div className="exam-layout">
-        <aside className="question-map" aria-label="题目导航">
+        <aside className={`question-map ${showQuestionMap ? "expanded" : ""}`} aria-label="题目导航">
           <div>
             <strong>答题进度</strong>
-            <span>{answeredCount}/{exam.questionCount}</span>
+            <div className="question-map-summary">
+              <span>{answeredCount}/{exam.questionCount}</span>
+              <button
+                className="question-map-toggle"
+                type="button"
+                aria-controls="question-map-grid"
+                aria-expanded={showQuestionMap}
+                onClick={() => setShowQuestionMap((visible) => !visible)}
+              >
+                {showQuestionMap ? "收起题号" : "展开题号"}
+                <ChevronDown size={15} aria-hidden="true" />
+              </button>
+            </div>
           </div>
-          <nav>
+          <nav id="question-map-grid">
             {exam.questions.map((item, index) => (
               <button
                 className={`${index === currentIndex ? "current" : ""} ${(answers[item.id]?.length ?? 0) > 0 ? "answered" : ""}`}
                 key={item.id}
-                onClick={() => setCurrentIndex(index)}
+                onClick={() => {
+                  setCurrentIndex(index);
+                  setShowQuestionMap(false);
+                }}
                 aria-label={`第 ${index + 1} 题${(answers[item.id]?.length ?? 0) > 0 ? "，已作答" : ""}`}
               >
                 {index + 1}
