@@ -2064,7 +2064,7 @@ img {
   .question-map > p { display: none; }
   .question-map.expanded nav { display: grid; }
   .question-map.expanded > p { display: flex; }
-  .question-map-toggle {
+  .question-map button.question-map-toggle {
     display: inline-flex;
     width: auto;
     min-height: 28px;
@@ -2080,7 +2080,7 @@ img {
     white-space: nowrap;
     cursor: pointer;
   }
-  .question-map-toggle svg { transition: transform 180ms ease; }
+  .question-map button.question-map-toggle svg { transition: transform 180ms ease; }
   .question-map.expanded .question-map-toggle svg { transform: rotate(180deg); }
   .question-card { min-height: 0; padding: 23px 18px; }
   .question-card h1 { font-size: 23px; }
