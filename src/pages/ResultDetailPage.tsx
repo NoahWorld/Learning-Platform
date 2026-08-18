@@ -2,16 +2,14 @@ import { ArrowLeft, Check, Clock3, RotateCcw, Target, Trophy, X } from "lucide-r
 import { Link, useParams } from "react-router-dom";
 import { apiGet } from "../api";
 import { ErrorState, LoadingState, formatDate, formatDuration } from "../components/PageBits";
-import { getDeviceId } from "../device";
 import type { ResultDetail } from "../types";
 import { useRemote } from "../useRemote";
 
 export function ResultDetailPage() {
   const { resultId = "" } = useParams();
-  const deviceId = getDeviceId();
   const { data, loading, error } = useRemote<ResultDetail>(
-    (signal) => apiGet(`/api/results/${encodeURIComponent(resultId)}?deviceId=${encodeURIComponent(deviceId)}`, signal),
-    [deviceId, resultId],
+    (signal) => apiGet(`/api/results/${encodeURIComponent(resultId)}`, signal),
+    [resultId],
   );
 
   if (loading) return <LoadingState label="正在生成考试复盘…" />;

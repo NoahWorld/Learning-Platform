@@ -12,7 +12,6 @@ import {
 import { Link } from "react-router-dom";
 import { apiGet } from "../api";
 import { ErrorState, LoadingState, ScoreSticker, formatDate } from "../components/PageBits";
-import { getDeviceId } from "../device";
 import type { DashboardSummary } from "../types";
 import { useRemote } from "../useRemote";
 
@@ -24,10 +23,9 @@ const learningLoop = [
 ];
 
 export function DashboardPage() {
-  const deviceId = getDeviceId();
   const { data, loading, error } = useRemote<DashboardSummary>(
-    (signal) => apiGet(`/api/dashboard?deviceId=${encodeURIComponent(deviceId)}`, signal),
-    [deviceId],
+    (signal) => apiGet("/api/dashboard", signal),
+    [],
   );
 
   return (
@@ -48,7 +46,7 @@ export function DashboardPage() {
               来场模拟考
             </Link>
           </div>
-          <div className="privacy-pill"><CheckCircle2 size={16} /> 无需登录，本机自动记成绩</div>
+          <div className="privacy-pill"><CheckCircle2 size={16} /> 账号同步，跨设备保留成绩</div>
         </div>
 
         <div className="hero-art" aria-hidden="true">
@@ -73,7 +71,7 @@ export function DashboardPage() {
         <div className="section-title-row">
           <div>
             <span className="mini-kicker"><Sparkles size={14} /> CURRENT STATS</span>
-            <h2>本机学习概览</h2>
+            <h2>我的学习概览</h2>
           </div>
           <Link className="text-link" to="/results">全部成绩 <ArrowRight size={16} /></Link>
         </div>

@@ -5,7 +5,20 @@ import { existsSync } from "node:fs";
 import { randomUUID } from "node:crypto";
 import { fileURLToPath } from "node:url";
 import { z } from "zod";
-import { deviceQuerySchema, submissionSchema } from "./content-schema.mjs";
+import {
+  loginSchema,
+  submissionSchema,
+} from "./content-schema.mjs";
+import {
+  clearSessionCookie,
+  createSessionRecord,
+  deleteCurrentSession,
+  getAuthenticatedUser,
+  insertSession,
+  mapUser,
+  setSessionCookie,
+  verifyPassword,
+} from "./auth.mjs";
 import { openDatabase } from "./db.mjs";
 import { createStorage } from "./storage.mjs";
 
@@ -33,8 +46,12 @@ export async function createApp({
   });
 
   app.setErrorHandler((error, request, reply) => {
-    request.log.error({ err: error }, "request failed");
     const statusCode = Number.isInteger(error.statusCode) ? error.statusCode : 500;
+    if (statusCode >= 500) {
+      request.log.error({ err: error }, "request failed");
+    } else {
+      request.log.warn({ err: error, statusCode }, "request rejected");
+    }
 
     reply.status(statusCode).send({
       error: statusCode >= 500 ? "服务器暂时无法处理这个请求" : error.message,
@@ -116,6 +133,8 @@ export async function createApp({
 }
 
 function registerApiRoutes(app, db, storage) {
+  const loginFailures = new Map();
+
   app.get("/api/health", async () => {
     const database = db.prepare("SELECT 1 AS ok").get();
     return {
@@ -125,8 +144,61 @@ function registerApiRoutes(app, db, storage) {
     };
   });
 
+  app.post("/api/auth/login", async (request, reply) => {
+    const input = parseOrThrow(loginSchema, request.body);
+    const throttleKey = `${request.ip}:${input.username}`;
+    const currentFailure = loginFailures.get(throttleKey);
+    const nowMs = Date.now();
+    if (currentFailure?.blockedUntil > nowMs) {
+      reply.header("Retry-After", Math.ceil((currentFailure.blockedUntil - nowMs) / 1000));
+      throw httpError(429, "登录尝试过多，请稍后再试");
+    }
+
+    const row = db
+      .prepare(
+        `SELECT id, username, display_name, password_hash, password_salt, created_at
+         FROM users
+         WHERE username = ?`,
+      )
+      .get(input.username);
+    const valid = row
+      ? await verifyPassword(input.password, row.password_salt, row.password_hash)
+      : (await verifyPassword(input.password, "00000000000000000000000000000000", "00".repeat(64)), false);
+
+    if (!valid) {
+      const failureWindowMs = 15 * 60 * 1000;
+      const withinWindow = currentFailure && nowMs - currentFailure.windowStartedAt < failureWindowMs;
+      const failures = withinWindow ? currentFailure.failures + 1 : 1;
+      loginFailures.set(throttleKey, {
+        failures,
+        windowStartedAt: withinWindow ? currentFailure.windowStartedAt : nowMs,
+        blockedUntil: failures >= 5 ? nowMs + failureWindowMs : 0,
+      });
+      throw httpError(401, "用户名或密码错误");
+    }
+
+    loginFailures.delete(throttleKey);
+    db.prepare("DELETE FROM sessions WHERE expires_at <= ?").run(new Date().toISOString());
+    const session = createSessionRecord(row.id);
+    insertSession(db, session);
+    setSessionCookie(reply, session.token, request);
+    return { user: mapUser(row) };
+  });
+
+  app.get("/api/auth/me", async (request) => {
+    const user = requireUser(db, request);
+    return { user: mapUser(user) };
+  });
+
+  app.post("/api/auth/logout", async (request, reply) => {
+    deleteCurrentSession(db, request);
+    clearSessionCookie(reply, request);
+    reply.status(204);
+    return reply.send();
+  });
+
   app.get("/api/dashboard", async (request) => {
-    const { deviceId } = parseOrThrow(deviceQuerySchema, request.query);
+    const user = requireUser(db, request);
     const materialCount = db
       .prepare("SELECT COUNT(*) AS count FROM materials WHERE status = 'published'")
       .get().count;
@@ -138,9 +210,9 @@ function registerApiRoutes(app, db, storage) {
         `SELECT COUNT(*) AS count, ROUND(AVG(score)) AS average_score,
                 MAX(score) AS best_score
          FROM attempts
-         WHERE device_id = ?`,
+         WHERE user_id = ?`,
       )
-      .get(deviceId);
+      .get(user.id);
     const mistakeCount = db
       .prepare(
         `SELECT COUNT(*) AS count
@@ -148,12 +220,12 @@ function registerApiRoutes(app, db, storage) {
            SELECT aa.question_id
            FROM attempt_answers aa
            JOIN attempts a ON a.id = aa.attempt_id
-           WHERE a.device_id = ?
+           WHERE a.user_id = ?
            GROUP BY aa.question_id
            HAVING SUM(CASE WHEN aa.is_correct = 0 THEN 1 ELSE 0 END) > 0
          )`,
       )
-      .get(deviceId).count;
+      .get(user.id).count;
     const recentAttempt = db
       .prepare(
         `SELECT a.id, a.exam_id, e.title AS exam_title, a.score,
@@ -161,11 +233,11 @@ function registerApiRoutes(app, db, storage) {
                 a.duration_seconds, e.passing_score, a.submitted_at
          FROM attempts a
          JOIN exams e ON e.id = a.exam_id
-         WHERE a.device_id = ?
+         WHERE a.user_id = ?
          ORDER BY a.submitted_at DESC
          LIMIT 1`,
       )
-      .get(deviceId);
+      .get(user.id);
 
     return {
       materialCount,
@@ -320,6 +392,7 @@ function registerApiRoutes(app, db, storage) {
   });
 
   app.post("/api/exams/:id/submissions", async (request, reply) => {
+    const user = requireUser(db, request);
     const input = parseOrThrow(submissionSchema, request.body);
     const exam = getExam(db, request.params.id, true);
 
@@ -392,12 +465,12 @@ function registerApiRoutes(app, db, storage) {
     db.transaction(() => {
       db.prepare(
         `INSERT INTO attempts (
-           id, device_id, exam_id, score, correct_count, wrong_count,
+           id, device_id, user_id, exam_id, score, correct_count, wrong_count,
            total_questions, duration_seconds, started_at, submitted_at
-         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+         ) VALUES (?, '', ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       ).run(
         attemptId,
-        input.deviceId,
+        user.id,
         exam.id,
         score,
         correctCount,
@@ -426,11 +499,11 @@ function registerApiRoutes(app, db, storage) {
     })();
 
     reply.status(201);
-    return getAttemptDetails(db, attemptId, input.deviceId);
+    return getAttemptDetails(db, attemptId, user.id);
   });
 
   app.get("/api/results", async (request) => {
-    const { deviceId } = parseOrThrow(deviceQuerySchema, request.query);
+    const user = requireUser(db, request);
     const results = db
       .prepare(
         `SELECT a.id, a.exam_id, e.title AS exam_title, a.score,
@@ -438,29 +511,29 @@ function registerApiRoutes(app, db, storage) {
                 a.duration_seconds, a.submitted_at, e.passing_score
          FROM attempts a
          JOIN exams e ON e.id = a.exam_id
-         WHERE a.device_id = ?
+         WHERE a.user_id = ?
          ORDER BY a.submitted_at DESC
          LIMIT 200`,
       )
-      .all(deviceId)
+      .all(user.id)
       .map(mapAttemptSummary);
 
     return { results };
   });
 
   app.get("/api/results/:id", async (request) => {
-    const { deviceId } = parseOrThrow(deviceQuerySchema, request.query);
-    const result = getAttemptDetails(db, request.params.id, deviceId);
+    const user = requireUser(db, request);
+    const result = getAttemptDetails(db, request.params.id, user.id);
 
     if (!result) {
-      throw httpError(404, "考试记录不存在或不属于当前设备");
+      throw httpError(404, "考试记录不存在或不属于当前用户");
     }
 
     return result;
   });
 
   app.get("/api/mistakes", async (request) => {
-    const { deviceId } = parseOrThrow(deviceQuerySchema, request.query);
+    const user = requireUser(db, request);
     const rows = db
       .prepare(
         `WITH answer_history AS (
@@ -475,7 +548,7 @@ function registerApiRoutes(app, db, storage) {
            JOIN attempts a ON a.id = aa.attempt_id
            JOIN questions q ON q.id = aa.question_id
            JOIN exams e ON e.id = q.exam_id
-           WHERE a.device_id = ?
+           WHERE a.user_id = ?
          )
          SELECT question_id, prompt, explanation, type, exam_id, exam_title,
                 SUM(CASE WHEN is_correct = 0 THEN 1 ELSE 0 END) AS wrong_count,
@@ -487,7 +560,7 @@ function registerApiRoutes(app, db, storage) {
          HAVING SUM(CASE WHEN is_correct = 0 THEN 1 ELSE 0 END) > 0
          ORDER BY last_wrong_at DESC`,
       )
-      .all(deviceId);
+      .all(user.id);
     const optionsStatement = db.prepare(
       `SELECT id, label, content
        FROM question_options
@@ -565,7 +638,7 @@ function getExam(db, examId, includeAnswers) {
   };
 }
 
-function getAttemptDetails(db, attemptId, deviceId) {
+function getAttemptDetails(db, attemptId, userId) {
   const attempt = db
     .prepare(
       `SELECT a.id, a.exam_id, e.title AS exam_title, a.score,
@@ -574,9 +647,9 @@ function getAttemptDetails(db, attemptId, deviceId) {
               e.passing_score
        FROM attempts a
        JOIN exams e ON e.id = a.exam_id
-       WHERE a.id = ? AND a.device_id = ?`,
+       WHERE a.id = ? AND a.user_id = ?`,
     )
-    .get(attemptId, deviceId);
+    .get(attemptId, userId);
 
   if (!attempt) {
     return null;
@@ -690,6 +763,14 @@ function parseOrThrow(schema, value) {
     throw httpError(400, `请求数据无效：${message}`);
   }
   return result.data;
+}
+
+function requireUser(db, request) {
+  const user = getAuthenticatedUser(db, request);
+  if (!user) {
+    throw httpError(401, "请先登录后继续");
+  }
+  return user;
 }
 
 function httpError(statusCode, message) {

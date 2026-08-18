@@ -3,12 +3,15 @@ import {
   BrainCircuit,
   ClipboardCheck,
   Home,
+  LogOut,
   RotateCcw,
   Trophy,
+  UserRound,
   X,
 } from "lucide-react";
-import { useEffect } from "react";
-import { Link, NavLink, Outlet, useLocation, useMatch } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Link, NavLink, Outlet, useLocation, useMatch, useNavigate } from "react-router-dom";
+import { useAuth } from "../auth";
 
 const navigation = [
   { to: "/", label: "工作台", icon: Home, end: true },
@@ -19,7 +22,10 @@ const navigation = [
 ];
 
 export function AppShell() {
+  const { user, logout } = useAuth();
   const location = useLocation();
+  const navigate = useNavigate();
+  const [logoutError, setLogoutError] = useState<string | null>(null);
   const isReading = Boolean(useMatch("/materials/:materialId"));
   const isExam = Boolean(useMatch("/exams/:examId"));
   const focusMode = isReading || isExam;
@@ -29,6 +35,16 @@ export function AppShell() {
     document.body.dataset.mode = focusMode ? "focus" : "comic";
   }, [focusMode, location.pathname]);
 
+  async function handleLogout() {
+    setLogoutError(null);
+    try {
+      await logout();
+      navigate("/login", { replace: true });
+    } catch (error) {
+      setLogoutError(error instanceof Error ? error.message : "退出登录失败");
+    }
+  }
+
   if (focusMode) {
     return (
       <div className="focus-shell">
@@ -37,12 +53,16 @@ export function AppShell() {
             <span className="focus-brand-mark">知</span>
             <span>知行台</span>
           </Link>
-          <Link className="focus-exit" to={isReading ? "/materials" : "/exams"}>
-            <X size={17} aria-hidden="true" />
-            {isReading ? "退出阅读" : "退出考试"}
-          </Link>
+          <div className="focus-actions">
+            <span className="focus-user">{user?.displayName}</span>
+            <Link className="focus-exit" to={isReading ? "/materials" : "/exams"}>
+              <X size={17} aria-hidden="true" />
+              {isReading ? "退出阅读" : "退出考试"}
+            </Link>
+          </div>
         </header>
         <main className="focus-main">
+          {logoutError ? <div className="shell-error" role="alert">{logoutError}</div> : null}
           <Outlet />
         </main>
       </div>
@@ -74,9 +94,10 @@ export function AppShell() {
 
         <div className="sidebar-note">
           <span className="tape" aria-hidden="true" />
-          <strong>不用登录</strong>
-          <p>成绩与错题只按当前设备记录，打开就能继续。</p>
-          <span className="scribble" aria-hidden="true">匿名 · 轻量 · 专注</span>
+          <span className="account-avatar" aria-hidden="true"><UserRound size={21} /></span>
+          <strong>{user?.displayName}</strong>
+          <p>{user?.username}<br />成绩与错题已同步到账号。</p>
+          <button type="button" onClick={() => void handleLogout()}><LogOut size={15} /> 退出登录</button>
         </div>
       </aside>
 
@@ -86,9 +107,13 @@ export function AppShell() {
             <span className="brand-burst" aria-hidden="true">知</span>
             <strong>知行台</strong>
           </Link>
-          <span className="mobile-kicker">今天也要涨知识！</span>
+          <span className="mobile-kicker">{user?.displayName} · 今天也要涨知识！</span>
+          <button className="mobile-logout" type="button" onClick={() => void handleLogout()} aria-label="退出登录">
+            <LogOut size={18} />
+          </button>
         </header>
         <main className="comic-main">
+          {logoutError ? <div className="shell-error" role="alert">{logoutError}</div> : null}
           <Outlet />
         </main>
       </div>

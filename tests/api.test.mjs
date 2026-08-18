@@ -4,6 +4,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import test from "node:test";
 import Database from "better-sqlite3";
+import { hashPassword } from "../server/auth.mjs";
 import { createApp } from "../server/app.mjs";
 import { openDatabase } from "../server/db.mjs";
 import { importContent } from "../server/import-content.mjs";
@@ -17,13 +18,43 @@ const hrEconomistFixture = JSON.parse(
 const hrMasterCollectionFixture = JSON.parse(
   await readFile(new URL("../data/hr-600-master-collection.json", import.meta.url), "utf8"),
 );
-const deviceId = "device-test-123";
+const testUsername = "13000000001";
+const testPassword = "TestPass1!";
+
+async function provisionUser(db, {
+  username = testUsername,
+  password = testPassword,
+  displayName = "测试用户",
+} = {}) {
+  const passwordRecord = await hashPassword(password);
+  const now = new Date().toISOString();
+  db.prepare(
+    `INSERT INTO users (
+       id, username, display_name, password_hash, password_salt, created_at, updated_at
+     ) VALUES (?, ?, ?, ?, ?, ?, ?)`,
+  ).run(username, username, displayName, passwordRecord.hash, passwordRecord.salt, now, now);
+}
+
+async function loginAs(app, username = testUsername, password = testPassword) {
+  const response = await app.inject({
+    method: "POST",
+    url: "/api/auth/login",
+    payload: { username, password },
+  });
+  assert.equal(response.statusCode, 200, response.body);
+  return response.headers["set-cookie"].split(";")[0];
+}
+
+function authenticated(cookie) {
+  return { cookie };
+}
 
 async function createTestApp() {
   const directory = await mkdtemp(join(tmpdir(), "learning-workbench-test-"));
   const databasePath = join(directory, "test.sqlite");
   const db = openDatabase(databasePath);
   importContent(db, fixture);
+  await provisionUser(db);
   db.close();
 
   const app = await createApp({
@@ -32,9 +63,11 @@ async function createTestApp() {
     serveStatic: false,
     storage: null,
   });
+  const cookie = await loginAs(app);
 
   return {
     app,
+    cookie,
     databasePath,
     async cleanup() {
       await app.close();
@@ -100,6 +133,57 @@ test("web pages are mounted under /study and legacy links redirect", async (cont
   assert.equal(unknownApi.json().error, "接口不存在");
 });
 
+test("pre-provisioned phone accounts can log in and registration stays closed", async (context) => {
+  const testApp = await createTestApp();
+  context.after(() => testApp.cleanup());
+
+  const registration = await testApp.app.inject({
+    method: "POST",
+    url: "/api/auth/register",
+    payload: { username: "13000000002", password: "AnotherPass1!" },
+  });
+  assert.equal(registration.statusCode, 404);
+
+  const unauthenticatedDashboard = await testApp.app.inject({
+    method: "GET",
+    url: "/api/dashboard",
+  });
+  assert.equal(unauthenticatedDashboard.statusCode, 401);
+
+  const wrongPassword = await testApp.app.inject({
+    method: "POST",
+    url: "/api/auth/login",
+    payload: { username: testUsername, password: "wrong-password" },
+  });
+  assert.equal(wrongPassword.statusCode, 401);
+  assert.equal(wrongPassword.json().error, "用户名或密码错误");
+
+  const me = await testApp.app.inject({
+    method: "GET",
+    url: "/api/auth/me",
+    headers: authenticated(testApp.cookie),
+  });
+  assert.equal(me.statusCode, 200);
+  assert.equal(me.json().user.id, testUsername);
+  assert.equal(me.json().user.username, testUsername);
+  assert.equal(me.json().user.displayName, "测试用户");
+
+  const logout = await testApp.app.inject({
+    method: "POST",
+    url: "/api/auth/logout",
+    headers: authenticated(testApp.cookie),
+  });
+  assert.equal(logout.statusCode, 204);
+  assert.match(logout.headers["set-cookie"], /Max-Age=0/);
+
+  const expiredSession = await testApp.app.inject({
+    method: "GET",
+    url: "/api/auth/me",
+    headers: authenticated(testApp.cookie),
+  });
+  assert.equal(expiredSession.statusCode, 401);
+});
+
 test("published materials and exams are readable without leaking answer keys", async (context) => {
   const testApp = await createTestApp();
   context.after(() => testApp.cleanup());
@@ -141,6 +225,7 @@ test("HR master collection imports all source questions and reveals answers only
   const databasePath = join(directory, "test.sqlite");
   const db = openDatabase(databasePath);
   const imported = importContent(db, hrMasterCollectionFixture);
+  await provisionUser(db);
   db.close();
 
   assert.deepEqual(imported, { materials: 0, exams: 1, questions: 154, assets: 0 });
@@ -151,6 +236,7 @@ test("HR master collection imports all source questions and reveals answers only
     serveStatic: false,
     storage: null,
   });
+  const cookie = await loginAs(app);
   context.after(async () => {
     await app.close();
     await rm(directory, { recursive: true, force: true });
@@ -174,8 +260,8 @@ test("HR master collection imports all source questions and reveals answers only
   const submission = await app.inject({
     method: "POST",
     url: `/api/exams/${examId}/submissions`,
+    headers: authenticated(cookie),
     payload: {
-      deviceId: "hr-master-test-device",
       durationSeconds: 154,
       answers: sourceQuestions.map((question) => ({
         questionId: question.id,
@@ -203,8 +289,8 @@ test("submissions persist results and mark a later-correct mistake as corrected"
   const firstSubmission = await testApp.app.inject({
     method: "POST",
     url: "/api/exams/sample-learning-check/submissions",
+    headers: authenticated(testApp.cookie),
     payload: {
-      deviceId,
       durationSeconds: 42,
       answers: [
         { questionId: "sample-q-active-recall", optionIds: ["sample-q1-a"] },
@@ -221,7 +307,8 @@ test("submissions persist results and mark a later-correct mistake as corrected"
 
   const initialMistakes = await testApp.app.inject({
     method: "GET",
-    url: `/api/mistakes?deviceId=${deviceId}`,
+    url: "/api/mistakes",
+    headers: authenticated(testApp.cookie),
   });
   assert.equal(initialMistakes.statusCode, 200);
   assert.equal(initialMistakes.json().mistakes.length, 1);
@@ -230,8 +317,8 @@ test("submissions persist results and mark a later-correct mistake as corrected"
   const secondSubmission = await testApp.app.inject({
     method: "POST",
     url: "/api/exams/sample-learning-check/submissions",
+    headers: authenticated(testApp.cookie),
     payload: {
-      deviceId,
       durationSeconds: 30,
       answers: [
         { questionId: "sample-q-active-recall", optionIds: ["sample-q1-b"] },
@@ -244,13 +331,15 @@ test("submissions persist results and mark a later-correct mistake as corrected"
 
   const correctedMistakes = await testApp.app.inject({
     method: "GET",
-    url: `/api/mistakes?deviceId=${deviceId}`,
+    url: "/api/mistakes",
+    headers: authenticated(testApp.cookie),
   });
   assert.equal(correctedMistakes.json().mistakes[0].corrected, true);
 
   const dashboard = await testApp.app.inject({
     method: "GET",
-    url: `/api/dashboard?deviceId=${deviceId}`,
+    url: "/api/dashboard",
+    headers: authenticated(testApp.cookie),
   });
   assert.equal(dashboard.statusCode, 200);
   assert.equal(dashboard.json().attemptCount, 2);
@@ -258,11 +347,28 @@ test("submissions persist results and mark a later-correct mistake as corrected"
   assert.equal(dashboard.json().recentAttempt.passingScore, 60);
   assert.equal(dashboard.json().recentAttempt.durationSeconds, 30);
 
-  const otherDeviceResult = await testApp.app.inject({
-    method: "GET",
-    url: `/api/results/${firstResult.id}?deviceId=another-device-456`,
+  const secondUsername = "13000000002";
+  const secondPassword = "AnotherPass1!";
+  await provisionUser(testApp.app.db, {
+    username: secondUsername,
+    password: secondPassword,
+    displayName: "另一个用户",
   });
-  assert.equal(otherDeviceResult.statusCode, 404);
+  const secondUserCookie = await loginAs(testApp.app, secondUsername, secondPassword);
+  const otherUserResult = await testApp.app.inject({
+    method: "GET",
+    url: `/api/results/${firstResult.id}`,
+    headers: authenticated(secondUserCookie),
+  });
+  assert.equal(otherUserResult.statusCode, 404);
+
+  const otherUserResults = await testApp.app.inject({
+    method: "GET",
+    url: "/api/results",
+    headers: authenticated(secondUserCookie),
+  });
+  assert.equal(otherUserResults.statusCode, 200);
+  assert.deepEqual(otherUserResults.json().results, []);
 
   const db = testApp.app.db;
   assert.throws(
@@ -276,11 +382,21 @@ test("invalid submissions fail clearly and do not create attempts", async (conte
   const testApp = await createTestApp();
   context.after(() => testApp.cleanup());
 
-  const invalid = await testApp.app.inject({
+  const unauthenticated = await testApp.app.inject({
     method: "POST",
     url: "/api/exams/sample-learning-check/submissions",
     payload: {
-      deviceId,
+      durationSeconds: 10,
+      answers: [],
+    },
+  });
+  assert.equal(unauthenticated.statusCode, 401);
+
+  const invalid = await testApp.app.inject({
+    method: "POST",
+    url: "/api/exams/sample-learning-check/submissions",
+    headers: authenticated(testApp.cookie),
+    payload: {
       durationSeconds: 10,
       answers: [
         { questionId: "sample-q-active-recall", optionIds: ["sample-q1-b"] },
@@ -300,8 +416,8 @@ test("multiple-choice omissions receive official-style partial credit", async (c
   const response = await testApp.app.inject({
     method: "POST",
     url: "/api/exams/sample-learning-check/submissions",
+    headers: authenticated(testApp.cookie),
     payload: {
-      deviceId,
       durationSeconds: 20,
       answers: [
         { questionId: "sample-q-active-recall", optionIds: ["sample-q1-b"] },
@@ -337,16 +453,46 @@ test("version 1 databases migrate case-question fields without losing rows", asy
     );
     INSERT INTO questions (id, exam_id, type, prompt, explanation, position, points)
       VALUES ('legacy-q', 'legacy-exam', 'single', '旧题目', '旧解析', 0, 1);
+
+    CREATE TABLE attempts (
+      id TEXT PRIMARY KEY,
+      device_id TEXT NOT NULL,
+      exam_id TEXT NOT NULL,
+      score INTEGER NOT NULL,
+      correct_count INTEGER NOT NULL,
+      wrong_count INTEGER NOT NULL,
+      total_questions INTEGER NOT NULL,
+      duration_seconds INTEGER NOT NULL,
+      started_at TEXT NOT NULL,
+      submitted_at TEXT NOT NULL
+    );
+    INSERT INTO attempts (
+      id, device_id, exam_id, score, correct_count, wrong_count,
+      total_questions, duration_seconds, started_at, submitted_at
+    ) VALUES (
+      'legacy-attempt', 'legacy-device', 'legacy-exam', 80, 1, 0,
+      1, 30, '2026-01-01T00:00:00.000Z', '2026-01-01T00:00:30.000Z'
+    );
     PRAGMA user_version = 1;
   `);
   legacyDb.close();
 
   const migratedDb = openDatabase(databasePath);
   context.after(() => migratedDb.close());
-  assert.equal(migratedDb.pragma("user_version", { simple: true }), 2);
+  assert.equal(migratedDb.pragma("user_version", { simple: true }), 3);
   assert.deepEqual(
     migratedDb.prepare("SELECT id, section, passage FROM questions WHERE id = ?").get("legacy-q"),
     { id: "legacy-q", section: "standard", passage: "" },
+  );
+  assert.deepEqual(
+    migratedDb.prepare("SELECT id, device_id, user_id FROM attempts WHERE id = ?").get(
+      "legacy-attempt",
+    ),
+    { id: "legacy-attempt", device_id: "legacy-device", user_id: null },
+  );
+  assert.equal(
+    migratedDb.prepare("SELECT COUNT(*) AS count FROM users").get().count,
+    0,
   );
 });
 

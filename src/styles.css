@@ -206,6 +206,30 @@ img {
   line-height: 1.6;
 }
 
+.account-avatar {
+  display: grid;
+  width: 36px;
+  height: 36px;
+  margin-bottom: 8px;
+  place-items: center;
+  border: 2px solid var(--ink);
+  border-radius: 50%;
+  background: var(--paper);
+}
+
+.sidebar-note button {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  font-size: 11px;
+  font-weight: 900;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
 .scribble {
   font-family: "Kaiti SC", KaiTi, cursive;
   font-size: 12px;
@@ -1580,6 +1604,75 @@ img {
   color: #66716d;
 }
 
+.focus-actions { display: flex; align-items: center; gap: 18px; }
+.focus-user { color: #68736f; font-size: 12px; }
+.shell-error { margin-bottom: 16px; padding: 10px 13px; border: 2px solid #8f2a3e; color: #8f2a3e; background: #fff0f1; font-size: 13px; font-weight: 750; }
+
+.auth-loading {
+  display: grid;
+  min-height: 100vh;
+  place-items: center;
+  color: var(--muted);
+  font-weight: 850;
+}
+
+.login-page {
+  display: grid;
+  min-height: 100vh;
+  grid-template-columns: minmax(0, 1.08fr) minmax(430px, 0.92fr);
+  background: var(--cream);
+}
+
+.login-poster {
+  position: relative;
+  display: flex;
+  min-height: 100vh;
+  flex-direction: column;
+  justify-content: center;
+  overflow: hidden;
+  padding: clamp(48px, 8vw, 120px);
+  border-right: var(--border);
+  background: var(--yellow);
+}
+
+.login-poster::before,
+.login-poster::after {
+  position: absolute;
+  border: var(--border);
+  border-radius: 50%;
+  content: "";
+}
+
+.login-poster::before { right: -120px; bottom: -100px; width: 360px; height: 360px; background: var(--blue); }
+.login-poster::after { top: -100px; left: -90px; width: 250px; height: 250px; background: var(--pink); }
+.login-brand-mark { position: relative; z-index: 1; display: grid; width: 78px; height: 78px; place-items: center; border: var(--border); border-radius: 24px 12px; background: var(--paper); box-shadow: 6px 6px 0 var(--ink); transform: rotate(-4deg); }
+.login-poster .mini-kicker { position: relative; z-index: 1; display: flex; align-items: center; gap: 6px; margin: 34px 0 15px; }
+.login-poster h1 { position: relative; z-index: 1; margin: 0; font-size: clamp(46px, 5.5vw, 82px); font-weight: 1000; letter-spacing: -0.07em; line-height: 1.06; }
+.login-poster h1 span { display: inline-block; margin-top: 8px; padding: 0 8px 7px 0; box-shadow: inset 0 -17px 0 var(--pink); }
+.login-poster > p:not(.mini-kicker) { position: relative; z-index: 1; max-width: 610px; margin: 28px 0 0; color: #384157; font-size: 17px; font-weight: 700; line-height: 1.8; }
+.login-comic-note { position: relative; z-index: 1; width: fit-content; margin: 40px 0 0 auto; padding: 18px 25px; border: var(--border); border-radius: 50%; background: var(--paper); box-shadow: 5px 5px 0 var(--ink); font-family: "Kaiti SC", KaiTi, cursive; font-size: 14px; text-align: center; transform: rotate(4deg); }
+.login-comic-note strong { font-size: 17px; }
+.login-spark { position: absolute; z-index: 1; font-size: 40px; }
+.login-spark.spark-a { top: 18%; right: 12%; color: var(--orange); transform: rotate(12deg); }
+.login-spark.spark-b { right: 32%; bottom: 13%; color: var(--pink); transform: rotate(-10deg); }
+
+.login-panel { display: grid; min-height: 100vh; place-items: center; padding: 40px; background: var(--paper); }
+.login-card { width: min(420px, 100%); }
+.login-card header > span { display: inline-block; padding: 5px 9px; border: 2px solid var(--ink); background: var(--green); font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 10px; font-weight: 900; letter-spacing: .12em; box-shadow: 3px 3px 0 var(--ink); }
+.login-card h2 { margin: 20px 0 7px; font-size: 40px; letter-spacing: -.04em; }
+.login-card header p { margin: 0 0 32px; color: var(--muted); font-size: 14px; }
+.login-card form { display: grid; }
+.login-card label { margin: 0 0 8px; font-size: 13px; font-weight: 900; }
+.login-field { display: grid; min-height: 54px; grid-template-columns: 24px 1fr; align-items: center; gap: 9px; margin-bottom: 20px; padding: 0 15px; border: var(--border); background: white; box-shadow: 3px 3px 0 #dcd5c8; }
+.login-field:focus-within { box-shadow: 4px 4px 0 var(--blue); }
+.login-field input { width: 100%; height: 48px; border: 0; outline: 0; color: var(--ink); background: transparent; }
+.login-field input::placeholder { color: #a4a8b0; }
+.login-error { margin: 0 0 18px; padding: 11px 13px; border: 2px solid #9a3045; color: #8a273b; background: #fff0f3; font-size: 13px; font-weight: 750; }
+.login-submit { display: inline-flex; min-height: 54px; align-items: center; justify-content: center; gap: 9px; border: var(--border); color: white; background: var(--ink); box-shadow: 5px 5px 0 var(--pink); font-weight: 900; cursor: pointer; }
+.login-submit:hover:not(:disabled) { transform: translate(2px, 2px); box-shadow: 3px 3px 0 var(--pink); }
+.login-submit:disabled { cursor: wait; opacity: .65; }
+.login-help { margin: 25px 0 0; color: var(--muted); font-size: 12px; line-height: 1.65; text-align: center; }
+
 .focus-main {
   width: min(1120px, 100%);
   margin: 0 auto;
@@ -1968,7 +2061,8 @@ img {
     position: sticky;
     top: 0;
     z-index: 20;
-    display: flex;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
     min-height: 60px;
     align-items: center;
     justify-content: space-between;
@@ -1979,7 +2073,8 @@ img {
   .brand.compact { gap: 9px; margin: 0; }
   .brand.compact .brand-burst { width: 34px; height: 34px; border-radius: 10px 6px; font-size: 13px; font-weight: 1000; }
   .brand.compact strong { font-size: 17px; }
-  .mobile-kicker { font-family: "Kaiti SC", KaiTi, cursive; font-size: 12px; font-weight: 800; }
+  .mobile-kicker { overflow: hidden; padding: 0 10px; font-family: "Kaiti SC", KaiTi, cursive; font-size: 12px; font-weight: 800; text-align: right; text-overflow: ellipsis; white-space: nowrap; }
+  .mobile-logout { display: grid; width: 34px; height: 34px; place-items: center; padding: 0; border: 2px solid var(--ink); border-radius: 50%; background: var(--paper); cursor: pointer; }
   .mobile-nav {
     position: fixed;
     inset: auto 0 0;
@@ -2084,9 +2179,22 @@ img {
   .question-map.expanded .question-map-toggle svg { transform: rotate(180deg); }
   .question-card { min-height: 0; padding: 23px 18px; }
   .question-card h1 { font-size: 23px; }
+  .login-page { display: block; min-height: 100vh; background: var(--paper); }
+  .login-poster { min-height: 330px; padding: 45px 28px 40px; border-right: 0; border-bottom: var(--border); }
+  .login-brand-mark { width: 60px; height: 60px; border-radius: 18px 9px; }
+  .login-brand-mark svg { width: 32px; }
+  .login-poster .mini-kicker { margin: 25px 0 11px; }
+  .login-poster h1 { font-size: clamp(38px, 11vw, 54px); }
+  .login-poster h1 span { box-shadow: inset 0 -11px 0 var(--pink); }
+  .login-poster > p:not(.mini-kicker) { margin-top: 18px; font-size: 14px; }
+  .login-comic-note { display: none; }
+  .login-spark.spark-b { display: none; }
+  .login-panel { min-height: auto; padding: 38px 22px 54px; }
+  .login-card h2 { font-size: 34px; }
 }
 
 @media (max-width: 480px) {
+  .mobile-kicker { font-size: 10px; }
   .hero-actions { display: grid; grid-template-columns: 1fr; }
   .comic-button { width: 100%; }
   .hero-art { min-height: 260px; }

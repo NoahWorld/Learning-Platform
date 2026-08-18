@@ -10,15 +10,13 @@ import {
   formatDate,
   formatDuration,
 } from "../components/PageBits";
-import { getDeviceId } from "../device";
 import type { ResultSummary } from "../types";
 import { useRemote } from "../useRemote";
 
 export function ResultsPage() {
-  const deviceId = getDeviceId();
   const { data, loading, error } = useRemote<{ results: ResultSummary[] }>(
-    (signal) => apiGet(`/api/results?deviceId=${encodeURIComponent(deviceId)}`, signal),
-    [deviceId],
+    (signal) => apiGet("/api/results", signal),
+    [],
   );
   const results = data?.results ?? [];
   const average = results.length
@@ -44,7 +42,7 @@ export function ResultsPage() {
       {!loading && !error && results.length === 0 ? (
         <EmptyState
           title="第一张成绩单还在等你"
-          description="完成一场模拟考试后，分数、用时和逐题解析都会保存在当前设备。"
+          description="完成一场模拟考试后，分数、用时和逐题解析都会保存在你的账号。"
           actionLabel="去参加模拟考试"
           actionTo="/exams"
         />

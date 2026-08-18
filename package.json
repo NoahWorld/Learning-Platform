@@ -11,7 +11,8 @@
     "start": "NODE_ENV=production node server/index.mjs",
     "test": "node --test --test-reporter spec tests/*.test.mjs",
     "check": "npm run build && npm test",
-    "import:data": "node server/import-content.mjs"
+    "import:data": "node server/import-content.mjs",
+    "user:upsert": "node server/manage-user.mjs upsert"
   },
   "dependencies": {
     "@fastify/helmet": "^13.1.0",

@@ -2,7 +2,7 @@ import Database from "better-sqlite3";
 import { mkdirSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 
-const CURRENT_SCHEMA_VERSION = 2;
+const CURRENT_SCHEMA_VERSION = 3;
 
 export function openDatabase(databasePath = "./data/study-workbench.sqlite") {
   const resolvedPath = databasePath === ":memory:" ? databasePath : resolve(databasePath);
@@ -24,7 +24,7 @@ export function openDatabase(databasePath = "./data/study-workbench.sqlite") {
 }
 
 function migrate(db) {
-  const version = db.pragma("user_version", { simple: true });
+  let version = db.pragma("user_version", { simple: true });
 
   if (version > CURRENT_SCHEMA_VERSION) {
     throw new Error(
@@ -94,9 +94,28 @@ function migrate(db) {
           updated_at TEXT NOT NULL
         );
 
+        CREATE TABLE users (
+          id TEXT PRIMARY KEY,
+          username TEXT NOT NULL UNIQUE COLLATE NOCASE,
+          display_name TEXT NOT NULL,
+          password_hash TEXT NOT NULL,
+          password_salt TEXT NOT NULL,
+          created_at TEXT NOT NULL,
+          updated_at TEXT NOT NULL
+        );
+
+        CREATE TABLE sessions (
+          id TEXT PRIMARY KEY,
+          user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+          token_hash TEXT NOT NULL UNIQUE,
+          created_at TEXT NOT NULL,
+          expires_at TEXT NOT NULL
+        );
+
         CREATE TABLE attempts (
           id TEXT PRIMARY KEY,
-          device_id TEXT NOT NULL,
+          device_id TEXT NOT NULL DEFAULT '',
+          user_id TEXT REFERENCES users(id) ON DELETE RESTRICT,
           exam_id TEXT NOT NULL REFERENCES exams(id) ON DELETE RESTRICT,
           score INTEGER NOT NULL CHECK (score BETWEEN 0 AND 100),
           correct_count INTEGER NOT NULL CHECK (correct_count >= 0),
@@ -131,6 +150,12 @@ function migrate(db) {
         CREATE INDEX idx_attempts_device_submitted
           ON attempts(device_id, submitted_at DESC);
 
+        CREATE INDEX idx_attempts_user_submitted
+          ON attempts(user_id, submitted_at DESC);
+
+        CREATE INDEX idx_sessions_user_expires
+          ON sessions(user_id, expires_at DESC);
+
         CREATE INDEX idx_attempt_answers_question_correct
           ON attempt_answers(question_id, is_correct);
       `);
@@ -149,6 +174,42 @@ function migrate(db) {
           CHECK (section IN ('standard', 'case'));
         ALTER TABLE questions
           ADD COLUMN passage TEXT NOT NULL DEFAULT '';
+      `);
+      db.pragma("user_version = 2");
+      db.pragma("optimize");
+    })();
+    version = 2;
+  }
+
+  if (version === 2) {
+    db.transaction(() => {
+      db.exec(`
+        CREATE TABLE users (
+          id TEXT PRIMARY KEY,
+          username TEXT NOT NULL UNIQUE COLLATE NOCASE,
+          display_name TEXT NOT NULL,
+          password_hash TEXT NOT NULL,
+          password_salt TEXT NOT NULL,
+          created_at TEXT NOT NULL,
+          updated_at TEXT NOT NULL
+        );
+
+        CREATE TABLE sessions (
+          id TEXT PRIMARY KEY,
+          user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+          token_hash TEXT NOT NULL UNIQUE,
+          created_at TEXT NOT NULL,
+          expires_at TEXT NOT NULL
+        );
+
+        ALTER TABLE attempts
+          ADD COLUMN user_id TEXT REFERENCES users(id) ON DELETE RESTRICT;
+
+        CREATE INDEX idx_attempts_user_submitted
+          ON attempts(user_id, submitted_at DESC);
+
+        CREATE INDEX idx_sessions_user_expires
+          ON sessions(user_id, expires_at DESC);
       `);
       db.pragma(`user_version = ${CURRENT_SCHEMA_VERSION}`);
       db.pragma("optimize");

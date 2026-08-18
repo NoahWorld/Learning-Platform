@@ -137,11 +137,6 @@ export const contentSchema = z
   });
 
 export const submissionSchema = z.object({
-  deviceId: z
-    .string()
-    .min(8)
-    .max(128)
-    .regex(/^[a-zA-Z0-9._:-]+$/, "设备标识格式无效"),
   durationSeconds: z.number().int().min(0).max(604800).default(0),
   startedAt: z.string().datetime().optional(),
   answers: z
@@ -154,10 +149,12 @@ export const submissionSchema = z.object({
     .max(500),
 });
 
-export const deviceQuerySchema = z.object({
-  deviceId: z
-    .string()
-    .min(8)
-    .max(128)
-    .regex(/^[a-zA-Z0-9._:-]+$/, "设备标识格式无效"),
+const usernameSchema = z
+  .string()
+  .trim()
+  .regex(/^1[3-9]\d{9}$/, "用户名必须是有效的大陆手机号");
+
+export const loginSchema = z.object({
+  username: usernameSchema,
+  password: z.string().min(1, "请输入密码").max(128, "密码最多 128 个字符"),
 });

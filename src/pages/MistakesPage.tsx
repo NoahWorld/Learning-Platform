@@ -2,15 +2,13 @@ import { ArrowRight, CheckCircle2, RotateCcw, Sparkles, Target, XCircle } from "
 import { Link } from "react-router-dom";
 import { apiGet } from "../api";
 import { EmptyState, ErrorState, LoadingState, PageHeader, formatDate } from "../components/PageBits";
-import { getDeviceId } from "../device";
 import type { MistakeItem } from "../types";
 import { useRemote } from "../useRemote";
 
 export function MistakesPage() {
-  const deviceId = getDeviceId();
   const { data, loading, error } = useRemote<{ mistakes: MistakeItem[] }>(
-    (signal) => apiGet(`/api/mistakes?deviceId=${encodeURIComponent(deviceId)}`, signal),
-    [deviceId],
+    (signal) => apiGet("/api/mistakes", signal),
+    [],
   );
   const mistakes = data?.mistakes ?? [];
   const correctedCount = mistakes.filter((mistake) => mistake.corrected).length;

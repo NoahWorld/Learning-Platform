@@ -1,3 +1,10 @@
+export interface User {
+  id: string;
+  username: string;
+  displayName: string;
+  createdAt: string;
+}
+
 export interface DashboardSummary {
   materialCount: number;
   examCount: number;

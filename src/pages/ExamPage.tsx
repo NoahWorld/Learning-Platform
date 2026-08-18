@@ -14,7 +14,6 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { apiGet, apiPost } from "../api";
 import { ErrorState, LoadingState } from "../components/PageBits";
-import { getDeviceId } from "../device";
 import type { ExamDetail, ResultDetail } from "../types";
 import { useRemote } from "../useRemote";
 
@@ -23,7 +22,6 @@ type ExamPhase = "intro" | "active" | "submitting";
 export function ExamPage() {
   const { examId = "" } = useParams();
   const navigate = useNavigate();
-  const deviceId = getDeviceId();
   const { data: exam, loading, error } = useRemote<ExamDetail>(
     (signal) => apiGet(`/api/exams/${encodeURIComponent(examId)}`, signal),
     [examId],
@@ -53,7 +51,6 @@ export function ExamPage() {
       const result = await apiPost<ResultDetail>(
         `/api/exams/${encodeURIComponent(exam.id)}/submissions`,
         {
-          deviceId,
           startedAt: new Date(startedAt).toISOString(),
           durationSeconds: Math.max(0, Math.round((Date.now() - startedAt) / 1000)),
           answers: exam.questions.map((question) => ({
@@ -69,7 +66,7 @@ export function ExamPage() {
       setShowReview(false);
       submittedRef.current = false;
     }
-  }, [answers, deviceId, exam, navigate, startedAt]);
+  }, [answers, exam, navigate, startedAt]);
 
   useEffect(() => {
     if (phase !== "active" || secondsRemaining <= 0) return;
