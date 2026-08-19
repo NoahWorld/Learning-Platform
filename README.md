@@ -69,6 +69,33 @@ npm run import:data -- data/hr-600-master-collection.json
 
 该数据集保留附件中的原题顺序、选项、参考答案和解析。答题接口不会提前返回答案；交卷后，成绩详情按第 1—154 题的顺序统一展示答案与解析。后续补齐其余题目时应创建新版本的试卷 ID，避免改写已有考试记录。
 
+### 2026 人力资源电子资料包
+
+`scripts/build-electronic-study-pack.py` 可把“电子资料包”目录中的 11 份指定 PDF 整理为 11 条学习资料、11 个 PDF 附件和 3 套在线试卷，共 499 道题：
+
+- 历年真题 100 题
+- 知识点配题 199 题
+- 经典母题 200 题
+
+先安装内容构建工具，再从原始资料重新生成：
+
+```bash
+python3 -m pip install -r scripts/requirements-content.txt
+python3 scripts/build-electronic-study-pack.py \
+  --source-dir '/你的文件路径/电子资料包' \
+  --bundle-dir imports/electronic-study-pack-2026 \
+  --questions-output data/hr-electronic-study-pack-questions-2026.json
+```
+
+`data/hr-electronic-study-pack-questions-2026.json` 是纳入版本控制的在线题库。包含原始 PDF 的完整导入包位于 `imports/`，该目录不提交 Git；导入生产环境时使用：
+
+```bash
+docker compose exec app npm run import:data -- \
+  /app/imports/electronic-study-pack-2026/content.json
+```
+
+生成器会严格核对文件名、题量、选项和答案并在异常时退出。其中历年真题第 85—88 题的原 PDF 缺少转移矩阵图，案例材料只补入从原文解析可逐项核对的数字摘要；经典母题第 34、74 题原文没有文字解析，平台会明确显示“原始资料未提供文字解析”，不生成虚构内容。
+
 图片和附件由 MinIO 保存，SQLite 只保存文件元数据。需要导入附件时，在 JSON 顶层加入：
 
 ```json

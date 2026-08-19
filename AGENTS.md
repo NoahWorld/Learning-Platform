@@ -19,6 +19,7 @@
 - 测试：`npm test`
 - 完整校验：`npm run check`
 - 导入内容：`npm run import:data -- data/content.example.json`
+- 重建 2026 电子资料包：`python3 scripts/build-electronic-study-pack.py --source-dir '<电子资料包目录>' --bundle-dir imports/electronic-study-pack-2026 --questions-output data/hr-electronic-study-pack-questions-2026.json`
 - 创建或重置用户：`npm run user:upsert -- --username <手机号> --display-name <昵称>`
 - 迁移旧设备成绩：在创建用户命令后追加 `--adopt-device <旧设备 ID>`；只能接管尚未归属账号的旧记录。
 
@@ -49,3 +50,5 @@
 - 部署后必须检查容器健康状态、`/api/health`、`/study`、`/study` 下的前端深层路由、根地址和旧链接跳转，以及容器日志。
 - 部署数据库迁移前必须创建 SQLite 备份；迁移后需核对用户数量、账号成绩数量和未归属旧记录数量。
 - “人力600母题”当前附件实际只有 154 题，权威导入文件为 `data/hr-600-master-collection.json`，试卷 ID 为 `hr-600-master-collection-v1`；不得用虚构题目补足到 600。答案与解析仅在交卷后的成绩详情中展示。
+- “2026 人力资源电子资料包”由 `scripts/build-electronic-study-pack.py` 从 11 份指定 PDF 生成；纳入版本控制的在线题库是 `data/hr-electronic-study-pack-questions-2026.json`，固定包含 100、199、200 题三套试卷，共 499 题。带 11 份原始 PDF 的生产导入包放在 `imports/electronic-study-pack-2026/`，`imports/` 不提交 Git。
+- 电子资料包的源异常必须保持可追溯：历年真题第 85—88 题原 PDF 缺少转移矩阵图，只允许使用从同份资料解析可核对的数字摘要；经典母题第 34、74 题没有文字解析，第 64 题的解析缺少“参考解析”标记。不得静默丢题、伪造解析或补造缺失图表。
