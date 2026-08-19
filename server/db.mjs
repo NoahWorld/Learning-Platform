@@ -2,7 +2,7 @@ import Database from "better-sqlite3";
 import { mkdirSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 
-const CURRENT_SCHEMA_VERSION = 3;
+const CURRENT_SCHEMA_VERSION = 4;
 
 export function openDatabase(databasePath = "./data/study-workbench.sqlite") {
   const resolvedPath = databasePath === ":memory:" ? databasePath : resolve(databasePath);
@@ -53,6 +53,11 @@ function migrate(db) {
           description TEXT NOT NULL DEFAULT '',
           duration_minutes INTEGER NOT NULL CHECK (duration_minutes > 0),
           passing_score INTEGER NOT NULL DEFAULT 60 CHECK (passing_score BETWEEN 0 AND 100),
+          series_id TEXT NOT NULL DEFAULT '',
+          series_title TEXT NOT NULL DEFAULT '',
+          series_description TEXT NOT NULL DEFAULT '',
+          series_order INTEGER NOT NULL DEFAULT 999 CHECK (series_order >= 0),
+          paper_order INTEGER NOT NULL DEFAULT 1 CHECK (paper_order > 0),
           status TEXT NOT NULL DEFAULT 'published' CHECK (status IN ('draft', 'published')),
           created_at TEXT NOT NULL,
           updated_at TEXT NOT NULL
@@ -141,6 +146,9 @@ function migrate(db) {
         CREATE INDEX idx_exams_status_updated_at
           ON exams(status, updated_at DESC);
 
+        CREATE INDEX idx_exams_status_series_order
+          ON exams(status, series_order, paper_order);
+
         CREATE INDEX idx_questions_exam_position
           ON questions(exam_id, position);
 
@@ -210,6 +218,29 @@ function migrate(db) {
 
         CREATE INDEX idx_sessions_user_expires
           ON sessions(user_id, expires_at DESC);
+      `);
+      db.pragma("user_version = 3");
+      db.pragma("optimize");
+    })();
+    version = 3;
+  }
+
+  if (version === 3) {
+    db.transaction(() => {
+      db.exec(`
+        ALTER TABLE exams
+          ADD COLUMN series_id TEXT NOT NULL DEFAULT '';
+        ALTER TABLE exams
+          ADD COLUMN series_title TEXT NOT NULL DEFAULT '';
+        ALTER TABLE exams
+          ADD COLUMN series_description TEXT NOT NULL DEFAULT '';
+        ALTER TABLE exams
+          ADD COLUMN series_order INTEGER NOT NULL DEFAULT 999 CHECK (series_order >= 0);
+        ALTER TABLE exams
+          ADD COLUMN paper_order INTEGER NOT NULL DEFAULT 1 CHECK (paper_order > 0);
+
+        CREATE INDEX idx_exams_status_series_order
+          ON exams(status, series_order, paper_order);
       `);
       db.pragma(`user_version = ${CURRENT_SCHEMA_VERSION}`);
       db.pragma("optimize");

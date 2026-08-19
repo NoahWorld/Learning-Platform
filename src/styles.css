@@ -1066,18 +1066,13 @@ img {
   font-weight: 850;
 }
 
-.exam-list {
+.exam-series-list {
   display: grid;
-  gap: 17px;
+  gap: 20px;
 }
 
-.exam-card {
-  display: grid;
-  grid-template-columns: 92px minmax(0, 1fr) auto;
-  align-items: center;
-  gap: 24px;
-  min-height: 190px;
-  padding: 24px;
+.exam-series {
+  overflow: hidden;
   border: var(--border);
   box-shadow: 5px 5px 0 var(--ink);
 }
@@ -1086,40 +1081,165 @@ img {
 .exam-tone-2 { background: #9ddfff; }
 .exam-tone-3 { background: #ffa4c5; }
 
-.exam-index {
+.exam-series-header {
+  display: grid;
+  grid-template-columns: 88px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 22px;
+  min-height: 190px;
+  padding: 24px;
+}
+
+.exam-series-index {
   font-family: Impact, Haettenschweiler, sans-serif;
   font-size: 64px;
   line-height: 1;
-  opacity: 0.28;
+  opacity: 0.25;
 }
 
-.exam-card-main h2 {
+.exam-series-copy h2 {
   margin: 8px 0 6px;
-  font-size: 25px;
+  font-size: 29px;
   font-weight: 950;
-  letter-spacing: -0.03em;
+  letter-spacing: -0.035em;
 }
 
-.exam-card-main > p {
+.exam-series-copy > p {
   margin: 0;
   color: #50596c;
   font-size: 13px;
   line-height: 1.6;
 }
 
-.exam-facts {
+.exam-series-facts {
   display: flex;
   flex-wrap: wrap;
   gap: 14px;
   margin-top: 17px;
 }
 
-.exam-facts span {
+.exam-series-facts span,
+.paper-card-copy > div span {
   display: inline-flex;
   align-items: center;
   gap: 5px;
   font-size: 12px;
   font-weight: 850;
+}
+
+.series-toggle {
+  display: inline-flex;
+  min-height: 50px;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 0 20px;
+  border: var(--border);
+  color: white;
+  background: var(--ink);
+  box-shadow: 4px 4px 0 rgb(20 32 59 / 28%);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.series-toggle svg {
+  transition: transform 180ms ease;
+}
+
+.series-toggle[aria-expanded="true"] svg {
+  transform: rotate(180deg);
+}
+
+.series-toggle:hover,
+.series-toggle:focus-visible {
+  transform: translate(-1px, -1px);
+  box-shadow: 5px 5px 0 rgb(20 32 59 / 28%);
+}
+
+.exam-paper-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  padding: 18px;
+  border-top: var(--border);
+  background: rgb(255 253 247 / 86%);
+}
+
+.exam-paper-card {
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 14px;
+  min-height: 150px;
+  padding: 17px;
+  border: 2px solid var(--ink);
+  background: #fffdf7;
+  box-shadow: 3px 3px 0 var(--ink);
+}
+
+.paper-number {
+  font-family: Impact, Haettenschweiler, sans-serif;
+  font-size: 38px;
+  line-height: 1;
+  opacity: 0.18;
+}
+
+.paper-card-copy > span {
+  color: #667087;
+  font-size: 10px;
+  font-weight: 950;
+  letter-spacing: 0.1em;
+}
+
+.paper-card-copy h3 {
+  margin: 5px 0;
+  font-size: 17px;
+  font-weight: 950;
+  line-height: 1.3;
+}
+
+.paper-card-copy > p {
+  display: -webkit-box;
+  margin: 0;
+  overflow: hidden;
+  color: #5d6575;
+  font-size: 11px;
+  line-height: 1.55;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.paper-card-copy > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 11px;
+}
+
+.paper-card-copy > div span {
+  font-size: 10px;
+}
+
+.paper-start-button {
+  display: inline-flex;
+  min-height: 40px;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 0 13px;
+  border: 2px solid var(--ink);
+  color: var(--ink);
+  background: var(--yellow);
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.paper-start-button:hover,
+.paper-start-button:focus-visible {
+  color: white;
+  background: var(--ink);
 }
 
 .score-summary {
@@ -2120,9 +2240,10 @@ img {
   .material-card { min-height: 350px; }
   .exam-manifesto { grid-template-columns: auto 1fr; }
   .exam-manifesto ul { grid-column: 1 / -1; }
-  .exam-card { grid-template-columns: 56px minmax(0, 1fr); gap: 12px; padding: 18px; }
-  .exam-index { font-size: 46px; }
-  .exam-card .comic-button { grid-column: 1 / -1; justify-self: stretch; }
+  .exam-series-header { grid-template-columns: 56px minmax(0, 1fr); gap: 12px; padding: 18px; }
+  .exam-series-index { font-size: 46px; }
+  .series-toggle { grid-column: 1 / -1; justify-self: stretch; }
+  .exam-paper-grid { grid-template-columns: 1fr; }
   .score-summary { grid-template-columns: 1fr; }
   .result-history { padding: 16px; }
   .result-row { grid-template-columns: 56px minmax(0, 1fr) 18px; gap: 12px; }
@@ -2211,9 +2332,13 @@ img {
   .exam-manifesto { display: block; }
   .manifesto-icon { margin-bottom: 13px; }
   .exam-manifesto ul { margin-top: 14px; }
-  .exam-card { grid-template-columns: 43px minmax(0, 1fr); }
-  .exam-index { font-size: 36px; }
-  .exam-card-main h2 { font-size: 21px; }
+  .exam-series-header { grid-template-columns: 43px minmax(0, 1fr); }
+  .exam-series-index { font-size: 36px; }
+  .exam-series-copy h2 { font-size: 24px; }
+  .exam-paper-grid { padding: 12px; }
+  .exam-paper-card { grid-template-columns: 36px minmax(0, 1fr); gap: 10px; padding: 14px; }
+  .paper-number { font-size: 30px; }
+  .paper-start-button { grid-column: 1 / -1; width: 100%; }
   .result-copy > div { gap: 8px; }
   .review-legend { display: none; }
   .mistake-banner > div { display: block; }

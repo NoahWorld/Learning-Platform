@@ -87,13 +87,19 @@ export function importContent(db, rawContent, uploadedAssets = []) {
     const upsertExam = db.prepare(`
       INSERT INTO exams (
         id, title, description, duration_minutes, passing_score,
+        series_id, series_title, series_description, series_order, paper_order,
         status, created_at, updated_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       ON CONFLICT(id) DO UPDATE SET
         title = excluded.title,
         description = excluded.description,
         duration_minutes = excluded.duration_minutes,
         passing_score = excluded.passing_score,
+        series_id = excluded.series_id,
+        series_title = excluded.series_title,
+        series_description = excluded.series_description,
+        series_order = excluded.series_order,
+        paper_order = excluded.paper_order,
         status = excluded.status,
         updated_at = excluded.updated_at
     `);
@@ -125,6 +131,11 @@ export function importContent(db, rawContent, uploadedAssets = []) {
         exam.description,
         exam.durationMinutes,
         exam.passingScore,
+        exam.seriesId,
+        exam.seriesTitle,
+        exam.seriesDescription,
+        exam.seriesOrder,
+        exam.paperOrder,
         exam.status,
         now,
         now,

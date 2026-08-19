@@ -85,6 +85,11 @@ const examSchema = z.object({
   description: z.string().max(2000).default(""),
   durationMinutes: z.number().int().positive().max(1440),
   passingScore: z.number().int().min(0).max(100).default(60),
+  seriesId: z.union([idSchema, z.literal("")]).default(""),
+  seriesTitle: z.string().max(200).default(""),
+  seriesDescription: z.string().max(1000).default(""),
+  seriesOrder: z.number().int().min(0).max(10000).default(999),
+  paperOrder: z.number().int().positive().max(10000).default(1),
   status: z.enum(["draft", "published"]).default("published"),
   questions: z.array(questionSchema).min(1).max(500),
 });

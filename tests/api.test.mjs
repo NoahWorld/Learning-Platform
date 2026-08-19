@@ -212,6 +212,8 @@ test("published materials and exams are readable without leaking answer keys", a
   const exam = examResponse.json();
   assert.equal(exam.questionCount, 2);
   assert.equal(exam.totalPoints, 3);
+  assert.equal(exam.seriesId, "");
+  assert.equal(exam.seriesOrder, 999);
   for (const question of exam.questions) {
     assert.equal(Object.hasOwn(question, "explanation"), false);
     for (const option of question.options) {
@@ -442,6 +444,24 @@ test("version 1 databases migrate case-question fields without losing rows", asy
 
   const legacyDb = new Database(databasePath);
   legacyDb.exec(`
+    CREATE TABLE exams (
+      id TEXT PRIMARY KEY,
+      title TEXT NOT NULL,
+      description TEXT NOT NULL DEFAULT '',
+      duration_minutes INTEGER NOT NULL,
+      passing_score INTEGER NOT NULL DEFAULT 60,
+      status TEXT NOT NULL DEFAULT 'published',
+      created_at TEXT NOT NULL,
+      updated_at TEXT NOT NULL
+    );
+    INSERT INTO exams (
+      id, title, description, duration_minutes, passing_score,
+      status, created_at, updated_at
+    ) VALUES (
+      'legacy-exam', '旧版试卷', '', 30, 60,
+      'published', '2026-01-01T00:00:00.000Z', '2026-01-01T00:00:00.000Z'
+    );
+
     CREATE TABLE questions (
       id TEXT PRIMARY KEY,
       exam_id TEXT NOT NULL,
@@ -479,7 +499,7 @@ test("version 1 databases migrate case-question fields without losing rows", asy
 
   const migratedDb = openDatabase(databasePath);
   context.after(() => migratedDb.close());
-  assert.equal(migratedDb.pragma("user_version", { simple: true }), 3);
+  assert.equal(migratedDb.pragma("user_version", { simple: true }), 4);
   assert.deepEqual(
     migratedDb.prepare("SELECT id, section, passage FROM questions WHERE id = ?").get("legacy-q"),
     { id: "legacy-q", section: "standard", passage: "" },
@@ -493,6 +513,12 @@ test("version 1 databases migrate case-question fields without losing rows", asy
   assert.equal(
     migratedDb.prepare("SELECT COUNT(*) AS count FROM users").get().count,
     0,
+  );
+  assert.deepEqual(
+    migratedDb
+      .prepare("SELECT series_id, series_order, paper_order FROM exams WHERE id = ?")
+      .get("legacy-exam"),
+    { series_id: "", series_order: 999, paper_order: 1 },
   );
 });
 

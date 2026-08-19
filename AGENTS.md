@@ -19,6 +19,8 @@
 - 测试：`npm test`
 - 完整校验：`npm run check`
 - 导入内容：`npm run import:data -- data/content.example.json`
+- 重建短卷系列：`npm run exams:build-short-series`
+- 确认短卷完整后隐藏原长卷：`npm run exams:archive-long`
 - 重建 2026 电子资料包：`python3 scripts/build-electronic-study-pack.py --source-dir '<电子资料包目录>' --bundle-dir imports/electronic-study-pack-2026 --questions-output data/hr-electronic-study-pack-questions-2026.json`
 - 创建或重置用户：`npm run user:upsert -- --username <手机号> --display-name <昵称>`
 - 迁移旧设备成绩：在创建用户命令后追加 `--adopt-device <旧设备 ID>`；只能接管尚未归属账号的旧记录。
@@ -30,6 +32,7 @@
 - 成绩和错题接口必须从当前有效会话取得 `user_id`，不得接受客户端传入用户名、用户 ID 或设备 ID 来决定数据归属。
 - 旧版本匿名成绩保留原 `device_id` 且默认不归属任何用户；只能通过精确设备 ID 的管理命令显式迁移，禁止批量猜测归属。
 - 考试详情接口不得泄露正确答案；仅提交后返回判题结果和解析。
+- 大题库以 `series_id` 分组展示；公开练习卷应控制在每套最多 30 题、25 分钟。原长卷只能改为 `draft` 隐藏，不得删除，以保留历史成绩和答题明细的外键关系。
 - 所有写接口必须校验输入，错误需返回明确上下文，不得静默吞掉。
 - 数据库变更必须更新 `server/db.mjs` 中的迁移及本文件。
 - 题目 `type` 决定作答方式（`single` / `multiple`），`section` 决定题面类别（`standard` / `case`）；案例题必须提供 `passage`。
@@ -51,4 +54,5 @@
 - 部署数据库迁移前必须创建 SQLite 备份；迁移后需核对用户数量、账号成绩数量和未归属旧记录数量。
 - “人力600母题”当前附件实际只有 154 题，权威导入文件为 `data/hr-600-master-collection.json`，试卷 ID 为 `hr-600-master-collection-v1`；不得用虚构题目补足到 600。答案与解析仅在交卷后的成绩详情中展示。
 - “2026 人力资源电子资料包”由 `scripts/build-electronic-study-pack.py` 从 11 份指定 PDF 生成；纳入版本控制的在线题库是 `data/hr-electronic-study-pack-questions-2026.json`，固定包含 100、199、200 题三套试卷，共 499 题。带 11 份原始 PDF 的生产导入包放在 `imports/electronic-study-pack-2026/`，`imports/` 不提交 Git。
+- `scripts/build-short-exam-series.mjs` 从上述 499 题和当前 154 道母题生成 `data/hr-short-exam-series-2026.json`：历年真题 4 套、知识点强化 7 套、经典母题 7 套、母题集锦 6 套，共 24 套、653 题；拆分时不漏题、不重复题，单套最多 30 题且限时 25 分钟。
 - 电子资料包的源异常必须保持可追溯：历年真题第 85—88 题原 PDF 缺少转移矩阵图，只允许使用从同份资料解析可核对的数字摘要；经典母题第 34、74 题没有文字解析，第 64 题的解析缺少“参考解析”标记。不得静默丢题、伪造解析或补造缺失图表。

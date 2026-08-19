@@ -50,6 +50,11 @@ export interface ExamSummary {
   description: string;
   durationMinutes: number;
   passingScore: number;
+  seriesId: string;
+  seriesTitle: string;
+  seriesDescription: string;
+  seriesOrder: number;
+  paperOrder: number;
   questionCount: number;
   totalPoints: number;
   updatedAt: string;

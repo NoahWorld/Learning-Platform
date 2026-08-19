@@ -367,13 +367,15 @@ function registerApiRoutes(app, db, storage) {
     const exams = db
       .prepare(
         `SELECT e.id, e.title, e.description, e.duration_minutes,
-                e.passing_score, e.updated_at, COUNT(q.id) AS question_count,
+                e.passing_score, e.series_id, e.series_title,
+                e.series_description, e.series_order, e.paper_order,
+                e.updated_at, COUNT(q.id) AS question_count,
                 COALESCE(SUM(q.points), 0) AS total_points
          FROM exams e
          LEFT JOIN questions q ON q.exam_id = e.id
          WHERE e.status = 'published'
          GROUP BY e.id
-         ORDER BY e.updated_at DESC, e.title ASC`,
+         ORDER BY e.series_order ASC, e.paper_order ASC, e.updated_at DESC, e.title ASC`,
       )
       .all()
       .map(mapExamSummary);
@@ -589,7 +591,9 @@ function registerApiRoutes(app, db, storage) {
 function getExam(db, examId, includeAnswers) {
   const exam = db
     .prepare(
-      `SELECT id, title, description, duration_minutes, passing_score, updated_at
+      `SELECT id, title, description, duration_minutes, passing_score,
+              series_id, series_title, series_description, series_order,
+              paper_order, updated_at
        FROM exams
        WHERE id = ? AND status = 'published'`,
     )
@@ -733,6 +737,11 @@ function mapExamSummary(row) {
     description: row.description,
     durationMinutes: row.duration_minutes,
     passingScore: row.passing_score,
+    seriesId: row.series_id,
+    seriesTitle: row.series_title,
+    seriesDescription: row.series_description,
+    seriesOrder: row.series_order,
+    paperOrder: row.paper_order,
     questionCount: row.question_count,
     totalPoints: row.total_points,
     updatedAt: row.updated_at,
