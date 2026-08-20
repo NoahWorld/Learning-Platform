@@ -20,6 +20,22 @@ const hrMasterCollectionFixture = JSON.parse(
 );
 const testUsername = "13000000001";
 const testPassword = "TestPass1!";
+let testCaptchaSequence = 0;
+
+function createTestCaptchaChallenge(nowMs = Date.now()) {
+  testCaptchaSequence += 1;
+  const suffix = String(testCaptchaSequence);
+  return {
+    id: `test-captcha-${suffix}`,
+    prompt: "请选择「星星」",
+    options: [
+      { id: `test-wrong-${suffix}`, imageData: "data:image/svg+xml;base64,d3Jvbmc=" },
+      { id: `test-correct-${suffix}`, imageData: "data:image/svg+xml;base64,Y29ycmVjdA==" },
+    ],
+    correctOptionId: `test-correct-${suffix}`,
+    expiresAt: nowMs + 3 * 60 * 1000,
+  };
+}
 
 async function provisionUser(db, {
   username = testUsername,
@@ -36,13 +52,32 @@ async function provisionUser(db, {
 }
 
 async function loginAs(app, username = testUsername, password = testPassword) {
+  const captcha = await issueCaptcha(app);
   const response = await app.inject({
     method: "POST",
     url: "/api/auth/login",
-    payload: { username, password },
+    payload: {
+      username,
+      password,
+      captchaId: captcha.id,
+      captchaOptionId: captcha.correctOptionId,
+    },
   });
   assert.equal(response.statusCode, 200, response.body);
   return response.headers["set-cookie"].split(";")[0];
+}
+
+async function issueCaptcha(app) {
+  const response = await app.inject({ method: "GET", url: "/api/auth/captcha" });
+  assert.equal(response.statusCode, 200, response.body);
+  assert.equal(response.headers["cache-control"], "no-store");
+  const captcha = response.json();
+  return {
+    ...captcha,
+    correctOptionId: captcha.options.find((option) => option.id.startsWith("test-correct-"))
+      ?.id,
+    wrongOptionId: captcha.options.find((option) => option.id.startsWith("test-wrong-"))?.id,
+  };
 }
 
 function authenticated(cookie) {
@@ -62,6 +97,7 @@ async function createTestApp() {
     logger: false,
     serveStatic: false,
     storage: null,
+    captchaFactory: createTestCaptchaChallenge,
   });
   const cookie = await loginAs(app);
 
@@ -133,7 +169,7 @@ test("web pages are mounted under /study and legacy links redirect", async (cont
   assert.equal(unknownApi.json().error, "接口不存在");
 });
 
-test("pre-provisioned phone accounts can log in and registration stays closed", async (context) => {
+test("pre-provisioned usernames require a one-time image challenge and registration stays closed", async (context) => {
   const testApp = await createTestApp();
   context.after(() => testApp.cleanup());
 
@@ -150,13 +186,73 @@ test("pre-provisioned phone accounts can log in and registration stays closed", 
   });
   assert.equal(unauthenticatedDashboard.statusCode, 401);
 
-  const wrongPassword = await testApp.app.inject({
+  const missingCaptcha = await testApp.app.inject({
     method: "POST",
     url: "/api/auth/login",
     payload: { username: testUsername, password: "wrong-password" },
   });
+  assert.equal(missingCaptcha.statusCode, 400);
+
+  const incorrectCaptcha = await issueCaptcha(testApp.app);
+  const wrongSelection = await testApp.app.inject({
+    method: "POST",
+    url: "/api/auth/login",
+    payload: {
+      username: testUsername,
+      password: testPassword,
+      captchaId: incorrectCaptcha.id,
+      captchaOptionId: incorrectCaptcha.wrongOptionId,
+    },
+  });
+  assert.equal(wrongSelection.statusCode, 400);
+  assert.equal(
+    wrongSelection.json().error,
+    "图片选择码已失效或选择不正确，请重新选择",
+  );
+
+  const reusedSelection = await testApp.app.inject({
+    method: "POST",
+    url: "/api/auth/login",
+    payload: {
+      username: testUsername,
+      password: testPassword,
+      captchaId: incorrectCaptcha.id,
+      captchaOptionId: incorrectCaptcha.correctOptionId,
+    },
+  });
+  assert.equal(reusedSelection.statusCode, 400, "a captcha must be single-use");
+
+  const wrongPasswordCaptcha = await issueCaptcha(testApp.app);
+  const wrongPassword = await testApp.app.inject({
+    method: "POST",
+    url: "/api/auth/login",
+    payload: {
+      username: testUsername,
+      password: "wrong-password",
+      captchaId: wrongPasswordCaptcha.id,
+      captchaOptionId: wrongPasswordCaptcha.correctOptionId,
+    },
+  });
   assert.equal(wrongPassword.statusCode, 401);
   assert.equal(wrongPassword.json().error, "用户名或密码错误");
+
+  await provisionUser(testApp.app.db, {
+    username: "study-user",
+    password: "AnotherPass1!",
+    displayName: "普通用户名",
+  });
+  const normalizedUsernameCookie = await loginAs(
+    testApp.app,
+    " study - user ",
+    "AnotherPass1!",
+  );
+  const normalizedUsernameMe = await testApp.app.inject({
+    method: "GET",
+    url: "/api/auth/me",
+    headers: authenticated(normalizedUsernameCookie),
+  });
+  assert.equal(normalizedUsernameMe.statusCode, 200);
+  assert.equal(normalizedUsernameMe.json().user.username, "study-user");
 
   const me = await testApp.app.inject({
     method: "GET",
@@ -182,6 +278,41 @@ test("pre-provisioned phone accounts can log in and registration stays closed", 
     headers: authenticated(testApp.cookie),
   });
   assert.equal(expiredSession.statusCode, 401);
+});
+
+test("repeated password failures are rate limited after five attempts", async (context) => {
+  const testApp = await createTestApp();
+  context.after(() => testApp.cleanup());
+
+  for (let attempt = 1; attempt <= 5; attempt += 1) {
+    const captcha = await issueCaptcha(testApp.app);
+    const response = await testApp.app.inject({
+      method: "POST",
+      url: "/api/auth/login",
+      payload: {
+        username: testUsername,
+        password: "wrong-password",
+        captchaId: captcha.id,
+        captchaOptionId: captcha.correctOptionId,
+      },
+    });
+    assert.equal(response.statusCode, 401, `attempt ${attempt} should reject the password`);
+  }
+
+  const blockedCaptcha = await issueCaptcha(testApp.app);
+  const blocked = await testApp.app.inject({
+    method: "POST",
+    url: "/api/auth/login",
+    payload: {
+      username: testUsername,
+      password: testPassword,
+      captchaId: blockedCaptcha.id,
+      captchaOptionId: blockedCaptcha.correctOptionId,
+    },
+  });
+  assert.equal(blocked.statusCode, 429);
+  assert.match(blocked.json().error, /登录尝试过多/);
+  assert.ok(Number(blocked.headers["retry-after"]) > 0);
 });
 
 test("published materials and exams are readable without leaking answer keys", async (context) => {
@@ -237,6 +368,7 @@ test("HR master collection imports all source questions and reveals answers only
     logger: false,
     serveStatic: false,
     storage: null,
+    captchaFactory: createTestCaptchaChallenge,
   });
   const cookie = await loginAs(app);
   context.after(async () => {

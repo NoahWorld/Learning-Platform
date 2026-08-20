@@ -1,16 +1,18 @@
 import { openDatabase } from "./db.mjs";
 import { hashPassword } from "./auth.mjs";
+import { randomUUID } from "node:crypto";
 
 const args = parseArgs(process.argv.slice(2));
 
 if (args.command !== "upsert") {
   throw new Error(
-    "Usage: node server/manage-user.mjs upsert --username <phone> --display-name <name> [--adopt-device <legacy-device-id>]",
+    "Usage: node server/manage-user.mjs upsert --username <name> --display-name <name> [--adopt-device <legacy-device-id>]",
   );
 }
 
-if (!/^1[3-9]\d{9}$/.test(args.username ?? "")) {
-  throw new Error("--username must be a valid mainland China mobile number");
+const username = (args.username ?? "").replace(/\s/g, "");
+if (!username || username.length > 64) {
+  throw new Error("--username is required and must not exceed 64 characters after spaces are removed");
 }
 
 if (!args.displayName || args.displayName.length > 40) {
@@ -28,8 +30,8 @@ const db = openDatabase(process.env.DATABASE_PATH ?? "./data/study-workbench.sql
 try {
   const result = db.transaction(() => {
     const now = new Date().toISOString();
-    const existing = db.prepare("SELECT id FROM users WHERE username = ?").get(args.username);
-    const userId = existing?.id ?? args.username;
+    const existing = db.prepare("SELECT id FROM users WHERE username = ?").get(username);
+    const userId = existing?.id ?? randomUUID();
 
     if (existing) {
       db.prepare(
@@ -45,7 +47,7 @@ try {
          ) VALUES (?, ?, ?, ?, ?, ?, ?)`,
       ).run(
         userId,
-        args.username,
+        username,
         args.displayName,
         passwordRecord.hash,
         passwordRecord.salt,
@@ -68,7 +70,7 @@ try {
   })();
 
   console.log(
-    `User ${result.action}: ${args.username}; adopted legacy attempts: ${result.adoptedAttempts}`,
+    `User ${result.action}: ${username}; adopted legacy attempts: ${result.adoptedAttempts}`,
   );
 } finally {
   db.close();

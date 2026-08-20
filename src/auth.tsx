@@ -7,7 +7,12 @@ interface AuthContextValue {
   user: User | null;
   loading: boolean;
   error: string | null;
-  login: (username: string, password: string) => Promise<void>;
+  login: (
+    username: string,
+    password: string,
+    captchaId: string,
+    captchaOptionId: string,
+  ) => Promise<void>;
   logout: () => Promise<void>;
 }
 
@@ -34,8 +39,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return () => controller.abort();
   }, []);
 
-  const login = useCallback(async (username: string, password: string) => {
-    const response = await apiPost<{ user: User }>("/api/auth/login", { username, password });
+  const login = useCallback(async (
+    username: string,
+    password: string,
+    captchaId: string,
+    captchaOptionId: string,
+  ) => {
+    const response = await apiPost<{ user: User }>("/api/auth/login", {
+      username,
+      password,
+      captchaId,
+      captchaOptionId,
+    });
     setUser(response.user);
   }, []);
 

@@ -1,7 +1,23 @@
-import { ArrowRight, BookOpenCheck, LockKeyhole, Smartphone, Sparkles } from "lucide-react";
-import { type FormEvent, useEffect, useState } from "react";
+import {
+  ArrowRight,
+  BookOpenCheck,
+  LockKeyhole,
+  RefreshCw,
+  ShieldCheck,
+  Sparkles,
+  UserRound,
+} from "lucide-react";
+import { type FormEvent, useCallback, useEffect, useState } from "react";
 import { Navigate, useLocation, useNavigate } from "react-router-dom";
+import { apiGet } from "../api";
 import { useAuth } from "../auth";
+
+interface CaptchaChallenge {
+  id: string;
+  prompt: string;
+  options: Array<{ id: string; imageData: string }>;
+  expiresInSeconds: number;
+}
 
 export function LoginPage() {
   const { user, loading, login } = useAuth();
@@ -11,19 +27,46 @@ export function LoginPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [captcha, setCaptcha] = useState<CaptchaChallenge | null>(null);
+  const [captchaOptionId, setCaptchaOptionId] = useState("");
+  const [captchaLoading, setCaptchaLoading] = useState(false);
+  const [captchaError, setCaptchaError] = useState<string | null>(null);
+
+  const loadCaptcha = useCallback(async () => {
+    setCaptchaLoading(true);
+    setCaptcha(null);
+    setCaptchaOptionId("");
+    setCaptchaError(null);
+    try {
+      const challenge = await apiGet<CaptchaChallenge>("/api/auth/captcha");
+      setCaptcha(challenge);
+    } catch (challengeError) {
+      setCaptchaError(
+        challengeError instanceof Error ? challengeError.message : "图片选择码加载失败",
+      );
+    } finally {
+      setCaptchaLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
     document.body.dataset.mode = "comic";
-  }, []);
+    if (!loading && !user) void loadCaptcha();
+  }, [loadCaptcha, loading, user]);
 
   if (!loading && user) return <Navigate to="/" replace />;
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError(null);
+    if (!captcha || !captchaOptionId) {
+      setError("请先完成图片选择码");
+      return;
+    }
+
     setSubmitting(true);
     try {
-      await login(username, password);
+      await login(username, password, captcha.id, captchaOptionId);
       const destination =
         location.state && typeof location.state === "object" && "from" in location.state
           ? String(location.state.from)
@@ -31,6 +74,7 @@ export function LoginPage() {
       navigate(destination, { replace: true });
     } catch (loginError) {
       setError(loginError instanceof Error ? loginError.message : "登录失败，请稍后再试");
+      await loadCaptcha();
     } finally {
       setSubmitting(false);
     }
@@ -53,24 +97,22 @@ export function LoginPage() {
           <header>
             <span>WELCOME BACK</span>
             <h2>登录知行台</h2>
-            <p>使用管理员为你创建的手机号账号。</p>
+            <p>使用管理员为你创建的用户名和密码。</p>
           </header>
 
           <form onSubmit={handleSubmit}>
-            <label htmlFor="login-username">手机号</label>
+            <label htmlFor="login-username">用户名</label>
             <div className="login-field">
-              <Smartphone size={19} aria-hidden="true" />
+              <UserRound size={19} aria-hidden="true" />
               <input
                 id="login-username"
                 name="username"
-                type="tel"
-                inputMode="numeric"
+                type="text"
                 autoComplete="username"
-                pattern="1[3-9][0-9]{9}"
-                maxLength={11}
-                placeholder="请输入 11 位手机号"
+                maxLength={64}
+                placeholder="请输入用户名"
                 value={username}
-                onChange={(event) => setUsername(event.target.value.replace(/\D/g, ""))}
+                onChange={(event) => setUsername(event.target.value.replace(/\s/g, ""))}
                 required
               />
             </div>
@@ -91,9 +133,63 @@ export function LoginPage() {
               />
             </div>
 
+            <div className="login-captcha-heading">
+              <div>
+                <ShieldCheck size={17} aria-hidden="true" />
+                <span>图片选择码</span>
+              </div>
+              <button
+                type="button"
+                onClick={() => void loadCaptcha()}
+                disabled={captchaLoading || submitting}
+              >
+                <RefreshCw size={14} aria-hidden="true" /> 换一组
+              </button>
+            </div>
+
+            <div className="login-captcha" aria-busy={captchaLoading}>
+              {captchaLoading ? (
+                <p className="captcha-status">正在准备图片…</p>
+              ) : captcha ? (
+                <>
+                  <p id="captcha-prompt">{captcha.prompt}</p>
+                  <div className="captcha-options" role="group" aria-labelledby="captcha-prompt">
+                    {captcha.options.map((option, index) => (
+                      <button
+                        key={option.id}
+                        className={captchaOptionId === option.id ? "selected" : ""}
+                        type="button"
+                        aria-label={`图形选项 ${index + 1}`}
+                        aria-pressed={captchaOptionId === option.id}
+                        onClick={() => setCaptchaOptionId(option.id)}
+                        disabled={submitting}
+                      >
+                        <img
+                          src={option.imageData}
+                          alt=""
+                          draggable={false}
+                          width="66"
+                          height="66"
+                        />
+                      </button>
+                    ))}
+                  </div>
+                </>
+              ) : (
+                <button className="captcha-retry" type="button" onClick={() => void loadCaptcha()}>
+                  重新加载图片选择码
+                </button>
+              )}
+            </div>
+
+            {captchaError ? <div className="captcha-error" role="alert">{captchaError}</div> : null}
             {error ? <div className="login-error" role="alert">{error}</div> : null}
 
-            <button className="login-submit" type="submit" disabled={submitting || loading}>
+            <button
+              className="login-submit"
+              type="submit"
+              disabled={submitting || loading || captchaLoading || !captcha || !captchaOptionId}
+            >
               {submitting ? "正在登录…" : <>进入我的工作台 <ArrowRight size={18} /></>}
             </button>
           </form>

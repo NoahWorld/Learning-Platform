@@ -156,10 +156,17 @@ export const submissionSchema = z.object({
 
 const usernameSchema = z
   .string()
-  .trim()
-  .regex(/^1[3-9]\d{9}$/, "用户名必须是有效的大陆手机号");
+  .transform((value) => value.replace(/\s/g, ""))
+  .pipe(
+    z
+      .string()
+      .min(1, "请输入用户名")
+      .max(64, "用户名最多 64 个字符"),
+  );
 
 export const loginSchema = z.object({
   username: usernameSchema,
   password: z.string().min(1, "请输入密码").max(128, "密码最多 128 个字符"),
+  captchaId: z.string().min(1, "图片选择码不能为空").max(100),
+  captchaOptionId: z.string().min(1, "请选择正确的图片").max(100),
 });

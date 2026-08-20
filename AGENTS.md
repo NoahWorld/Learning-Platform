@@ -7,8 +7,8 @@
 - 服务端：Node.js、Fastify。
 - 数据库：SQLite，默认文件为 `data/study-workbench.sqlite`。
 - 对象存储：私有 MinIO；图片和资料附件存对象存储，SQLite 只保存元数据。
-- 身份策略：用户名为中国大陆手机号，全局唯一且同时作为新用户 ID；只允许管理员预置账号，暂不开放自助注册。
-- 认证策略：密码只保存 scrypt 哈希和随机盐；登录后使用数据库会话与 `HttpOnly`、`SameSite=Lax` Cookie，前端不得保存明文密码或会话令牌。
+- 身份策略：用户名为不超过 64 个字符的全局唯一标识，登录和管理员建号时统一移除全部空白字符，不做手机号格式校验；历史手机号账号及其用户 ID 保持不变，新账号使用独立随机 UUID 作为用户 ID。只允许管理员预置账号，暂不开放自助注册。
+- 认证策略：密码只保存 scrypt 哈希和随机盐；登录必须通过 3 分钟内有效、只能使用一次且绑定请求 IP 的简单图片选择码。用户名与 IP 组合连续 5 次密码错误或同一 IP 连续 20 次密码错误后锁定 15 分钟；同一 IP 每 10 分钟最多获取 30 组图片选择码。登录后使用数据库会话与 `HttpOnly`、`SameSite=Lax` Cookie，前端不得保存明文密码或会话令牌。
 - 生产部署：阿里云 Ubuntu，Docker Engine + Compose；应用只公开宿主机 80 端口，MinIO 仅在 Compose 私有网络中提供服务。
 - 公网页面统一挂载在 `/study`；根地址跳转到 `/study`，旧版资料、考试、错题和成绩链接跳转到对应的 `/study/...` 地址；API 与静态资源仍分别使用 `/api` 和 `/assets`。
 
@@ -22,7 +22,7 @@
 - 重建短卷系列：`npm run exams:build-short-series`
 - 确认短卷完整后隐藏原长卷：`npm run exams:archive-long`
 - 重建 2026 电子资料包：`python3 scripts/build-electronic-study-pack.py --source-dir '<电子资料包目录>' --bundle-dir imports/electronic-study-pack-2026 --questions-output data/hr-electronic-study-pack-questions-2026.json`
-- 创建或重置用户：`npm run user:upsert -- --username <手机号> --display-name <昵称>`
+- 创建或重置用户：`npm run user:upsert -- --username <用户名> --display-name <昵称>`
 - 迁移旧设备成绩：在创建用户命令后追加 `--adopt-device <旧设备 ID>`；只能接管尚未归属账号的旧记录。
 
 ## 数据与接口约束
@@ -34,6 +34,7 @@
 - 考试详情接口不得泄露正确答案；仅提交后返回判题结果和解析。
 - 大题库以 `series_id` 分组展示；公开练习卷应控制在每套最多 30 题、25 分钟。原长卷只能改为 `draft` 隐藏，不得删除，以保留历史成绩和答题明细的外键关系。
 - 所有写接口必须校验输入，错误需返回明确上下文，不得静默吞掉。
+- 图片选择码只向客户端返回随机选项 ID 与图像，正确答案只保存在服务端内存中；每次登录尝试后立即作废，不得复用。
 - 数据库变更必须更新 `server/db.mjs` 中的迁移及本文件。
 - 题目 `type` 决定作答方式（`single` / `multiple`），`section` 决定题面类别（`standard` / `case`）；案例题必须提供 `passage`。
 - 多选题全选正确得题目满分；未错选但少选时，每个已选正确选项得 0.5 分；只要错选，该题得 0 分。案例多选题沿用同一规则。

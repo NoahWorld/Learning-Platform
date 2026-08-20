@@ -21,6 +21,7 @@ import {
 } from "./auth.mjs";
 import { openDatabase } from "./db.mjs";
 import { createStorage } from "./storage.mjs";
+import { createCaptchaChallenge } from "./captcha.mjs";
 
 const DEFAULT_STATIC_DIR = fileURLToPath(new URL("../dist", import.meta.url));
 const LEGACY_STUDY_PATH = /^\/(?:materials(?:\/.*)?|exams(?:\/.*)?|mistakes|results(?:\/.*)?)$/;
@@ -31,6 +32,7 @@ export async function createApp({
   serveStatic = true,
   staticDir = DEFAULT_STATIC_DIR,
   storage = createStorage(),
+  captchaFactory = createCaptchaChallenge,
 } = {}) {
   const app = Fastify({
     logger,
@@ -81,7 +83,7 @@ export async function createApp({
     strictTransportSecurity: false,
   });
 
-  registerApiRoutes(app, db, storage);
+  registerApiRoutes(app, db, storage, captchaFactory);
 
   if (serveStatic) {
     if (!existsSync(staticDir)) {
@@ -132,8 +134,14 @@ export async function createApp({
   return app;
 }
 
-function registerApiRoutes(app, db, storage) {
+function registerApiRoutes(app, db, storage, captchaFactory) {
   const loginFailures = new Map();
+  const ipLoginFailures = new Map();
+  const captchaChallenges = new Map();
+  const captchaIssues = new Map();
+  const loginFailureWindowMs = 15 * 60 * 1000;
+  const captchaIssueWindowMs = 10 * 60 * 1000;
+  const maxCaptchaIssuesPerWindow = 30;
 
   app.get("/api/health", async () => {
     const database = db.prepare("SELECT 1 AS ok").get();
@@ -144,14 +152,63 @@ function registerApiRoutes(app, db, storage) {
     };
   });
 
+  app.get("/api/auth/captcha", async (request, reply) => {
+    const nowMs = Date.now();
+    pruneExpiredState(nowMs);
+
+    const currentIssue = captchaIssues.get(request.ip);
+    const withinWindow =
+      currentIssue && nowMs - currentIssue.windowStartedAt < captchaIssueWindowMs;
+    const issueCount = withinWindow ? currentIssue.count : 0;
+    if (issueCount >= maxCaptchaIssuesPerWindow) {
+      const retryAfterSeconds = Math.ceil(
+        (currentIssue.windowStartedAt + captchaIssueWindowMs - nowMs) / 1000,
+      );
+      reply.header("Retry-After", Math.max(retryAfterSeconds, 1));
+      throw httpError(429, "图片选择码请求过于频繁，请稍后再试");
+    }
+
+    captchaIssues.set(request.ip, {
+      count: issueCount + 1,
+      windowStartedAt: withinWindow ? currentIssue.windowStartedAt : nowMs,
+    });
+
+    const challenge = captchaFactory(nowMs);
+    captchaChallenges.set(challenge.id, { ...challenge, ip: request.ip });
+    reply.header("Cache-Control", "no-store");
+    return {
+      id: challenge.id,
+      prompt: challenge.prompt,
+      options: challenge.options,
+      expiresInSeconds: Math.ceil((challenge.expiresAt - nowMs) / 1000),
+    };
+  });
+
   app.post("/api/auth/login", async (request, reply) => {
     const input = parseOrThrow(loginSchema, request.body);
-    const throttleKey = `${request.ip}:${input.username}`;
-    const currentFailure = loginFailures.get(throttleKey);
     const nowMs = Date.now();
-    if (currentFailure?.blockedUntil > nowMs) {
-      reply.header("Retry-After", Math.ceil((currentFailure.blockedUntil - nowMs) / 1000));
+    pruneExpiredState(nowMs);
+    const throttleKey = `${request.ip}:${input.username.toLocaleLowerCase("en-US")}`;
+    const currentFailure = loginFailures.get(throttleKey);
+    const currentIpFailure = ipLoginFailures.get(request.ip);
+    const blockedUntil = Math.max(
+      currentFailure?.blockedUntil ?? 0,
+      currentIpFailure?.blockedUntil ?? 0,
+    );
+    if (blockedUntil > nowMs) {
+      reply.header("Retry-After", Math.ceil((blockedUntil - nowMs) / 1000));
       throw httpError(429, "登录尝试过多，请稍后再试");
+    }
+
+    const challenge = captchaChallenges.get(input.captchaId);
+    if (challenge) captchaChallenges.delete(input.captchaId);
+    const captchaValid =
+      challenge &&
+      challenge.expiresAt > nowMs &&
+      challenge.ip === request.ip &&
+      challenge.correctOptionId === input.captchaOptionId;
+    if (!captchaValid) {
+      throw httpError(400, "图片选择码已失效或选择不正确，请重新选择");
     }
 
     const row = db
@@ -166,24 +223,45 @@ function registerApiRoutes(app, db, storage) {
       : (await verifyPassword(input.password, "00000000000000000000000000000000", "00".repeat(64)), false);
 
     if (!valid) {
-      const failureWindowMs = 15 * 60 * 1000;
-      const withinWindow = currentFailure && nowMs - currentFailure.windowStartedAt < failureWindowMs;
-      const failures = withinWindow ? currentFailure.failures + 1 : 1;
-      loginFailures.set(throttleKey, {
-        failures,
-        windowStartedAt: withinWindow ? currentFailure.windowStartedAt : nowMs,
-        blockedUntil: failures >= 5 ? nowMs + failureWindowMs : 0,
-      });
+      recordLoginFailure(loginFailures, throttleKey, currentFailure, 5, nowMs);
+      recordLoginFailure(ipLoginFailures, request.ip, currentIpFailure, 20, nowMs);
       throw httpError(401, "用户名或密码错误");
     }
 
     loginFailures.delete(throttleKey);
+    ipLoginFailures.delete(request.ip);
     db.prepare("DELETE FROM sessions WHERE expires_at <= ?").run(new Date().toISOString());
     const session = createSessionRecord(row.id);
     insertSession(db, session);
     setSessionCookie(reply, session.token, request);
     return { user: mapUser(row) };
   });
+
+  function recordLoginFailure(target, key, current, limit, nowMs) {
+    const withinWindow =
+      current && nowMs - current.windowStartedAt < loginFailureWindowMs;
+    const failures = withinWindow ? current.failures + 1 : 1;
+    target.set(key, {
+      failures,
+      windowStartedAt: withinWindow ? current.windowStartedAt : nowMs,
+      blockedUntil: failures >= limit ? nowMs + loginFailureWindowMs : 0,
+    });
+  }
+
+  function pruneExpiredState(nowMs) {
+    for (const [id, challenge] of captchaChallenges) {
+      if (challenge.expiresAt <= nowMs) captchaChallenges.delete(id);
+    }
+    for (const [key, failure] of loginFailures) {
+      if (nowMs - failure.windowStartedAt >= loginFailureWindowMs) loginFailures.delete(key);
+    }
+    for (const [key, failure] of ipLoginFailures) {
+      if (nowMs - failure.windowStartedAt >= loginFailureWindowMs) ipLoginFailures.delete(key);
+    }
+    for (const [ip, issue] of captchaIssues) {
+      if (nowMs - issue.windowStartedAt >= captchaIssueWindowMs) captchaIssues.delete(ip);
+    }
+  }
 
   app.get("/api/auth/me", async (request) => {
     const user = requireUser(db, request);
