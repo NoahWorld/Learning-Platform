@@ -84,7 +84,7 @@ function authenticated(cookie) {
   return { cookie };
 }
 
-async function createTestApp() {
+async function createTestApp({ materialsEnabled = false } = {}) {
   const directory = await mkdtemp(join(tmpdir(), "learning-workbench-test-"));
   const databasePath = join(directory, "test.sqlite");
   const db = openDatabase(databasePath);
@@ -98,6 +98,7 @@ async function createTestApp() {
     serveStatic: false,
     storage: null,
     captchaFactory: createTestCaptchaChallenge,
+    materialsEnabled,
   });
   const cookie = await loginAs(app);
 
@@ -159,6 +160,20 @@ test("web pages are mounted under /study and legacy links redirect", async (cont
     legacyDeepLink.headers.location,
     "/study/exams/sample-learning-check?mode=review",
   );
+
+  const hiddenMaterialDeepLink = await app.inject({
+    method: "GET",
+    url: "/study/materials/sample-learning-method?from=bookmark",
+  });
+  assert.equal(hiddenMaterialDeepLink.statusCode, 302);
+  assert.equal(hiddenMaterialDeepLink.headers.location, "/study?from=bookmark");
+
+  const hiddenLegacyMaterial = await app.inject({
+    method: "GET",
+    url: "/materials/sample-learning-method",
+  });
+  assert.equal(hiddenLegacyMaterial.statusCode, 302);
+  assert.equal(hiddenLegacyMaterial.headers.location, "/study");
 
   const unknownPage = await app.inject({ method: "GET", url: "/outside-study" });
   assert.equal(unknownPage.statusCode, 404);
@@ -315,25 +330,59 @@ test("repeated password failures are rate limited after five attempts", async (c
   assert.ok(Number(blocked.headers["retry-after"]) > 0);
 });
 
-test("published materials and exams are readable without leaking answer keys", async (context) => {
+test("a new login invalidates the same user's previous device session", async (context) => {
+  const testApp = await createTestApp();
+  context.after(() => testApp.cleanup());
+
+  const firstDeviceCookie = testApp.cookie;
+  const secondDeviceCookie = await loginAs(testApp.app);
+
+  const firstDevice = await testApp.app.inject({
+    method: "GET",
+    url: "/api/auth/me",
+    headers: authenticated(firstDeviceCookie),
+  });
+  assert.equal(firstDevice.statusCode, 401);
+
+  const secondDevice = await testApp.app.inject({
+    method: "GET",
+    url: "/api/auth/me",
+    headers: authenticated(secondDeviceCookie),
+  });
+  assert.equal(secondDevice.statusCode, 200);
+  assert.equal(
+    testApp.app.db.prepare("SELECT COUNT(*) AS count FROM sessions WHERE user_id = ?").get(testUsername)
+      .count,
+    1,
+  );
+});
+
+test("materials and direct assets stay blocked while exams remain available", async (context) => {
   const testApp = await createTestApp();
   context.after(() => testApp.cleanup());
 
   const health = await testApp.app.inject({ method: "GET", url: "/api/health" });
   assert.equal(health.statusCode, 200);
   assert.deepEqual(health.json().status, "ok");
+  assert.equal(health.json().capabilities.materials, "disabled");
 
   const materials = await testApp.app.inject({ method: "GET", url: "/api/materials" });
-  assert.equal(materials.statusCode, 200);
-  assert.equal(materials.json().materials.length, 1);
-  assert.equal(materials.json().categories[0].category, "学习方法");
+  assert.equal(materials.statusCode, 404);
+  assert.equal(materials.json().error, "学习资料模块暂未开放");
 
   const material = await testApp.app.inject({
     method: "GET",
     url: "/api/materials/sample-learning-method",
   });
-  assert.equal(material.statusCode, 200);
-  assert.match(material.json().content, /主动回忆/);
+  assert.equal(material.statusCode, 404);
+  assert.equal(material.json().error, "学习资料模块暂未开放");
+
+  const directAsset = await testApp.app.inject({
+    method: "GET",
+    url: "/api/assets/known-or-guessed-asset-id",
+  });
+  assert.equal(directAsset.statusCode, 404);
+  assert.equal(directAsset.json().error, "学习资料模块暂未开放");
 
   const examResponse = await testApp.app.inject({
     method: "GET",
@@ -351,6 +400,26 @@ test("published materials and exams are readable without leaking answer keys", a
       assert.equal(Object.hasOwn(option, "correct"), false);
     }
   }
+});
+
+test("materials can be re-enabled explicitly without reimporting their data", async (context) => {
+  const testApp = await createTestApp({ materialsEnabled: true });
+  context.after(() => testApp.cleanup());
+
+  const health = await testApp.app.inject({ method: "GET", url: "/api/health" });
+  assert.equal(health.json().capabilities.materials, "enabled");
+
+  const materials = await testApp.app.inject({ method: "GET", url: "/api/materials" });
+  assert.equal(materials.statusCode, 200);
+  assert.equal(materials.json().materials.length, 1);
+  assert.equal(materials.json().categories[0].category, "学习方法");
+
+  const material = await testApp.app.inject({
+    method: "GET",
+    url: "/api/materials/sample-learning-method",
+  });
+  assert.equal(material.statusCode, 200);
+  assert.match(material.json().content, /主动回忆/);
 });
 
 test("HR master collection imports all source questions and reveals answers only after submission", async (context) => {
@@ -631,7 +700,7 @@ test("version 1 databases migrate case-question fields without losing rows", asy
 
   const migratedDb = openDatabase(databasePath);
   context.after(() => migratedDb.close());
-  assert.equal(migratedDb.pragma("user_version", { simple: true }), 4);
+  assert.equal(migratedDb.pragma("user_version", { simple: true }), 5);
   assert.deepEqual(
     migratedDb.prepare("SELECT id, section, passage FROM questions WHERE id = ?").get("legacy-q"),
     { id: "legacy-q", section: "standard", passage: "" },
@@ -651,6 +720,57 @@ test("version 1 databases migrate case-question fields without losing rows", asy
       .prepare("SELECT series_id, series_order, paper_order FROM exams WHERE id = ?")
       .get("legacy-exam"),
     { series_id: "", series_order: 999, paper_order: 1 },
+  );
+});
+
+test("version 4 migration keeps only the newest session per user", async (context) => {
+  const directory = await mkdtemp(join(tmpdir(), "learning-workbench-session-migration-"));
+  const databasePath = join(directory, "version-4.sqlite");
+  let migratedDb;
+  context.after(async () => {
+    migratedDb?.close();
+    await rm(directory, { recursive: true, force: true });
+  });
+
+  const versionFourDb = openDatabase(databasePath);
+  versionFourDb.exec(`
+    DROP INDEX idx_sessions_one_per_user;
+    INSERT INTO users (
+      id, username, display_name, password_hash, password_salt, created_at, updated_at
+    ) VALUES (
+      'session-user', 'session-user', '会话测试', 'hash', 'salt',
+      '2026-01-01T00:00:00.000Z', '2026-01-01T00:00:00.000Z'
+    );
+    INSERT INTO sessions (id, user_id, token_hash, created_at, expires_at) VALUES
+      ('older-session', 'session-user', 'older-token',
+       '2026-01-01T00:00:00.000Z', '2026-02-01T00:00:00.000Z'),
+      ('newer-session', 'session-user', 'newer-token',
+       '2026-01-02T00:00:00.000Z', '2026-03-01T00:00:00.000Z');
+    PRAGMA user_version = 4;
+  `);
+  versionFourDb.close();
+
+  migratedDb = openDatabase(databasePath);
+  assert.equal(migratedDb.pragma("user_version", { simple: true }), 5);
+  assert.deepEqual(
+    migratedDb.prepare("SELECT id FROM sessions WHERE user_id = ?").all("session-user"),
+    [{ id: "newer-session" }],
+  );
+  assert.throws(
+    () =>
+      migratedDb
+        .prepare(
+          `INSERT INTO sessions (id, user_id, token_hash, created_at, expires_at)
+           VALUES (?, ?, ?, ?, ?)`,
+        )
+        .run(
+          "duplicate-session",
+          "session-user",
+          "duplicate-token",
+          "2026-01-03T00:00:00.000Z",
+          "2026-04-01T00:00:00.000Z",
+        ),
+    /UNIQUE constraint failed: sessions.user_id/,
   );
 });
 

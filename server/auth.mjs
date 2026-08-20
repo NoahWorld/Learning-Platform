@@ -87,11 +87,24 @@ export function deleteCurrentSession(db, request) {
   return db.prepare("DELETE FROM sessions WHERE token_hash = ?").run(hashSessionToken(token)).changes;
 }
 
-export function insertSession(db, session) {
-  db.prepare(
+export function replaceUserSession(db, session) {
+  const deleteSessions = db.prepare("DELETE FROM sessions WHERE user_id = ?");
+  const insertSession = db.prepare(
     `INSERT INTO sessions (id, user_id, token_hash, created_at, expires_at)
      VALUES (?, ?, ?, ?, ?)`,
-  ).run(session.id, session.userId, session.tokenHash, session.createdAt, session.expiresAt);
+  );
+
+  return db.transaction(() => {
+    const replacedSessionCount = deleteSessions.run(session.userId).changes;
+    insertSession.run(
+      session.id,
+      session.userId,
+      session.tokenHash,
+      session.createdAt,
+      session.expiresAt,
+    );
+    return replacedSessionCount;
+  })();
 }
 
 export function mapUser(row) {

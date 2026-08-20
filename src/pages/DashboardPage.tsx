@@ -12,15 +12,22 @@ import {
 import { Link } from "react-router-dom";
 import { apiGet } from "../api";
 import { ErrorState, LoadingState, ScoreSticker, formatDate } from "../components/PageBits";
+import { materialsEnabled } from "../features";
 import type { DashboardSummary } from "../types";
 import { useRemote } from "../useRemote";
 
-const learningLoop = [
-  { number: "01", title: "看资料", text: "把知识拆成小节", icon: BookOpen, color: "yellow" },
-  { number: "02", title: "做模拟", text: "用考试检验掌握", icon: ClipboardCheck, color: "pink" },
-  { number: "03", title: "翻错题", text: "找到真正的薄弱点", icon: RotateCcw, color: "blue" },
-  { number: "04", title: "看成长", text: "让每次进步有记录", icon: Trophy, color: "green" },
-];
+const learningLoop = materialsEnabled
+  ? [
+      { number: "01", title: "看资料", text: "把知识拆成小节", icon: BookOpen, color: "yellow" },
+      { number: "02", title: "做模拟", text: "用考试检验掌握", icon: ClipboardCheck, color: "pink" },
+      { number: "03", title: "翻错题", text: "找到真正的薄弱点", icon: RotateCcw, color: "blue" },
+      { number: "04", title: "看成长", text: "让每次进步有记录", icon: Trophy, color: "green" },
+    ]
+  : [
+      { number: "01", title: "做模拟", text: "用短卷检验掌握", icon: ClipboardCheck, color: "pink" },
+      { number: "02", title: "翻错题", text: "找到真正的薄弱点", icon: RotateCcw, color: "blue" },
+      { number: "03", title: "看成绩", text: "让每次进步有记录", icon: Trophy, color: "green" },
+    ];
 
 export function DashboardPage() {
   const { data, loading, error } = useRemote<DashboardSummary>(
@@ -32,29 +39,29 @@ export function DashboardPage() {
     <div className="dashboard-page">
       <section className="hero-comic">
         <div className="hero-copy">
-          <span className="hero-label"><Flame size={17} /> 今日学习工作台</span>
+          <span className="hero-label"><Flame size={17} /> 今日训练工作台</span>
           <h1>
             把零散知识，
             <span>练成稳定得分！</span>
           </h1>
-          <p>学习、模拟、复盘、再练习。一个页面接住你的完整学习闭环。</p>
+          <p>{materialsEnabled ? "学习、模拟、复盘、再练习。一个页面接住你的完整学习闭环。" : "模拟、复盘、再练习。一个页面接住你的完整备考闭环。"}</p>
           <div className="hero-actions">
-            <Link className="comic-button primary" to="/materials">
-              开始学习 <ArrowRight size={18} />
+            <Link className="comic-button primary" to={materialsEnabled ? "/materials" : "/exams"}>
+              {materialsEnabled ? "开始学习" : "开始模拟"} <ArrowRight size={18} />
             </Link>
-            <Link className="comic-button secondary" to="/exams">
-              来场模拟考
+            <Link className="comic-button secondary" to={materialsEnabled ? "/exams" : "/results"}>
+              {materialsEnabled ? "来场模拟考" : "查看成绩"}
             </Link>
           </div>
-          <div className="privacy-pill"><CheckCircle2 size={16} /> 账号同步，跨设备保留成绩</div>
+          <div className="privacy-pill"><CheckCircle2 size={16} /> 账号同步，更换设备成绩仍保留</div>
         </div>
 
         <div className="hero-art" aria-hidden="true">
           <div className="sun-burst" />
           <div className="comic-card card-a">
-            <span>LEARN</span>
-            <BookOpen size={48} />
-            <strong>知识 +1</strong>
+            <span>{materialsEnabled ? "LEARN" : "PRACTICE"}</span>
+            {materialsEnabled ? <BookOpen size={48} /> : <ClipboardCheck size={48} />}
+            <strong>{materialsEnabled ? "知识 +1" : "训练 +1"}</strong>
           </div>
           <div className="comic-card card-b">
             <span>TEST!</span>
@@ -81,9 +88,9 @@ export function DashboardPage() {
         {data ? (
           <div className="stat-strip">
             <article className="stat-card yellow">
-              <span>资料库</span>
-              <strong>{data.materialCount}</strong>
-              <small>篇可学资料</small>
+              <span>{materialsEnabled ? "资料库" : "模拟题库"}</span>
+              <strong>{materialsEnabled ? data.materialCount : data.examCount}</strong>
+              <small>{materialsEnabled ? "篇可学资料" : "套可用试卷"}</small>
             </article>
             <article className="stat-card pink">
               <span>已完成</span>
@@ -109,7 +116,7 @@ export function DashboardPage() {
           <div className="section-title-row compact-row">
             <div>
               <span className="mini-kicker">YOUR LEARNING LOOP</span>
-              <h2>四步形成学习闭环</h2>
+              <h2>{materialsEnabled ? "四步形成学习闭环" : "三步完成备考闭环"}</h2>
             </div>
           </div>
           <div className="loop-grid">

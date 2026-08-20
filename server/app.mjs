@@ -14,8 +14,8 @@ import {
   createSessionRecord,
   deleteCurrentSession,
   getAuthenticatedUser,
-  insertSession,
   mapUser,
+  replaceUserSession,
   setSessionCookie,
   verifyPassword,
 } from "./auth.mjs";
@@ -24,7 +24,9 @@ import { createStorage } from "./storage.mjs";
 import { createCaptchaChallenge } from "./captcha.mjs";
 
 const DEFAULT_STATIC_DIR = fileURLToPath(new URL("../dist", import.meta.url));
-const LEGACY_STUDY_PATH = /^\/(?:materials(?:\/.*)?|exams(?:\/.*)?|mistakes|results(?:\/.*)?)$/;
+const LEGACY_STUDY_PATH = /^\/(?:exams(?:\/.*)?|mistakes|results(?:\/.*)?)$/;
+const LEGACY_MATERIALS_PATH = /^\/materials(?:\/.*)?$/;
+const STUDY_MATERIALS_PATH = /^\/study\/materials(?:\/.*)?$/;
 
 export async function createApp({
   databasePath = process.env.DATABASE_PATH ?? "./data/study-workbench.sqlite",
@@ -33,6 +35,11 @@ export async function createApp({
   staticDir = DEFAULT_STATIC_DIR,
   storage = createStorage(),
   captchaFactory = createCaptchaChallenge,
+  materialsEnabled = parseBooleanEnvironment(
+    "MATERIALS_ENABLED",
+    process.env.MATERIALS_ENABLED,
+    false,
+  ),
 } = {}) {
   const app = Fastify({
     logger,
@@ -83,7 +90,7 @@ export async function createApp({
     strictTransportSecurity: false,
   });
 
-  registerApiRoutes(app, db, storage, captchaFactory);
+  registerApiRoutes(app, db, storage, captchaFactory, materialsEnabled);
 
   if (serveStatic) {
     if (!existsSync(staticDir)) {
@@ -118,6 +125,14 @@ export async function createApp({
         return reply.redirect(`/study${requestUrl.search}`);
       }
 
+      if (
+        !materialsEnabled &&
+        (LEGACY_MATERIALS_PATH.test(requestUrl.pathname) ||
+          STUDY_MATERIALS_PATH.test(requestUrl.pathname))
+      ) {
+        return reply.redirect(`/study${requestUrl.search}`);
+      }
+
       if (LEGACY_STUDY_PATH.test(requestUrl.pathname)) {
         return reply.redirect(`/study${requestUrl.pathname}${requestUrl.search}`);
       }
@@ -134,7 +149,7 @@ export async function createApp({
   return app;
 }
 
-function registerApiRoutes(app, db, storage, captchaFactory) {
+function registerApiRoutes(app, db, storage, captchaFactory, materialsEnabled) {
   const loginFailures = new Map();
   const ipLoginFailures = new Map();
   const captchaChallenges = new Map();
@@ -148,6 +163,9 @@ function registerApiRoutes(app, db, storage, captchaFactory) {
     return {
       status: database.ok === 1 ? "ok" : "degraded",
       storage: storage ? "configured" : "not_configured",
+      capabilities: {
+        materials: materialsEnabled ? "enabled" : "disabled",
+      },
       time: new Date().toISOString(),
     };
   });
@@ -232,7 +250,11 @@ function registerApiRoutes(app, db, storage, captchaFactory) {
     ipLoginFailures.delete(request.ip);
     db.prepare("DELETE FROM sessions WHERE expires_at <= ?").run(new Date().toISOString());
     const session = createSessionRecord(row.id);
-    insertSession(db, session);
+    const replacedSessionCount = replaceUserSession(db, session);
+    request.log.info(
+      { userId: row.id, replacedSessionCount },
+      "user session replaced after successful login",
+    );
     setSessionCookie(reply, session.token, request);
     return { user: mapUser(row) };
   });
@@ -277,9 +299,9 @@ function registerApiRoutes(app, db, storage, captchaFactory) {
 
   app.get("/api/dashboard", async (request) => {
     const user = requireUser(db, request);
-    const materialCount = db
-      .prepare("SELECT COUNT(*) AS count FROM materials WHERE status = 'published'")
-      .get().count;
+    const materialCount = materialsEnabled
+      ? db.prepare("SELECT COUNT(*) AS count FROM materials WHERE status = 'published'").get().count
+      : 0;
     const examCount = db
       .prepare("SELECT COUNT(*) AS count FROM exams WHERE status = 'published'")
       .get().count;
@@ -329,6 +351,7 @@ function registerApiRoutes(app, db, storage, captchaFactory) {
   });
 
   app.get("/api/materials", async (request) => {
+    requireMaterialsEnabled(materialsEnabled);
     const query = parseOrThrow(
       z.object({
         search: z.string().max(100).optional(),
@@ -376,6 +399,7 @@ function registerApiRoutes(app, db, storage, captchaFactory) {
   });
 
   app.get("/api/materials/:id", async (request) => {
+    requireMaterialsEnabled(materialsEnabled);
     const material = db
       .prepare(
         `SELECT id, title, summary, content, category, estimated_minutes, updated_at,
@@ -416,6 +440,7 @@ function registerApiRoutes(app, db, storage, captchaFactory) {
   });
 
   app.get("/api/assets/:id", async (request, reply) => {
+    requireMaterialsEnabled(materialsEnabled);
     const asset = db
       .prepare(
         `SELECT id, object_key, file_name, content_type, size_bytes
@@ -858,6 +883,21 @@ function requireUser(db, request) {
     throw httpError(401, "请先登录后继续");
   }
   return user;
+}
+
+function requireMaterialsEnabled(materialsEnabled) {
+  if (!materialsEnabled) {
+    throw httpError(404, "学习资料模块暂未开放");
+  }
+}
+
+function parseBooleanEnvironment(name, rawValue, fallback) {
+  if (rawValue === undefined || rawValue === "") return fallback;
+  if (rawValue === "true") return true;
+  if (rawValue === "false") return false;
+  throw new Error(
+    `${name} must be either "true" or "false", received ${JSON.stringify(rawValue)}`,
+  );
 }
 
 function httpError(statusCode, message) {

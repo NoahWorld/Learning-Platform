@@ -2,7 +2,7 @@ import Database from "better-sqlite3";
 import { mkdirSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 
-const CURRENT_SCHEMA_VERSION = 4;
+const CURRENT_SCHEMA_VERSION = 5;
 
 export function openDatabase(databasePath = "./data/study-workbench.sqlite") {
   const resolvedPath = databasePath === ":memory:" ? databasePath : resolve(databasePath);
@@ -164,6 +164,9 @@ function migrate(db) {
         CREATE INDEX idx_sessions_user_expires
           ON sessions(user_id, expires_at DESC);
 
+        CREATE UNIQUE INDEX idx_sessions_one_per_user
+          ON sessions(user_id);
+
         CREATE INDEX idx_attempt_answers_question_correct
           ON attempt_answers(question_id, is_correct);
       `);
@@ -241,6 +244,32 @@ function migrate(db) {
 
         CREATE INDEX idx_exams_status_series_order
           ON exams(status, series_order, paper_order);
+      `);
+      db.pragma("user_version = 4");
+      db.pragma("optimize");
+    })();
+    version = 4;
+  }
+
+  if (version === 4) {
+    db.transaction(() => {
+      db.exec(`
+        DELETE FROM sessions
+        WHERE id IN (
+          SELECT id
+          FROM (
+            SELECT id,
+                   ROW_NUMBER() OVER (
+                     PARTITION BY user_id
+                     ORDER BY expires_at DESC, created_at DESC, id DESC
+                   ) AS session_rank
+            FROM sessions
+          ) ranked_sessions
+          WHERE session_rank > 1
+        );
+
+        CREATE UNIQUE INDEX idx_sessions_one_per_user
+          ON sessions(user_id);
       `);
       db.pragma(`user_version = ${CURRENT_SCHEMA_VERSION}`);
       db.pragma("optimize");

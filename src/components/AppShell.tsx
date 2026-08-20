@@ -12,13 +12,16 @@ import {
 import { useEffect, useState } from "react";
 import { Link, NavLink, Outlet, useLocation, useMatch, useNavigate } from "react-router-dom";
 import { useAuth } from "../auth";
+import { materialsEnabled } from "../features";
 
 const navigation = [
   { to: "/", label: "工作台", icon: Home, end: true },
-  { to: "/materials", label: "学习", icon: BookOpen },
-  { to: "/exams", label: "模拟考", icon: ClipboardCheck },
-  { to: "/mistakes", label: "错题", icon: RotateCcw },
-  { to: "/results", label: "成绩", icon: Trophy },
+  ...(materialsEnabled
+    ? [{ to: "/materials", label: "学习", icon: BookOpen, end: false }]
+    : []),
+  { to: "/exams", label: "模拟考", icon: ClipboardCheck, end: false },
+  { to: "/mistakes", label: "错题", icon: RotateCcw, end: false },
+  { to: "/results", label: "成绩", icon: Trophy, end: false },
 ];
 
 export function AppShell() {
@@ -26,7 +29,8 @@ export function AppShell() {
   const location = useLocation();
   const navigate = useNavigate();
   const [logoutError, setLogoutError] = useState<string | null>(null);
-  const isReading = Boolean(useMatch("/materials/:materialId"));
+  const materialMatch = useMatch("/materials/:materialId");
+  const isReading = materialsEnabled && Boolean(materialMatch);
   const isExam = Boolean(useMatch("/exams/:examId"));
   const focusMode = isReading || isExam;
 

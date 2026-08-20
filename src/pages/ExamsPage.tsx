@@ -62,8 +62,8 @@ export function ExamsPage() {
         <EmptyState
           title="还没有可用试卷"
           description="录入题目并发布试卷后，就可以在这里开始第一次模拟考试。"
-          actionLabel="先去学习资料"
-          actionTo="/materials"
+          actionLabel="返回工作台"
+          actionTo="/"
         />
       ) : null}
 

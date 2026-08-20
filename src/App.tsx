@@ -1,6 +1,7 @@
 import { Route, Routes } from "react-router-dom";
 import { RequireAuth } from "./auth";
 import { AppShell } from "./components/AppShell";
+import { materialsEnabled } from "./features";
 import { DashboardPage } from "./pages/DashboardPage";
 import { ExamPage } from "./pages/ExamPage";
 import { ExamsPage } from "./pages/ExamsPage";
@@ -19,8 +20,10 @@ export default function App() {
       <Route element={<RequireAuth />}>
         <Route element={<AppShell />}>
           <Route index element={<DashboardPage />} />
-          <Route path="materials" element={<MaterialsPage />} />
-          <Route path="materials/:materialId" element={<MaterialDetailPage />} />
+          {materialsEnabled ? <Route path="materials" element={<MaterialsPage />} /> : null}
+          {materialsEnabled ? (
+            <Route path="materials/:materialId" element={<MaterialDetailPage />} />
+          ) : null}
           <Route path="exams" element={<ExamsPage />} />
           <Route path="exams/:examId" element={<ExamPage />} />
           <Route path="mistakes" element={<MistakesPage />} />

@@ -19,6 +19,8 @@ RUN npm ci
 COPY index.html tsconfig.json vite.config.ts ./
 COPY src ./src
 COPY public ./public
+ARG VITE_MATERIALS_ENABLED=false
+ENV VITE_MATERIALS_ENABLED=${VITE_MATERIALS_ENABLED}
 RUN npm run build \
     && test -s dist/og.png \
     && npm prune --omit=dev \
