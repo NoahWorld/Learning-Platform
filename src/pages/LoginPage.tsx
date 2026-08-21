@@ -1,6 +1,8 @@
 import {
   ArrowRight,
   BookOpenCheck,
+  Eye,
+  EyeOff,
   LockKeyhole,
   RefreshCw,
   ShieldCheck,
@@ -25,6 +27,7 @@ export function LoginPage() {
   const location = useLocation();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [passwordVisible, setPasswordVisible] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [captcha, setCaptcha] = useState<CaptchaChallenge | null>(null);
@@ -118,12 +121,12 @@ export function LoginPage() {
             </div>
 
             <label htmlFor="login-password">密码</label>
-            <div className="login-field">
+            <div className="login-field login-password-field">
               <LockKeyhole size={19} aria-hidden="true" />
               <input
                 id="login-password"
                 name="password"
-                type="password"
+                type={passwordVisible ? "text" : "password"}
                 autoComplete="current-password"
                 maxLength={128}
                 placeholder="请输入密码"
@@ -131,6 +134,20 @@ export function LoginPage() {
                 onChange={(event) => setPassword(event.target.value)}
                 required
               />
+              <button
+                className="password-visibility-toggle"
+                type="button"
+                aria-label={passwordVisible ? "隐藏密码" : "显示密码"}
+                aria-pressed={passwordVisible}
+                title={passwordVisible ? "隐藏密码" : "显示密码"}
+                onClick={() => setPasswordVisible((visible) => !visible)}
+              >
+                {passwordVisible ? (
+                  <EyeOff size={19} aria-hidden="true" />
+                ) : (
+                  <Eye size={19} aria-hidden="true" />
+                )}
+              </button>
             </div>
 
             <div className="login-captcha-heading">

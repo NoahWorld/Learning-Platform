@@ -1784,9 +1784,13 @@ img {
 .login-card form { display: grid; }
 .login-card label { margin: 0 0 8px; font-size: 13px; font-weight: 900; }
 .login-field { display: grid; min-height: 54px; grid-template-columns: 24px 1fr; align-items: center; gap: 9px; margin-bottom: 20px; padding: 0 15px; border: var(--border); background: white; box-shadow: 3px 3px 0 #dcd5c8; }
+.login-password-field { grid-template-columns: 24px minmax(0, 1fr) 42px; padding-right: 5px; }
 .login-field:focus-within { box-shadow: 4px 4px 0 var(--blue); }
 .login-field input { width: 100%; height: 48px; border: 0; outline: 0; color: var(--ink); background: transparent; }
 .login-field input::placeholder { color: #a4a8b0; }
+.password-visibility-toggle { display: grid; width: 42px; height: 42px; padding: 0; place-items: center; border: 0; border-radius: 8px; color: #556174; background: transparent; cursor: pointer; }
+.password-visibility-toggle:hover { color: var(--ink); background: #edf8ff; }
+.password-visibility-toggle:focus-visible { outline: 3px solid var(--blue); outline-offset: -2px; }
 .login-captcha-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 1px 0 9px; }
 .login-captcha-heading > div { display: inline-flex; align-items: center; gap: 7px; font-size: 13px; font-weight: 900; }
 .login-captcha-heading > button { display: inline-flex; align-items: center; gap: 4px; padding: 4px 0; border: 0; color: #486474; background: transparent; font-size: 12px; font-weight: 800; cursor: pointer; }
