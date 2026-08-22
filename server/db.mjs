@@ -2,7 +2,7 @@ import Database from "better-sqlite3";
 import { mkdirSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 
-const CURRENT_SCHEMA_VERSION = 5;
+const CURRENT_SCHEMA_VERSION = 6;
 
 export function openDatabase(databasePath = "./data/study-workbench.sqlite") {
   const resolvedPath = databasePath === ":memory:" ? databasePath : resolve(databasePath);
@@ -140,6 +140,15 @@ function migrate(db) {
           PRIMARY KEY (attempt_id, question_id)
         );
 
+        CREATE TABLE mistake_practice_attempts (
+          id TEXT PRIMARY KEY,
+          user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+          question_id TEXT NOT NULL REFERENCES questions(id) ON DELETE RESTRICT,
+          selected_option_ids TEXT NOT NULL,
+          is_correct INTEGER NOT NULL CHECK (is_correct IN (0, 1)),
+          submitted_at TEXT NOT NULL
+        );
+
         CREATE INDEX idx_materials_status_category
           ON materials(status, category);
 
@@ -169,6 +178,12 @@ function migrate(db) {
 
         CREATE INDEX idx_attempt_answers_question_correct
           ON attempt_answers(question_id, is_correct);
+
+        CREATE INDEX idx_mistake_practice_user_question_submitted
+          ON mistake_practice_attempts(user_id, question_id, submitted_at DESC);
+
+        CREATE INDEX idx_mistake_practice_user_correct
+          ON mistake_practice_attempts(user_id, is_correct);
       `);
       db.pragma(`user_version = ${CURRENT_SCHEMA_VERSION}`);
       db.pragma("optimize");
@@ -270,6 +285,30 @@ function migrate(db) {
 
         CREATE UNIQUE INDEX idx_sessions_one_per_user
           ON sessions(user_id);
+      `);
+      db.pragma("user_version = 5");
+      db.pragma("optimize");
+    })();
+    version = 5;
+  }
+
+  if (version === 5) {
+    db.transaction(() => {
+      db.exec(`
+        CREATE TABLE mistake_practice_attempts (
+          id TEXT PRIMARY KEY,
+          user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+          question_id TEXT NOT NULL REFERENCES questions(id) ON DELETE RESTRICT,
+          selected_option_ids TEXT NOT NULL,
+          is_correct INTEGER NOT NULL CHECK (is_correct IN (0, 1)),
+          submitted_at TEXT NOT NULL
+        );
+
+        CREATE INDEX idx_mistake_practice_user_question_submitted
+          ON mistake_practice_attempts(user_id, question_id, submitted_at DESC);
+
+        CREATE INDEX idx_mistake_practice_user_correct
+          ON mistake_practice_attempts(user_id, is_correct);
       `);
       db.pragma(`user_version = ${CURRENT_SCHEMA_VERSION}`);
       db.pragma("optimize");

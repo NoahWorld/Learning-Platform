@@ -125,5 +125,37 @@ export interface MistakeItem {
   correctCount: number;
   lastWrongAt: string;
   corrected: boolean;
+  practiceCount: number;
+  lastPracticedAt: string | null;
+  relearned: boolean;
   correctOptions: Array<Pick<ExamOption, "id" | "label" | "content">>;
+}
+
+export interface MistakePracticeQuestion {
+  questionId: string;
+  prompt: string;
+  type: "single" | "multiple";
+  section: "standard" | "case";
+  passage: string;
+  points: number;
+  examId: string;
+  examTitle: string;
+  wrongCount: number;
+  lastWrongAt: string;
+  practiceCount: number;
+  lastPracticedAt: string | null;
+  relearned: boolean;
+  options: ExamOption[];
+}
+
+export interface MistakePracticeResult {
+  id: string;
+  questionId: string;
+  selectedOptionIds: string[];
+  isCorrect: boolean;
+  submittedAt: string;
+  practiceCount: number;
+  relearned: boolean;
+  correctOptions: Array<Pick<ExamOption, "id" | "label" | "content">>;
+  explanation: string;
 }

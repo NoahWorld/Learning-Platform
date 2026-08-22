@@ -154,6 +154,10 @@ export const submissionSchema = z.object({
     .max(500),
 });
 
+export const mistakePracticeSubmissionSchema = z.object({
+  optionIds: z.array(idSchema).min(1, "请至少选择一个答案").max(12),
+});
+
 const usernameSchema = z
   .string()
   .transform((value) => value.replace(/\s/g, ""))

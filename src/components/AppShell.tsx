@@ -32,7 +32,8 @@ export function AppShell() {
   const materialMatch = useMatch("/materials/:materialId");
   const isReading = materialsEnabled && Boolean(materialMatch);
   const isExam = Boolean(useMatch("/exams/:examId"));
-  const focusMode = isReading || isExam;
+  const isMistakePractice = Boolean(useMatch("/mistakes/practice"));
+  const focusMode = isReading || isExam || isMistakePractice;
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "instant" });
@@ -59,9 +60,12 @@ export function AppShell() {
           </Link>
           <div className="focus-actions">
             <span className="focus-user">{user?.displayName}</span>
-            <Link className="focus-exit" to={isReading ? "/materials" : "/exams"}>
+            <Link
+              className="focus-exit"
+              to={isReading ? "/materials" : isMistakePractice ? "/mistakes" : "/exams"}
+            >
               <X size={17} aria-hidden="true" />
-              {isReading ? "退出阅读" : "退出考试"}
+              {isReading ? "退出阅读" : isMistakePractice ? "退出错题练习" : "退出考试"}
             </Link>
           </div>
         </header>

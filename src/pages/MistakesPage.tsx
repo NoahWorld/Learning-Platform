@@ -11,16 +11,16 @@ export function MistakesPage() {
     [],
   );
   const mistakes = data?.mistakes ?? [];
-  const correctedCount = mistakes.filter((mistake) => mistake.corrected).length;
+  const relearnedCount = mistakes.filter((mistake) => mistake.relearned).length;
 
   return (
     <div className="standard-page mistakes-page">
       <PageHeader
         eyebrow="MISTAKE PLAYBOOK"
         title="错题复盘"
-        description="错题不是失败记录，而是一张会自动更新的“下一步学习地图”。"
+        description="逐题重新作答，答对后标记为“已重学”；题目仍会保留，随时可以再练。"
         action={
-          <Link className="comic-button primary" to="/exams">继续练习 <ArrowRight size={17} /></Link>
+          <Link className="comic-button primary" to="/mistakes/practice">开始错题练习 <ArrowRight size={17} /></Link>
         }
       />
 
@@ -39,18 +39,22 @@ export function MistakesPage() {
         <>
           <section className="mistake-banner">
             <div><Target size={31} /><strong>{mistakes.length}</strong><span>道历史错题</span></div>
-            <div><CheckCircle2 size={31} /><strong>{correctedCount}</strong><span>道最近已订正</span></div>
-            <p><Sparkles size={18} /> 优先重练重复出错、且尚未订正的题目。</p>
+            <div><CheckCircle2 size={31} /><strong>{relearnedCount}</strong><span>道已重学</span></div>
+            <p><Sparkles size={18} /> 未重学的错题会排在练习前面，已重学也能继续做。</p>
           </section>
 
           <div className="mistake-list">
             {mistakes.map((mistake, index) => (
-              <article className={`mistake-card ${mistake.corrected ? "corrected" : "open"}`} key={mistake.questionId}>
+              <article className={`mistake-card ${mistake.relearned ? "corrected" : "open"}`} key={mistake.questionId}>
                 <header>
                   <span className="mistake-index">#{String(index + 1).padStart(2, "0")}</span>
                   <span className="mistake-exam">{mistake.examTitle}</span>
                   <span className="mistake-status">
-                    {mistake.corrected ? <><CheckCircle2 size={16} /> 最近已订正</> : <><XCircle size={16} /> 仍需巩固</>}
+                    {mistake.relearned
+                      ? <><CheckCircle2 size={16} /> 已重学</>
+                      : mistake.corrected
+                        ? <><CheckCircle2 size={16} /> 最近已订正</>
+                        : <><XCircle size={16} /> 仍需巩固</>}
                   </span>
                 </header>
                 <h2>{mistake.prompt}</h2>
@@ -60,8 +64,12 @@ export function MistakesPage() {
                 </div>
                 {mistake.explanation ? <p className="mistake-explanation"><strong>解析：</strong>{mistake.explanation}</p> : null}
                 <footer>
-                  <span>累计答错 {mistake.wrongCount} 次 · 最近 {formatDate(mistake.lastWrongAt)}</span>
-                  <Link to={`/exams/${mistake.examId}`}><RotateCcw size={16} /> 重练这套试卷</Link>
+                  <span>
+                    累计答错 {mistake.wrongCount} 次 · 错题练习 {mistake.practiceCount} 次 · 最近 {formatDate(mistake.lastWrongAt)}
+                  </span>
+                  <Link to={`/mistakes/practice?question=${encodeURIComponent(mistake.questionId)}`}>
+                    <RotateCcw size={16} /> 练这道题
+                  </Link>
                 </footer>
               </article>
             ))}

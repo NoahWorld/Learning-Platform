@@ -161,6 +161,16 @@ test("web pages are mounted under /study and legacy links redirect", async (cont
     "/study/exams/sample-learning-check?mode=review",
   );
 
+  const legacyMistakePractice = await app.inject({
+    method: "GET",
+    url: "/mistakes/practice?questionId=sample-q-active-recall",
+  });
+  assert.equal(legacyMistakePractice.statusCode, 302);
+  assert.equal(
+    legacyMistakePractice.headers.location,
+    "/study/mistakes/practice?questionId=sample-q-active-recall",
+  );
+
   const hiddenMaterialDeepLink = await app.inject({
     method: "GET",
     url: "/study/materials/sample-learning-method?from=bookmark",
@@ -581,6 +591,107 @@ test("submissions persist results and mark a later-correct mistake as corrected"
   );
 });
 
+test("mistake practice persists every retry and keeps relearned questions available", async (context) => {
+  const testApp = await createTestApp();
+  context.after(() => testApp.cleanup());
+
+  const examSubmission = await testApp.app.inject({
+    method: "POST",
+    url: "/api/exams/sample-learning-check/submissions",
+    headers: authenticated(testApp.cookie),
+    payload: {
+      durationSeconds: 20,
+      answers: [
+        { questionId: "sample-q-active-recall", optionIds: ["sample-q1-a"] },
+        { questionId: "sample-q-review", optionIds: ["sample-q2-a", "sample-q2-c"] },
+      ],
+    },
+  });
+  assert.equal(examSubmission.statusCode, 201);
+
+  const practiceList = await testApp.app.inject({
+    method: "GET",
+    url: "/api/mistakes/practice",
+    headers: authenticated(testApp.cookie),
+  });
+  assert.equal(practiceList.statusCode, 200);
+  assert.equal(practiceList.json().questions.length, 1);
+  assert.equal(practiceList.json().questions[0].questionId, "sample-q-active-recall");
+  assert.equal(practiceList.json().questions[0].relearned, false);
+  assert.equal(practiceList.json().questions[0].practiceCount, 0);
+  assert.ok(
+    practiceList.json().questions[0].options.every((option) => !("correct" in option)),
+    "practice questions must not reveal correct options before submission",
+  );
+
+  const unrelatedQuestion = await testApp.app.inject({
+    method: "POST",
+    url: "/api/mistakes/sample-q-review/practice",
+    headers: authenticated(testApp.cookie),
+    payload: { optionIds: ["sample-q2-a", "sample-q2-c"] },
+  });
+  assert.equal(unrelatedQuestion.statusCode, 404);
+
+  const wrongPractice = await testApp.app.inject({
+    method: "POST",
+    url: "/api/mistakes/sample-q-active-recall/practice",
+    headers: authenticated(testApp.cookie),
+    payload: { optionIds: ["sample-q1-a"] },
+  });
+  assert.equal(wrongPractice.statusCode, 201);
+  assert.equal(wrongPractice.json().isCorrect, false);
+  assert.equal(wrongPractice.json().relearned, false);
+  assert.equal(wrongPractice.json().practiceCount, 1);
+  assert.deepEqual(wrongPractice.json().correctOptions.map((option) => option.id), ["sample-q1-b"]);
+
+  const correctPractice = await testApp.app.inject({
+    method: "POST",
+    url: "/api/mistakes/sample-q-active-recall/practice",
+    headers: authenticated(testApp.cookie),
+    payload: { optionIds: ["sample-q1-b"] },
+  });
+  assert.equal(correctPractice.statusCode, 201);
+  assert.equal(correctPractice.json().isCorrect, true);
+  assert.equal(correctPractice.json().relearned, true);
+  assert.equal(correctPractice.json().practiceCount, 2);
+
+  const retryAfterRelearning = await testApp.app.inject({
+    method: "POST",
+    url: "/api/mistakes/sample-q-active-recall/practice",
+    headers: authenticated(testApp.cookie),
+    payload: { optionIds: ["sample-q1-a"] },
+  });
+  assert.equal(retryAfterRelearning.statusCode, 201);
+  assert.equal(retryAfterRelearning.json().isCorrect, false);
+  assert.equal(
+    retryAfterRelearning.json().relearned,
+    true,
+    "a later wrong retry must not erase the relearned milestone",
+  );
+  assert.equal(retryAfterRelearning.json().practiceCount, 3);
+
+  const refreshedList = await testApp.app.inject({
+    method: "GET",
+    url: "/api/mistakes/practice",
+    headers: authenticated(testApp.cookie),
+  });
+  assert.equal(refreshedList.json().questions.length, 1, "relearned mistakes remain practiceable");
+  assert.equal(refreshedList.json().questions[0].relearned, true);
+  assert.equal(refreshedList.json().questions[0].practiceCount, 3);
+
+  const mistakeBook = await testApp.app.inject({
+    method: "GET",
+    url: "/api/mistakes",
+    headers: authenticated(testApp.cookie),
+  });
+  assert.equal(mistakeBook.json().mistakes[0].relearned, true);
+  assert.equal(mistakeBook.json().mistakes[0].practiceCount, 3);
+  assert.equal(
+    testApp.app.db.prepare("SELECT COUNT(*) AS count FROM mistake_practice_attempts").get().count,
+    3,
+  );
+});
+
 test("invalid submissions fail clearly and do not create attempts", async (context) => {
   const testApp = await createTestApp();
   context.after(() => testApp.cleanup());
@@ -700,7 +811,7 @@ test("version 1 databases migrate case-question fields without losing rows", asy
 
   const migratedDb = openDatabase(databasePath);
   context.after(() => migratedDb.close());
-  assert.equal(migratedDb.pragma("user_version", { simple: true }), 5);
+  assert.equal(migratedDb.pragma("user_version", { simple: true }), 6);
   assert.deepEqual(
     migratedDb.prepare("SELECT id, section, passage FROM questions WHERE id = ?").get("legacy-q"),
     { id: "legacy-q", section: "standard", passage: "" },
@@ -735,6 +846,7 @@ test("version 4 migration keeps only the newest session per user", async (contex
   const versionFourDb = openDatabase(databasePath);
   versionFourDb.exec(`
     DROP INDEX idx_sessions_one_per_user;
+    DROP TABLE mistake_practice_attempts;
     INSERT INTO users (
       id, username, display_name, password_hash, password_salt, created_at, updated_at
     ) VALUES (
@@ -751,7 +863,13 @@ test("version 4 migration keeps only the newest session per user", async (contex
   versionFourDb.close();
 
   migratedDb = openDatabase(databasePath);
-  assert.equal(migratedDb.pragma("user_version", { simple: true }), 5);
+  assert.equal(migratedDb.pragma("user_version", { simple: true }), 6);
+  assert.equal(
+    migratedDb
+      .prepare("SELECT COUNT(*) AS count FROM sqlite_master WHERE type = 'table' AND name = ?")
+      .get("mistake_practice_attempts").count,
+    1,
+  );
   assert.deepEqual(
     migratedDb.prepare("SELECT id FROM sessions WHERE user_id = ?").all("session-user"),
     [{ id: "newer-session" }],

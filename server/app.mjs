@@ -7,6 +7,7 @@ import { fileURLToPath } from "node:url";
 import { z } from "zod";
 import {
   loginSchema,
+  mistakePracticeSubmissionSchema,
   submissionSchema,
 } from "./content-schema.mjs";
 import {
@@ -24,7 +25,7 @@ import { createStorage } from "./storage.mjs";
 import { createCaptchaChallenge } from "./captcha.mjs";
 
 const DEFAULT_STATIC_DIR = fileURLToPath(new URL("../dist", import.meta.url));
-const LEGACY_STUDY_PATH = /^\/(?:exams(?:\/.*)?|mistakes|results(?:\/.*)?)$/;
+const LEGACY_STUDY_PATH = /^\/(?:exams(?:\/.*)?|mistakes(?:\/.*)?|results(?:\/.*)?)$/;
 const LEGACY_MATERIALS_PATH = /^\/materials(?:\/.*)?$/;
 const STUDY_MATERIALS_PATH = /^\/study\/materials(?:\/.*)?$/;
 
@@ -654,18 +655,30 @@ function registerApiRoutes(app, db, storage, captchaFactory, materialsEnabled) {
            JOIN questions q ON q.id = aa.question_id
            JOIN exams e ON e.id = q.exam_id
            WHERE a.user_id = ?
+         ),
+         practice_stats AS (
+           SELECT question_id, COUNT(*) AS practice_count,
+                  MAX(submitted_at) AS last_practiced_at,
+                  MAX(is_correct) AS relearned
+           FROM mistake_practice_attempts
+           WHERE user_id = ?
+           GROUP BY question_id
          )
-         SELECT question_id, prompt, explanation, type, exam_id, exam_title,
-                SUM(CASE WHEN is_correct = 0 THEN 1 ELSE 0 END) AS wrong_count,
-                SUM(CASE WHEN is_correct = 1 THEN 1 ELSE 0 END) AS correct_count,
-                MAX(CASE WHEN is_correct = 0 THEN submitted_at END) AS last_wrong_at,
-                MAX(CASE WHEN recency = 1 THEN is_correct END) AS latest_is_correct
-         FROM answer_history
-         GROUP BY question_id, prompt, explanation, type, exam_id, exam_title
-         HAVING SUM(CASE WHEN is_correct = 0 THEN 1 ELSE 0 END) > 0
+         SELECT ah.question_id, ah.prompt, ah.explanation, ah.type, ah.exam_id, ah.exam_title,
+                SUM(CASE WHEN ah.is_correct = 0 THEN 1 ELSE 0 END) AS wrong_count,
+                SUM(CASE WHEN ah.is_correct = 1 THEN 1 ELSE 0 END) AS correct_count,
+                MAX(CASE WHEN ah.is_correct = 0 THEN ah.submitted_at END) AS last_wrong_at,
+                MAX(CASE WHEN ah.recency = 1 THEN ah.is_correct END) AS latest_is_correct,
+                COALESCE(MAX(ps.practice_count), 0) AS practice_count,
+                MAX(ps.last_practiced_at) AS last_practiced_at,
+                COALESCE(MAX(ps.relearned), 0) AS relearned
+         FROM answer_history ah
+         LEFT JOIN practice_stats ps ON ps.question_id = ah.question_id
+         GROUP BY ah.question_id, ah.prompt, ah.explanation, ah.type, ah.exam_id, ah.exam_title
+         HAVING SUM(CASE WHEN ah.is_correct = 0 THEN 1 ELSE 0 END) > 0
          ORDER BY last_wrong_at DESC`,
       )
-      .all(user.id);
+      .all(user.id, user.id);
     const optionsStatement = db.prepare(
       `SELECT id, label, content
        FROM question_options
@@ -685,8 +698,173 @@ function registerApiRoutes(app, db, storage, captchaFactory, materialsEnabled) {
         correctCount: row.correct_count,
         lastWrongAt: row.last_wrong_at,
         corrected: row.latest_is_correct === 1,
+        practiceCount: row.practice_count,
+        lastPracticedAt: row.last_practiced_at,
+        relearned: row.relearned === 1,
         correctOptions: optionsStatement.all(row.question_id),
       })),
+    };
+  });
+
+  app.get("/api/mistakes/practice", async (request) => {
+    const user = requireUser(db, request);
+    const rows = db
+      .prepare(
+        `WITH mistake_history AS (
+           SELECT q.id AS question_id, q.prompt, q.type, q.section, q.passage,
+                  q.points, e.id AS exam_id, e.title AS exam_title,
+                  aa.is_correct, a.submitted_at
+           FROM attempt_answers aa
+           JOIN attempts a ON a.id = aa.attempt_id
+           JOIN questions q ON q.id = aa.question_id
+           JOIN exams e ON e.id = q.exam_id
+           WHERE a.user_id = ?
+         ),
+         mistakes AS (
+           SELECT question_id, prompt, type, section, passage, points,
+                  exam_id, exam_title,
+                  SUM(CASE WHEN is_correct = 0 THEN 1 ELSE 0 END) AS wrong_count,
+                  MAX(CASE WHEN is_correct = 0 THEN submitted_at END) AS last_wrong_at
+           FROM mistake_history
+           GROUP BY question_id, prompt, type, section, passage, points, exam_id, exam_title
+           HAVING SUM(CASE WHEN is_correct = 0 THEN 1 ELSE 0 END) > 0
+         ),
+         practice_stats AS (
+           SELECT question_id, COUNT(*) AS practice_count,
+                  MAX(submitted_at) AS last_practiced_at,
+                  MAX(is_correct) AS relearned
+           FROM mistake_practice_attempts
+           WHERE user_id = ?
+           GROUP BY question_id
+         )
+         SELECT m.*, COALESCE(ps.practice_count, 0) AS practice_count,
+                ps.last_practiced_at, COALESCE(ps.relearned, 0) AS relearned
+         FROM mistakes m
+         LEFT JOIN practice_stats ps ON ps.question_id = m.question_id
+         ORDER BY relearned ASC, m.last_wrong_at DESC, m.question_id ASC`,
+      )
+      .all(user.id, user.id);
+    const optionsStatement = db.prepare(
+      `SELECT id, label, content
+       FROM question_options
+       WHERE question_id = ?
+       ORDER BY position ASC`,
+    );
+
+    return {
+      questions: rows.map((row) => ({
+        questionId: row.question_id,
+        prompt: row.prompt,
+        type: row.type,
+        section: row.section,
+        passage: row.passage,
+        points: row.points,
+        examId: row.exam_id,
+        examTitle: row.exam_title,
+        wrongCount: row.wrong_count,
+        lastWrongAt: row.last_wrong_at,
+        practiceCount: row.practice_count,
+        lastPracticedAt: row.last_practiced_at,
+        relearned: row.relearned === 1,
+        options: optionsStatement.all(row.question_id),
+      })),
+    };
+  });
+
+  app.post("/api/mistakes/:questionId/practice", async (request, reply) => {
+    const user = requireUser(db, request);
+    const input = parseOrThrow(mistakePracticeSubmissionSchema, request.body);
+    const question = db
+      .prepare(
+        `SELECT q.id, q.explanation
+         FROM questions q
+         WHERE q.id = ?
+           AND EXISTS (
+             SELECT 1
+             FROM attempt_answers aa
+             JOIN attempts a ON a.id = aa.attempt_id
+             WHERE aa.question_id = q.id
+               AND a.user_id = ?
+               AND aa.is_correct = 0
+           )`,
+      )
+      .get(request.params.questionId, user.id);
+
+    if (!question) {
+      throw httpError(404, "这道题不在当前用户的错题本中");
+    }
+
+    const duplicateOptionIds = findDuplicates(input.optionIds);
+    if (duplicateOptionIds.length > 0) {
+      throw httpError(400, `答题数据包含重复选项：${duplicateOptionIds.join(", ")}`);
+    }
+
+    const options = db
+      .prepare(
+        `SELECT id, label, content, is_correct
+         FROM question_options
+         WHERE question_id = ?
+         ORDER BY position ASC`,
+      )
+      .all(question.id);
+    const validOptionIds = new Set(options.map((option) => option.id));
+    const invalidOptionIds = input.optionIds.filter((id) => !validOptionIds.has(id));
+    if (invalidOptionIds.length > 0) {
+      throw httpError(400, `答题数据包含不属于这道题的选项：${invalidOptionIds.join(", ")}`);
+    }
+
+    const correctOptionIds = options
+      .filter((option) => option.is_correct === 1)
+      .map((option) => option.id);
+    const isCorrect = sameSet(input.optionIds, correctOptionIds);
+    const practiceAttemptId = randomUUID();
+    const submittedAt = new Date().toISOString();
+
+    db.prepare(
+      `INSERT INTO mistake_practice_attempts (
+         id, user_id, question_id, selected_option_ids, is_correct, submitted_at
+       ) VALUES (?, ?, ?, ?, ?, ?)`,
+    ).run(
+      practiceAttemptId,
+      user.id,
+      question.id,
+      JSON.stringify(input.optionIds),
+      isCorrect ? 1 : 0,
+      submittedAt,
+    );
+
+    const practiceStats = db
+      .prepare(
+        `SELECT COUNT(*) AS practice_count, MAX(is_correct) AS relearned
+         FROM mistake_practice_attempts
+         WHERE user_id = ? AND question_id = ?`,
+      )
+      .get(user.id, question.id);
+    request.log.info(
+      {
+        userId: user.id,
+        questionId: question.id,
+        practiceAttemptId,
+        isCorrect,
+        practiceCount: practiceStats.practice_count,
+        relearned: practiceStats.relearned === 1,
+      },
+      "mistake practice answer recorded",
+    );
+
+    reply.status(201);
+    return {
+      id: practiceAttemptId,
+      questionId: question.id,
+      selectedOptionIds: input.optionIds,
+      isCorrect,
+      submittedAt,
+      practiceCount: practiceStats.practice_count,
+      relearned: practiceStats.relearned === 1,
+      correctOptions: options
+        .filter((option) => option.is_correct === 1)
+        .map(({ id, label, content }) => ({ id, label, content })),
+      explanation: question.explanation,
     };
   });
 }
