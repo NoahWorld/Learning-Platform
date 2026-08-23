@@ -5,6 +5,7 @@ export interface LearningModule {
   number: string;
   title: string;
   shortTitle: string;
+  category: string;
   eyebrow: string;
   description: string;
   route: string;
@@ -19,6 +20,7 @@ export const learningModules: LearningModule[] = [
     number: "01",
     title: "中级经济师－人力资源",
     shortTitle: "人力资源",
+    category: "中级经济师",
     eyebrow: "ECONOMIST · HR",
     description: "沿用现有题库、模拟考试、错题重练和成绩记录。",
     route: "/",
@@ -31,6 +33,7 @@ export const learningModules: LearningModule[] = [
     number: "02",
     title: "中级经济师－经济学",
     shortTitle: "经济学",
+    category: "中级经济师",
     eyebrow: "ECONOMIST · ECONOMICS",
     description: "独立的经济学学习空间，题库和学习内容后续录入。",
     route: "/modules/economics",
@@ -43,6 +46,7 @@ export const learningModules: LearningModule[] = [
     number: "03",
     title: "英语",
     shortTitle: "英语",
+    category: "语言学习",
     eyebrow: "ENGLISH · DAILY GROWTH",
     description: "独立的英语学习空间，后续可加入单词、听力和阅读训练。",
     route: "/modules/english",
