@@ -57,7 +57,7 @@ export function LoginPage() {
     if (!loading && !user) void loadCaptcha();
   }, [loadCaptcha, loading, user]);
 
-  if (!loading && user) return <Navigate to="/" replace />;
+  if (!loading && user) return <Navigate to="/modules" replace />;
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -70,11 +70,11 @@ export function LoginPage() {
     setSubmitting(true);
     try {
       await login(username, password, captcha.id, captchaOptionId);
-      const destination =
+      const requestedPath =
         location.state && typeof location.state === "object" && "from" in location.state
           ? String(location.state.from)
           : "/";
-      navigate(destination, { replace: true });
+      navigate("/modules", { replace: true, state: { from: requestedPath } });
     } catch (loginError) {
       setError(loginError instanceof Error ? loginError.message : "登录失败，请稍后再试");
       await loadCaptcha();

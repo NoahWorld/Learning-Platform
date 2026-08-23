@@ -10,6 +10,8 @@ import { LoginPage } from "./pages/LoginPage";
 import { MaterialsPage } from "./pages/MaterialsPage";
 import { MistakesPage } from "./pages/MistakesPage";
 import { MistakePracticePage } from "./pages/MistakePracticePage";
+import { ModulePreviewPage } from "./pages/ModulePreviewPage";
+import { ModuleSelectionPage } from "./pages/ModuleSelectionPage";
 import { NotFoundPage } from "./pages/NotFoundPage";
 import { ResultDetailPage } from "./pages/ResultDetailPage";
 import { ResultsPage } from "./pages/ResultsPage";
@@ -19,6 +21,9 @@ export default function App() {
     <Routes>
       <Route path="login" element={<LoginPage />} />
       <Route element={<RequireAuth />}>
+        <Route path="modules" element={<ModuleSelectionPage />} />
+        <Route path="modules/economics" element={<ModulePreviewPage moduleId="economics" />} />
+        <Route path="modules/english" element={<ModulePreviewPage moduleId="english" />} />
         <Route element={<AppShell />}>
           <Route index element={<DashboardPage />} />
           {materialsEnabled ? <Route path="materials" element={<MaterialsPage />} /> : null}
