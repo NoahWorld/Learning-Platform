@@ -708,7 +708,7 @@ img {
   display: inline-flex;
   width: 72px;
   height: 72px;
-  align-items: baseline;
+  align-items: center;
   justify-content: center;
   border: var(--border);
   border-radius: 50%;
@@ -720,15 +720,16 @@ img {
 .score-sticker.keep-going { background: #ff9f73; }
 
 .score-sticker strong {
-  align-self: center;
   font-size: 31px;
   font-weight: 1000;
+  line-height: 1;
 }
 
 .score-sticker small {
   margin-left: 2px;
   font-size: 10px;
   font-weight: 900;
+  line-height: 1;
 }
 
 .standard-page {
