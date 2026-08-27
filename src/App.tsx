@@ -3,6 +3,8 @@ import { RequireAuth } from "./auth";
 import { AppShell } from "./components/AppShell";
 import { materialsEnabled } from "./features";
 import { DashboardPage } from "./pages/DashboardPage";
+import { EnglishListeningPage } from "./pages/EnglishListeningPage";
+import { EnglishModulePage } from "./pages/EnglishModulePage";
 import { ExamPage } from "./pages/ExamPage";
 import { ExamsPage } from "./pages/ExamsPage";
 import { MaterialDetailPage } from "./pages/MaterialDetailPage";
@@ -23,7 +25,8 @@ export default function App() {
       <Route element={<RequireAuth />}>
         <Route path="modules" element={<ModuleSelectionPage />} />
         <Route path="modules/economics" element={<ModulePreviewPage moduleId="economics" />} />
-        <Route path="modules/english" element={<ModulePreviewPage moduleId="english" />} />
+        <Route path="modules/english" element={<EnglishModulePage />} />
+        <Route path="modules/english/listening" element={<EnglishListeningPage />} />
         <Route element={<AppShell />}>
           <Route index element={<DashboardPage />} />
           {materialsEnabled ? <Route path="materials" element={<MaterialsPage />} /> : null}

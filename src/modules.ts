@@ -48,11 +48,11 @@ export const learningModules: LearningModule[] = [
     shortTitle: "英语",
     category: "语言学习",
     eyebrow: "ENGLISH · DAILY GROWTH",
-    description: "独立的英语学习空间，后续可加入单词、听力和阅读训练。",
+    description: "从听、说、读、写四个方向学习英语，听力板块现已开放。",
     route: "/modules/english",
-    status: "preparing",
+    status: "ready",
     color: "pink",
-    highlights: ["词汇积累", "听力训练", "阅读练习"],
+    highlights: ["音标发音", "场景听力", "听说读写"],
   },
 ];
 

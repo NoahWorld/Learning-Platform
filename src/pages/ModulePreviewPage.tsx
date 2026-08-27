@@ -1,15 +1,14 @@
-import { ArrowLeft, BookOpen, ClipboardCheck, Construction, Languages, Landmark, LineChart } from "lucide-react";
+import { ArrowLeft, BookOpen, ClipboardCheck, Construction, Landmark, LineChart } from "lucide-react";
 import { useEffect } from "react";
 import { Link } from "react-router-dom";
 import { ModuleTopBar } from "../components/ModuleTopBar";
-import { getLearningModule, type LearningModuleId } from "../modules";
+import { getLearningModule } from "../modules";
 
 const previewIcons = {
   economics: Landmark,
-  english: Languages,
-} satisfies Record<Exclude<LearningModuleId, "human-resources">, typeof Landmark>;
+};
 
-export function ModulePreviewPage({ moduleId }: { moduleId: "economics" | "english" }) {
+export function ModulePreviewPage({ moduleId }: { moduleId: "economics" }) {
   const learningModule = getLearningModule(moduleId);
   const HeroIcon = previewIcons[moduleId];
 
