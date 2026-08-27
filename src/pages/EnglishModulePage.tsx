@@ -61,13 +61,13 @@ export function EnglishModulePage() {
     <div className="module-page english-module-page">
       <ModuleTopBar compact />
       <main className="english-module-main">
-        <Link className="module-back-link" to="/modules"><ArrowLeft size={17} /> 返回模块选择</Link>
+        <Link className="module-back-link" to="/modules"><ArrowLeft size={17} /> 返回课程选择</Link>
 
         <section className="english-module-hero">
           <div>
             <span className="mini-kicker"><Sparkles size={15} /> ENGLISH LAB · 英语实验室</span>
             <h1>Learn it.<br /><em>Use it.</em></h1>
-            <p>从真实声音和日常场景开始，把英语拆成听、说、读、写四个独立板块。</p>
+            <p>从真实声音和日常场景开始，循序掌握英语。</p>
           </div>
           <div className="english-hero-sticker" aria-hidden="true">
             <strong>Aa</strong>
@@ -79,8 +79,8 @@ export function EnglishModulePage() {
         <section className="english-skill-section" aria-labelledby="english-skills-title">
           <header className="english-section-heading">
             <div>
-              <span>FOUR CORE SKILLS</span>
-              <h2 id="english-skills-title">四大板块</h2>
+              <span>ENGLISH SKILLS</span>
+              <h2 id="english-skills-title">听 · 说 · 读 · 写</h2>
             </div>
             <p>今天，从「听」开始。</p>
           </header>

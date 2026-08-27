@@ -47,7 +47,7 @@ export function EnglishListeningPage() {
     <div className="module-page english-listening-page">
       <ModuleTopBar compact />
       <main className="english-listening-main">
-        <Link className="module-back-link" to="/modules/english"><ArrowLeft size={17} /> 返回英语模块</Link>
+        <Link className="module-back-link" to="/modules/english"><ArrowLeft size={17} /> 返回英语课程</Link>
 
         <section className="listening-hero">
           <div className="listening-hero-copy">

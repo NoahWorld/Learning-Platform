@@ -35,17 +35,13 @@ export function ModuleSelectionPage() {
       <main className="module-selection-main">
         <section className="module-selection-heading">
           <div>
-            <span className="mini-kicker"><Sparkles size={15} /> CHOOSE YOUR WORKSPACE</span>
-            <h1>选择学习模块</h1>
-            <p>每个模块拥有独立的内容与进度，选择一个方向继续学习。</p>
-          </div>
-          <div className="module-heading-note" aria-hidden="true">
-            <span>当前 {learningModules.length} 个模块</span>
-            <strong>独立学习<br />持续扩充</strong>
+            <span className="mini-kicker"><Sparkles size={15} /> CHOOSE YOUR COURSE</span>
+            <h1>今天学什么？</h1>
+            <p>选一个方向，继续今天的学习。</p>
           </div>
         </section>
 
-        <section className="module-card-grid" aria-label="学习模块">
+        <section className="module-card-grid" aria-label="学习课程">
           {learningModules.map((learningModule) => {
             const Icon = moduleIcons[learningModule.id];
             const route = learningModule.id === "human-resources"
@@ -58,7 +54,7 @@ export function ModuleSelectionPage() {
                 key={learningModule.id}
               >
                 <div className="module-card-meta">
-                  <span>MODULE · {learningModule.number}</span>
+                  <span>COURSE · {learningModule.number}</span>
                   <i className={learningModule.status}>{learningModule.status === "ready" ? "已上线" : "筹备中"}</i>
                 </div>
                 <div className="module-card-heading">
@@ -73,15 +69,13 @@ export function ModuleSelectionPage() {
                   {learningModule.highlights.map((highlight) => <li key={highlight}>{highlight}</li>)}
                 </ul>
                 <span className="module-card-action">
-                  <span>{learningModule.status === "ready" ? "进入工作台" : "查看模块"}</span>
+                  <span>{learningModule.status === "ready" ? "开始学习" : "查看详情"}</span>
                   <ArrowRight size={18} aria-hidden="true" />
                 </span>
               </Link>
             );
           })}
         </section>
-
-        <p className="module-selection-footnote">以后新增其他学习类型，也会作为新的独立卡片出现在这里。</p>
       </main>
     </div>
   );

@@ -62,7 +62,7 @@ export function AppShell() {
           <div className="focus-actions">
             <span className="focus-user">{user?.displayName}</span>
             <Link className="focus-module-switch" to="/modules">
-              <LayoutGrid size={16} aria-hidden="true" /> 切换模块
+              <LayoutGrid size={16} aria-hidden="true" /> 切换课程
             </Link>
             <Link
               className="focus-exit"
@@ -95,9 +95,9 @@ export function AppShell() {
         </Link>
 
         <div className="active-module-card">
-          <span>当前模块</span>
+          <span>当前课程</span>
           <strong>中级经济师<br />人力资源</strong>
-          <Link to="/modules"><LayoutGrid size={15} aria-hidden="true" /> 切换模块</Link>
+          <Link to="/modules"><LayoutGrid size={15} aria-hidden="true" /> 切换课程</Link>
         </div>
 
         <nav className="desktop-nav" aria-label="主导航">
@@ -126,7 +126,7 @@ export function AppShell() {
             <strong>知行台</strong>
           </Link>
           <Link className="mobile-kicker" to="/modules">
-            <LayoutGrid size={13} aria-hidden="true" /> 人力资源 · 切换模块
+            <LayoutGrid size={13} aria-hidden="true" /> 人力资源 · 切换课程
           </Link>
           <button className="mobile-logout" type="button" onClick={() => void handleLogout()} aria-label="退出登录">
             <LogOut size={18} />

@@ -21,7 +21,7 @@ export function ModuleTopBar({ compact = false }: { compact?: boolean }) {
   return (
     <>
       <header className={`module-topbar${compact ? " compact" : ""}`}>
-        <Link className="module-brand" to="/modules" aria-label="返回学习模块选择">
+        <Link className="module-brand" to="/modules" aria-label="返回课程选择">
           <span><BookOpenCheck size={24} aria-hidden="true" /></span>
           <strong>知行台</strong>
         </Link>
@@ -29,7 +29,7 @@ export function ModuleTopBar({ compact = false }: { compact?: boolean }) {
         <div className="module-account">
           {compact ? (
             <Link className="module-switch-button" to="/modules">
-              <LayoutGrid size={17} aria-hidden="true" /> 全部模块
+              <LayoutGrid size={17} aria-hidden="true" /> 所有课程
             </Link>
           ) : null}
           <span className="module-user"><UserRound size={16} aria-hidden="true" /> {user?.displayName}</span>
