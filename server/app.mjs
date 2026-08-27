@@ -70,7 +70,9 @@ export async function createApp({
     }
 
     reply.status(statusCode).send({
-      error: statusCode >= 500 ? "服务器暂时无法处理这个请求" : error.message,
+      error: statusCode >= 500 && error.expose !== true
+        ? "服务器暂时无法处理这个请求"
+        : error.message,
       requestId: request.id,
     });
   });
@@ -393,6 +395,93 @@ function registerApiRoutes(app, db, storage, captchaFactory, materialsEnabled) {
         progress: getListeningProgress(db, user.id).get(scene.id) ?? emptyListeningProgress(),
       },
     };
+  });
+
+  app.get("/api/english/listening/:sceneId/audio", async (request, reply) => {
+    requireUser(db, request);
+    const scene = getEnglishListeningScene(request.params.sceneId);
+    if (!scene) {
+      throw httpError(404, "听力场景不存在");
+    }
+    if (!storage) {
+      throw httpError(503, "真人听力音频存储尚未配置，请联系管理员", { expose: true });
+    }
+
+    let objectStat;
+    try {
+      objectStat = await storage.client.statObject(storage.bucket, scene.audioObjectKey);
+    } catch (error) {
+      request.log.error(
+        { err: error, sceneId: scene.id, objectKey: scene.audioObjectKey },
+        "listening audio metadata lookup failed",
+      );
+      if (isMissingStorageObject(error)) {
+        throw httpError(503, `真人听力音频尚未同步：${scene.chineseTitle}`, {
+          expose: true,
+          cause: error,
+        });
+      }
+      throw httpError(502, `真人听力音频读取失败：${scene.chineseTitle}`, {
+        expose: true,
+        cause: error,
+      });
+    }
+
+    const size = Number(objectStat.size);
+    if (!Number.isSafeInteger(size) || size <= 0) {
+      request.log.error(
+        { sceneId: scene.id, objectKey: scene.audioObjectKey, reportedSize: objectStat.size },
+        "listening audio has an invalid object size",
+      );
+      throw httpError(502, `真人听力音频文件无效：${scene.chineseTitle}`, { expose: true });
+    }
+
+    let byteRange;
+    try {
+      byteRange = parseByteRange(request.headers.range, size);
+    } catch (error) {
+      reply.header("Content-Range", `bytes */${size}`);
+      throw error;
+    }
+
+    let objectStream;
+    try {
+      objectStream = byteRange.partial
+        ? await storage.client.getPartialObject(
+          storage.bucket,
+          scene.audioObjectKey,
+          byteRange.start,
+          byteRange.length,
+        )
+        : await storage.client.getObject(storage.bucket, scene.audioObjectKey);
+    } catch (error) {
+      request.log.error(
+        { err: error, sceneId: scene.id, objectKey: scene.audioObjectKey, byteRange },
+        "listening audio stream open failed",
+      );
+      throw httpError(502, `真人听力音频播放失败：${scene.chineseTitle}`, {
+        expose: true,
+        cause: error,
+      });
+    }
+
+    objectStream.on("error", (error) => {
+      request.log.error(
+        { err: error, sceneId: scene.id, objectKey: scene.audioObjectKey, byteRange },
+        "listening audio stream failed",
+      );
+    });
+
+    reply
+      .status(byteRange.partial ? 206 : 200)
+      .header("Content-Type", "audio/mpeg")
+      .header("Content-Length", byteRange.length)
+      .header("Accept-Ranges", "bytes")
+      .header("Cache-Control", "private, max-age=86400");
+    if (byteRange.partial) {
+      reply.header("Content-Range", `bytes ${byteRange.start}-${byteRange.end}/${size}`);
+    }
+    return reply.send(objectStream);
   });
 
   app.post("/api/english/listening/:sceneId/submissions", async (request, reply) => {
@@ -1241,10 +1330,54 @@ function parseBooleanEnvironment(name, rawValue, fallback) {
   );
 }
 
-function httpError(statusCode, message) {
-  const error = new Error(message);
+function httpError(statusCode, message, { expose = false, cause } = {}) {
+  const error = new Error(message, cause === undefined ? undefined : { cause });
   error.statusCode = statusCode;
+  error.expose = expose;
   return error;
+}
+
+function isMissingStorageObject(error) {
+  return error && typeof error === "object"
+    && ["NoSuchKey", "NoSuchObject", "NotFound"].includes(error.code);
+}
+
+function parseByteRange(rangeHeader, size) {
+  if (!rangeHeader) {
+    return { partial: false, start: 0, end: size - 1, length: size };
+  }
+
+  const match = /^bytes=(\d*)-(\d*)$/.exec(rangeHeader.trim());
+  if (!match || (!match[1] && !match[2])) {
+    throw httpError(416, "音频范围请求无效");
+  }
+
+  let start;
+  let end;
+  if (!match[1]) {
+    const suffixLength = Number.parseInt(match[2], 10);
+    if (!Number.isSafeInteger(suffixLength) || suffixLength <= 0) {
+      throw httpError(416, "音频范围请求无效");
+    }
+    start = Math.max(size - suffixLength, 0);
+    end = size - 1;
+  } else {
+    start = Number.parseInt(match[1], 10);
+    end = match[2] ? Number.parseInt(match[2], 10) : size - 1;
+  }
+
+  if (
+    !Number.isSafeInteger(start)
+    || !Number.isSafeInteger(end)
+    || start < 0
+    || end < start
+    || start >= size
+  ) {
+    throw httpError(416, "音频范围请求超出文件大小");
+  }
+
+  end = Math.min(end, size - 1);
+  return { partial: true, start, end, length: end - start + 1 };
 }
 
 function sameSet(left, right) {

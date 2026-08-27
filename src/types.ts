@@ -33,7 +33,13 @@ export interface ListeningSceneSummary {
   level: string;
   duration: string;
   tone: "yellow" | "blue" | "pink" | "green" | "orange" | "purple";
-  speechText: string;
+  audioUrl: string;
+  audioSource: {
+    title: string;
+    publisher: string;
+    pageUrl: string;
+  };
+  questionCount: number;
   progress: ListeningProgress;
 }
 

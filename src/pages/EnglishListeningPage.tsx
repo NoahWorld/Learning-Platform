@@ -18,6 +18,7 @@ import { ModuleTopBar } from "../components/ModuleTopBar";
 import { ErrorState, LoadingState } from "../components/PageBits";
 import { phonemeGroups } from "../englishContent";
 import type { ListeningListResponse, ListeningSceneSummary } from "../types";
+import { useAudioPlayback } from "../useAudioPlayback";
 import { useEnglishSpeech } from "../useEnglishSpeech";
 import { useRemote } from "../useRemote";
 
@@ -32,7 +33,8 @@ export function EnglishListeningPage() {
     (signal) => apiGet("/api/english/listening", signal),
     [],
   );
-  const { activeSpeech, play, speechError } = useEnglishSpeech();
+  const { activeAudio, audioError, play: playAudio } = useAudioPlayback();
+  const { activeSpeech, play: playSpeech, speechError } = useEnglishSpeech();
   const phonemeCount = useMemo(
     () => phonemeGroups.reduce((count, group) => count + group.items.length, 0),
     [],
@@ -53,9 +55,9 @@ export function EnglishListeningPage() {
           <div className="listening-hero-copy">
             <span className="mini-kicker"><Sparkles size={15} /> LISTEN FIRST · 只练听懂</span>
             <h1><span>LISTENING</span><strong>听</strong></h1>
-            <p>不看原文先听，带着问题再听，提交后逐句精析，最后换一种口音复测。</p>
+            <p>不看原文先听，带着问题再听，提交后逐句精析，最后用慢速重听查漏。</p>
             <div className="listening-hero-facts">
-              <span><Headphones size={16} /> {data?.summary.sceneCount ?? 6} 个场景</span>
+              <span><Headphones size={16} /> {data?.summary.sceneCount ?? 10} 个场景</span>
               <span><CheckCircle2 size={16} /> {data?.summary.practicedSceneCount ?? 0} 个已练</span>
               <span><Volume2 size={16} /> {phonemeCount} 个发音参考</span>
             </div>
@@ -71,27 +73,34 @@ export function EnglishListeningPage() {
           <div><b>01</b><span><strong>盲听</strong><small>先抓大意</small></span></div>
           <div><b>02</b><span><strong>作答</strong><small>锁定细节</small></span></div>
           <div><b>03</b><span><strong>精析</strong><small>核对原文</small></span></div>
-          <div><b>04</b><span><strong>复测</strong><small>切换口音</small></span></div>
+          <div><b>04</b><span><strong>复测</strong><small>正常 / 慢速</small></span></div>
         </section>
 
-        {speechError ? <div className="listening-speech-error" role="alert">{speechError}</div> : null}
+        {audioError ? <div className="listening-speech-error" role="alert">{audioError}</div> : null}
 
         <section className="listening-section scene-section" aria-labelledby="scene-title">
           <header className="listening-section-heading">
             <div>
-              <span>01 · REAL-LIFE LISTENING</span>
+              <span>01 · HUMAN VOICES</span>
               <h2 id="scene-title">从真实场景开始</h2>
             </div>
             <p><Ear size={17} /> 每个场景 3 道题，提交前不显示原文。</p>
           </header>
+
+          <p className="listening-source-note">
+            真人美音来自美国国务院 American English：
+            <a href="https://americanenglish.state.gov/resources/everyday-conversations-learning-american-english" target="_blank" rel="noreferrer">
+              Everyday Conversations
+            </a>
+          </p>
 
           {loading ? <LoadingState label="正在准备听力场景…" /> : null}
           {error ? <ErrorState message={error} /> : null}
           {data ? (
             <div className="listening-scene-grid">
               {data.scenes.map((scene) => {
-                const speechId = `preview-${scene.id}`;
-                const isPlaying = activeSpeech === speechId;
+                const audioId = `preview-${scene.id}`;
+                const isPlaying = activeAudio === audioId;
                 return (
                   <article className={`listening-scene-card ${scene.tone}`} key={scene.id}>
                     <header>
@@ -114,7 +123,7 @@ export function EnglishListeningPage() {
                       <button
                         className="scene-preview-button"
                         type="button"
-                        onClick={() => play(speechId, scene.speechText)}
+                        onClick={() => void playAudio(audioId, scene.audioUrl)}
                         aria-label={`${isPlaying ? "停止" : "试听"}${scene.chineseTitle}`}
                       >
                         {isPlaying ? <Pause size={16} /> : <Play size={16} />}
@@ -144,6 +153,7 @@ export function EnglishListeningPage() {
               </div>
               <p><Volume2 size={17} /> 点击音标，听示例词的声音。</p>
             </header>
+            {speechError ? <div className="listening-speech-error" role="alert">{speechError}</div> : null}
             <div className="phoneme-group-list">
               {phonemeGroups.map((group) => (
                 <article className={`phoneme-group ${group.tone}`} key={group.englishTitle}>
@@ -160,7 +170,7 @@ export function EnglishListeningPage() {
                         <button
                           className={isPlaying ? "playing" : ""}
                           type="button"
-                          onClick={() => play(speechId, phoneme.example)}
+                          onClick={() => playSpeech(speechId, phoneme.example)}
                           aria-label={`${isPlaying ? "停止" : "播放"}音标 /${phoneme.symbol}/ 的示例词 ${phoneme.example}`}
                           key={phoneme.symbol}
                         >
@@ -179,7 +189,7 @@ export function EnglishListeningPage() {
 
         <aside className="listening-tip">
           <span>LISTENING LOOP</span>
-          <strong>一听大意 → 二抓细节 → 三核对原文 → 四换声复测</strong>
+          <strong>一听大意 → 二抓细节 → 三核对原文 → 四慢速复测</strong>
           <p>同一个场景听懂三遍，比一次堆很多材料更有效。</p>
         </aside>
       </main>

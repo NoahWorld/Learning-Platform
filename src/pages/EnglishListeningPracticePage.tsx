@@ -17,12 +17,8 @@ import { Link, useParams } from "react-router-dom";
 import { apiGet, apiPost } from "../api";
 import { ModuleTopBar } from "../components/ModuleTopBar";
 import { ErrorState, LoadingState } from "../components/PageBits";
-import type {
-  ListeningAccent,
-  ListeningSceneResponse,
-  ListeningSubmissionResult,
-} from "../types";
-import { useEnglishSpeech } from "../useEnglishSpeech";
+import type { ListeningSceneResponse, ListeningSubmissionResult } from "../types";
+import { useAudioPlayback } from "../useAudioPlayback";
 import { useRemote } from "../useRemote";
 
 export function EnglishListeningPracticePage() {
@@ -31,8 +27,7 @@ export function EnglishListeningPracticePage() {
     (signal) => apiGet(`/api/english/listening/${encodeURIComponent(sceneId)}`, signal),
     [sceneId],
   );
-  const { activeSpeech, play, speechError, stop, supported } = useEnglishSpeech();
-  const [accent, setAccent] = useState<ListeningAccent>("us");
+  const { activeAudio, play, audioError, stop } = useAudioPlayback();
   const [listenCount, setListenCount] = useState(0);
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [result, setResult] = useState<ListeningSubmissionResult | null>(null);
@@ -53,17 +48,10 @@ export function EnglishListeningPracticePage() {
     [result],
   );
 
-  function changeAccent(nextAccent: ListeningAccent) {
-    stop();
-    setAccent(nextAccent);
-  }
-
-  function playScene(rate: "normal" | "slow") {
+  async function playScene(rate: "normal" | "slow") {
     if (!scene) return;
-    const playbackId = `${accent}-${rate}`;
-    const isNewPlayback = supported && activeSpeech !== playbackId;
-    if (isNewPlayback) setListenCount((count) => count + 1);
-    play(playbackId, scene.speechText, { accent, rate });
+    const started = await play(rate, scene.audioUrl, rate);
+    if (started) setListenCount((count) => count + 1);
   }
 
   async function submitListening() {
@@ -74,7 +62,7 @@ export function EnglishListeningPracticePage() {
       const submission = await apiPost<ListeningSubmissionResult>(
         `/api/english/listening/${encodeURIComponent(scene.id)}/submissions`,
         {
-          accent,
+          accent: "us",
           listenCount,
           durationSeconds: Math.min(3600, Math.max(0, Math.round((Date.now() - startedAt) / 1000))),
           answers: scene.questions.map((question) => ({
@@ -133,31 +121,31 @@ export function EnglishListeningPracticePage() {
               <span className={!result ? "active" : "done"}><b>1</b> 盲听</span>
               <span className={!result ? "active" : "done"}><b>2</b> 作答</span>
               <span className={result ? "active" : ""}><b>3</b> 精析</span>
-              <span className={result ? "active" : ""}><b>4</b> 换声复测</span>
+              <span className={result ? "active" : ""}><b>4</b> 慢速复测</span>
             </nav>
 
             <section className="listening-player" aria-labelledby="player-title">
               <div className="listening-player-copy">
                 <span>BLIND LISTENING</span>
                 <h2 id="player-title">先闭上“字幕”，只用耳朵听</h2>
-                <p>{result ? "现在可以结合原文，再切换口音听一遍。" : "第一遍听场景，第二遍带着问题抓人物、地点、数字和动作。"}</p>
+                <p>{result ? "现在可以结合原文，用正常或慢速再听一遍。" : "第一遍听场景，第二遍带着问题抓人物、地点、数字和动作。"}</p>
               </div>
-              <div className="accent-toggle" aria-label="选择英语口音">
-                <button className={accent === "us" ? "active" : ""} type="button" onClick={() => changeAccent("us")}>US 美音</button>
-                <button className={accent === "uk" ? "active" : ""} type="button" onClick={() => changeAccent("uk")}>UK 英音</button>
+              <div className="human-audio-source">
+                <span>HUMAN AUDIO</span>
+                <a href={scene.audioSource.pageUrl} target="_blank" rel="noreferrer">真人美音 · 官方来源</a>
               </div>
               <div className="listening-play-controls">
-                <button className="primary" type="button" onClick={() => playScene("normal")}>
-                  {activeSpeech === `${accent}-normal` ? <Pause /> : <Play />}
-                  <span><small>NORMAL</small><strong>{activeSpeech === `${accent}-normal` ? "停止播放" : "正常速度"}</strong></span>
+                <button className="primary" type="button" onClick={() => void playScene("normal")}>
+                  {activeAudio === "normal" ? <Pause /> : <Play />}
+                  <span><small>NORMAL</small><strong>{activeAudio === "normal" ? "停止播放" : "正常速度"}</strong></span>
                 </button>
-                <button type="button" onClick={() => playScene("slow")}>
-                  {activeSpeech === `${accent}-slow` ? <Pause /> : <Rabbit />}
-                  <span><small>SLOW</small><strong>{activeSpeech === `${accent}-slow` ? "停止播放" : "慢速再听"}</strong></span>
+                <button type="button" onClick={() => void playScene("slow")}>
+                  {activeAudio === "slow" ? <Pause /> : <Rabbit />}
+                  <span><small>SLOW</small><strong>{activeAudio === "slow" ? "停止播放" : "慢速再听"}</strong></span>
                 </button>
               </div>
               <div className="listen-count"><Headphones size={17} /> 本轮已播放 <strong>{listenCount}</strong> 次</div>
-              {speechError ? <div className="listening-speech-error" role="alert">{speechError}</div> : null}
+              {audioError ? <div className="listening-speech-error" role="alert">{audioError}</div> : null}
             </section>
 
             {!result ? (

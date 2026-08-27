@@ -4,7 +4,7 @@
 
 - 产品：使用预置账号登录的多模块个人学习与自测工作台；登录成功后先进入 `/study/modules` 选择学习模块。
 - 页面文案：用户用于说明信息架构的词语（例如“模块”“四大板块”“以后新增其他学习类型”）属于开发需求，不得直接当作面向学习者的提示文案展示。界面应使用“课程”“今天学什么”“听 · 说 · 读 · 写”等自然、简洁的学习语言；尚未制作的内容只标记“内容准备中”或“即将开放”，不展示内部规划、数据隔离或后续扩展说明。
-- 模块结构：模块选择页当前包含“中级经济师－人力资源”“中级经济师－经济学”“英语”三个大类。人力资源模块继续使用原 `/study`、考试、错题和成绩路由及现有数据；经济学和英语拥有独立模块首页，不得复用或展示人力资源数据。英语模块固定以 Listening/听、Speaking/说、Reading/读、Writing/写四板块扩展；当前 Listening/听已开放，目录路由为 `/study/modules/english/listening`，场景练习路由为 `/study/modules/english/listening/:sceneId`。听力模块只训练“听”，采用盲听、作答、提交后精析、换口音复测的顺序，不得加入录音、麦克风、跟读或口语评分；音标仅作为折叠的发音参考。音标与场景示例使用浏览器 Web Speech API 播放，语音能力不可用或播放失败时必须向用户显示明确错误。新增学习类型时应扩展模块目录，而不是混入现有学科。模块选择页保持紧凑、可扩展的响应式网格：手机端使用双列卡片，桌面端根据可用宽度自动排布，不为最后一张卡片设置跨列特例。
+- 模块结构：模块选择页当前包含“中级经济师－人力资源”“中级经济师－经济学”“英语”三个大类。人力资源模块继续使用原 `/study`、考试、错题和成绩路由及现有数据；经济学和英语拥有独立模块首页，不得复用或展示人力资源数据。英语模块固定以 Listening/听、Speaking/说、Reading/读、Writing/写四板块扩展；当前 Listening/听已开放，目录路由为 `/study/modules/english/listening`，场景练习路由为 `/study/modules/english/listening/:sceneId`。听力模块只训练“听”，采用盲听、作答、提交后精析、正常或慢速复测的顺序，不得加入录音、麦克风、跟读或口语评分；音标仅作为折叠的发音参考。场景对话必须播放已同步到私有 MinIO 的真人 MP3，Web Speech API 只用于音标示例；真人音频缺失、存储异常或播放失败时必须向用户显示明确错误，不得静默回退到机器朗读。新增学习类型时应扩展模块目录，而不是混入现有学科。模块选择页保持紧凑、可扩展的响应式网格：手机端使用双列卡片，桌面端根据可用宽度自动排布，不为最后一张卡片设置跨列特例。
 - 前端：React、TypeScript、Vite；所有页面必须兼容手机和电脑。
 - 服务端：Node.js、Fastify。
 - 数据库：SQLite，默认文件为 `data/study-workbench.sqlite`。
@@ -22,6 +22,7 @@
 - 测试：`npm test`
 - 完整校验：`npm run check`
 - 导入内容：`npm run import:data -- data/content.example.json`
+- 同步 Everyday Conversations 真人音频：`npm run audio:sync-listening -- --source-dir <官方 MP3 所在目录>`
 - 重建短卷系列：`npm run exams:build-short-series`
 - 确认短卷完整后隐藏原长卷：`npm run exams:archive-long`
 - 重建 2026 电子资料包：`python3 scripts/build-electronic-study-pack.py --source-dir '<电子资料包目录>' --bundle-dir imports/electronic-study-pack-2026 --questions-output data/hr-electronic-study-pack-questions-2026.json`
@@ -32,7 +33,7 @@
 
 - 学习资料、试卷、题目、考试记录均以 SQLite 为权威数据源。
 - 用户、会话、考试成绩和错题归属均以 SQLite 为权威数据源；前端不得使用设备标识或 `localStorage` 作为身份和成绩归属依据。
-- 英语听力场景内容以 `server/english-listening-content.mjs` 为单一事实源；列表与练习详情接口不得提前返回原文、正确答案或解析，只有完成全部题目并提交后才可返回。每次练习写入 `listening_attempts` 并绑定当前会话用户，前端只展示该用户自己的练习次数、最近成绩与最好成绩。
+- 英语听力场景内容以 `server/english-listening-content.mjs` 为单一事实源；首批内容固定使用美国国务院 American English 的 `Everyday Conversations` 中 `Around Town` 10 个官方真人对话，并为每条内容保留来源页、官方文件名、对象键和预期字节数。列表与练习详情接口不得提前返回原文、正确答案、解析、MinIO 对象键或官方 MP3 直链，只有完成全部题目并提交后才可返回原文与解析。真人 MP3 经登录鉴权的同源接口流式读取，必须支持 HTTP Range；公网不得直连 MinIO。每次练习写入 `listening_attempts` 并绑定当前会话用户，前端只展示该用户自己的练习次数、最近成绩与最好成绩。
 - 错题重练的每次提交写入 `mistake_practice_attempts`；只有完整答对才标记为“已重学”，该状态一旦获得便永久保留，但题目始终保留在错题本并允许继续重练。重练接口在提交前不得泄露正确答案和解析。
 - `sessions.user_id` 必须保持唯一；数据库升级时只保留每个用户到期时间最晚的会话，任何登录成功都必须删除该用户旧会话后再写入新会话。
 - 成绩和错题接口必须从当前有效会话取得 `user_id`，不得接受客户端传入用户名、用户 ID 或设备 ID 来决定数据归属。
@@ -59,6 +60,7 @@
 - `better-sqlite3` 原生模块在 Docker 构建阶段使用 Python/make/g++ 编译；运行镜像只复制裁剪后的生产依赖，不携带编译工具链。
 - 当前仅通过 HTTP/IP 提供服务，因此关闭 HSTS 与 CSP `upgrade-insecure-requests`；配置域名和 TLS 后必须同步恢复这两项。
 - 部署后必须检查容器健康状态、`/api/health`、`/study`、`/study` 下的前端深层路由、根地址和旧链接跳转，以及容器日志。
+- 首次部署或音源更新时，把已按预期字节数校验的 10 条官方 MP3 放入只读挂载的 `/app/imports/english-listening-audio`，执行 `docker compose run --rm app npm run audio:sync-listening -- --source-dir /app/imports/english-listening-audio`；同步命令必须逐条回读 MinIO 对象大小并输出对象键、字节数和 SHA-256，随后验证登录鉴权与 Range 播放接口。
 - 部署数据库迁移前必须创建 SQLite 备份；迁移后需核对用户数量、账号成绩数量和未归属旧记录数量。
 - “人力600母题”当前附件实际只有 154 题，权威导入文件为 `data/hr-600-master-collection.json`，试卷 ID 为 `hr-600-master-collection-v1`；不得用虚构题目补足到 600。答案与解析仅在交卷后的成绩详情中展示。
 - “2026 人力资源电子资料包”由 `scripts/build-electronic-study-pack.py` 从 11 份指定 PDF 生成；纳入版本控制的在线题库是 `data/hr-electronic-study-pack-questions-2026.json`，固定包含 100、199、200 题三套试卷，共 499 题。带 11 份原始 PDF 的生产导入包放在 `imports/electronic-study-pack-2026/`，`imports/` 不提交 Git。

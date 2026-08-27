@@ -2574,6 +2574,20 @@ img {
   font-weight: 800;
 }
 
+.listening-source-note {
+  margin: -7px 0 18px;
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.listening-source-note a {
+  color: var(--ink);
+  font-weight: 950;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
 .english-skill-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -3181,6 +3195,31 @@ img {
 .accent-toggle button { min-height: 36px; padding: 0 13px; border: 0; background: var(--paper); font-size: 10px; font-weight: 950; cursor: pointer; }
 .accent-toggle button + button { border-left: 1.5px solid var(--ink); }
 .accent-toggle button.active { background: var(--pink); }
+
+.human-audio-source {
+  display: flex;
+  align-self: start;
+  flex-direction: column;
+  gap: 2px;
+  padding: 8px 11px;
+  border: 2px solid var(--ink);
+  background: var(--green);
+  box-shadow: 2px 2px 0 var(--ink);
+}
+
+.human-audio-source span {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 8px;
+  font-weight: 950;
+  letter-spacing: .1em;
+}
+
+.human-audio-source a {
+  color: var(--ink);
+  font-size: 10px;
+  font-weight: 950;
+  text-decoration: none;
+}
 
 .listening-play-controls { display: grid; grid-column: 1 / -1; grid-template-columns: 1.25fr 1fr; gap: 12px; }
 .listening-play-controls button { display: flex; min-height: 90px; align-items: center; justify-content: center; gap: 14px; border: var(--border); background: var(--paper); box-shadow: 4px 4px 0 var(--ink); cursor: pointer; }
@@ -3976,7 +4015,8 @@ img {
   .listening-player-copy h2,
   .listening-quiz > header h2,
   .transcript-analysis > header h2 { font-size: 27px; }
-  .accent-toggle { width: 100%; margin-top: 17px; }
+  .accent-toggle,
+  .human-audio-source { width: 100%; margin-top: 17px; box-sizing: border-box; }
   .listening-play-controls { grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 14px; }
   .listening-play-controls button { min-height: 77px; gap: 8px; box-shadow: 3px 3px 0 var(--ink); }
   .listening-play-controls button > svg { width: 23px; height: 23px; }

@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { Readable } from "node:stream";
 import test from "node:test";
 import Database from "better-sqlite3";
 import { hashPassword } from "../server/auth.mjs";
@@ -84,7 +85,7 @@ function authenticated(cookie) {
   return { cookie };
 }
 
-async function createTestApp({ materialsEnabled = false } = {}) {
+async function createTestApp({ materialsEnabled = false, storage = null } = {}) {
   const directory = await mkdtemp(join(tmpdir(), "learning-workbench-test-"));
   const databasePath = join(directory, "test.sqlite");
   const db = openDatabase(databasePath);
@@ -96,7 +97,7 @@ async function createTestApp({ materialsEnabled = false } = {}) {
     databasePath,
     logger: false,
     serveStatic: false,
-    storage: null,
+    storage,
     captchaFactory: createTestCaptchaChallenge,
     materialsEnabled,
   });
@@ -448,28 +449,34 @@ test("listening practice hides answers until submission and persists per-user pr
     headers: authenticated(testApp.cookie),
   });
   assert.equal(listBefore.statusCode, 200, listBefore.body);
-  assert.equal(listBefore.json().scenes.length, 6);
+  assert.equal(listBefore.json().scenes.length, 10);
   assert.equal(listBefore.json().summary.practicedSceneCount, 0);
-  assert.doesNotMatch(listBefore.body, /correctOptionId|explanation|transcript/);
+  assert.doesNotMatch(
+    listBefore.body,
+    /correctOptionId|explanation|transcript|audioObjectKey|audioSourceUrl|audioByteLength/,
+  );
 
   const detail = await testApp.app.inject({
     method: "GET",
-    url: "/api/english/listening/coffee-shop",
+    url: "/api/english/listening/ordering-a-meal",
     headers: authenticated(testApp.cookie),
   });
   assert.equal(detail.statusCode, 200, detail.body);
   assert.equal(detail.json().scene.questions.length, 3);
-  assert.doesNotMatch(detail.body, /correctOptionId|explanation|transcript/);
+  assert.doesNotMatch(
+    detail.body,
+    /correctOptionId|explanation|transcript|audioObjectKey|audioSourceUrl|audioByteLength/,
+  );
 
   const incomplete = await testApp.app.inject({
     method: "POST",
-    url: "/api/english/listening/coffee-shop/submissions",
+    url: "/api/english/listening/ordering-a-meal/submissions",
     headers: authenticated(testApp.cookie),
     payload: {
       accent: "us",
       listenCount: 1,
       durationSeconds: 20,
-      answers: [{ questionId: "coffee-place", optionId: "cafe" }],
+      answers: [{ questionId: "meal-ralph-drink", optionId: "tea" }],
     },
   });
   assert.equal(incomplete.statusCode, 400);
@@ -477,24 +484,24 @@ test("listening practice hides answers until submission and persists per-user pr
 
   const completed = await testApp.app.inject({
     method: "POST",
-    url: "/api/english/listening/coffee-shop/submissions",
+    url: "/api/english/listening/ordering-a-meal/submissions",
     headers: authenticated(testApp.cookie),
     payload: {
-      accent: "uk",
+      accent: "us",
       listenCount: 2,
       durationSeconds: 36,
       answers: [
-        { questionId: "coffee-place", optionId: "cafe" },
-        { questionId: "coffee-temperature", optionId: "hot" },
-        { questionId: "coffee-sugar", optionId: "none" },
+        { questionId: "meal-ralph-drink", optionId: "tea" },
+        { questionId: "meal-beef", optionId: "well" },
+        { questionId: "meal-anna", optionId: "potato-salad" },
       ],
     },
   });
   assert.equal(completed.statusCode, 201, completed.body);
   assert.equal(completed.json().score, 100);
   assert.equal(completed.json().correctCount, 3);
-  assert.equal(completed.json().transcript.length, 3);
-  assert.equal(completed.json().answers[0].correctOptionId, "cafe");
+  assert.equal(completed.json().transcript.length, 8);
+  assert.equal(completed.json().answers[0].correctOptionId, "tea");
 
   const persisted = testApp.app.db
     .prepare(
@@ -504,8 +511,8 @@ test("listening practice hides answers until submission and persists per-user pr
     .all();
   assert.deepEqual(persisted, [{
     user_id: testUsername,
-    scene_id: "coffee-shop",
-    accent: "uk",
+    scene_id: "ordering-a-meal",
+    accent: "us",
     score: 100,
     listen_count: 2,
     duration_seconds: 36,
@@ -516,16 +523,82 @@ test("listening practice hides answers until submission and persists per-user pr
     url: "/api/english/listening",
     headers: authenticated(testApp.cookie),
   });
-  const coffeeProgress = listAfter.json().scenes.find((scene) => scene.id === "coffee-shop").progress;
+  const mealProgress = listAfter.json().scenes.find((scene) => scene.id === "ordering-a-meal").progress;
   assert.deepEqual(
     {
-      attemptCount: coffeeProgress.attemptCount,
-      bestScore: coffeeProgress.bestScore,
-      latestScore: coffeeProgress.latestScore,
+      attemptCount: mealProgress.attemptCount,
+      bestScore: mealProgress.bestScore,
+      latestScore: mealProgress.latestScore,
     },
     { attemptCount: 1, bestScore: 100, latestScore: 100 },
   );
   assert.equal(listAfter.json().summary.masteredSceneCount, 1);
+});
+
+test("listening audio is authenticated and supports byte ranges", async (context) => {
+  const audio = Buffer.from("0123456789");
+  const requestedObjects = [];
+  const storage = {
+    bucket: "test-assets",
+    client: {
+      async statObject(bucket, objectKey) {
+        requestedObjects.push({ operation: "stat", bucket, objectKey });
+        return { size: audio.length };
+      },
+      async getObject(bucket, objectKey) {
+        requestedObjects.push({ operation: "full", bucket, objectKey });
+        return Readable.from([audio]);
+      },
+      async getPartialObject(bucket, objectKey, start, length) {
+        requestedObjects.push({ operation: "partial", bucket, objectKey, start, length });
+        return Readable.from([audio.subarray(start, start + length)]);
+      },
+    },
+  };
+  const testApp = await createTestApp({ storage });
+  context.after(() => testApp.cleanup());
+  const url = "/api/english/listening/ordering-a-meal/audio";
+
+  const unauthenticated = await testApp.app.inject({ method: "GET", url });
+  assert.equal(unauthenticated.statusCode, 401);
+
+  const full = await testApp.app.inject({
+    method: "GET",
+    url,
+    headers: authenticated(testApp.cookie),
+  });
+  assert.equal(full.statusCode, 200, full.body);
+  assert.equal(full.headers["accept-ranges"], "bytes");
+  assert.equal(full.headers["content-length"], String(audio.length));
+  assert.deepEqual(full.rawPayload, audio);
+
+  const partial = await testApp.app.inject({
+    method: "GET",
+    url,
+    headers: { ...authenticated(testApp.cookie), range: "bytes=2-5" },
+  });
+  assert.equal(partial.statusCode, 206, partial.body);
+  assert.equal(partial.headers["content-range"], "bytes 2-5/10");
+  assert.equal(partial.headers["content-length"], "4");
+  assert.deepEqual(partial.rawPayload, Buffer.from("2345"));
+
+  const invalid = await testApp.app.inject({
+    method: "GET",
+    url,
+    headers: { ...authenticated(testApp.cookie), range: "bytes=50-60" },
+  });
+  assert.equal(invalid.statusCode, 416);
+  assert.equal(invalid.headers["content-range"], "bytes */10");
+  assert.match(invalid.json().error, /超出文件大小/);
+
+  assert.ok(requestedObjects.some((request) => request.operation === "full"));
+  assert.ok(requestedObjects.some((request) => (
+    request.operation === "partial" && request.start === 2 && request.length === 4
+  )));
+  assert.ok(requestedObjects.every((request) => (
+    request.bucket === "test-assets"
+      && request.objectKey === "english-listening/everyday-conversations/dialogue_2-01_ordering_a_meal.mp3"
+  )));
 });
 
 test("HR master collection imports all source questions and reveals answers only after submission", async (context) => {
