@@ -15,6 +15,84 @@ export interface DashboardSummary {
   recentAttempt: ResultSummary | null;
 }
 
+export type ListeningAccent = "us" | "uk";
+
+export interface ListeningProgress {
+  attemptCount: number;
+  bestScore: number | null;
+  latestScore: number | null;
+  lastPracticedAt: string | null;
+}
+
+export interface ListeningSceneSummary {
+  id: string;
+  number: string;
+  englishTitle: string;
+  chineseTitle: string;
+  context: string;
+  level: string;
+  duration: string;
+  tone: "yellow" | "blue" | "pink" | "green" | "orange" | "purple";
+  speechText: string;
+  progress: ListeningProgress;
+}
+
+export interface ListeningQuestionOption {
+  id: string;
+  label: string;
+  content: string;
+}
+
+export interface ListeningQuestion {
+  id: string;
+  prompt: string;
+  options: ListeningQuestionOption[];
+}
+
+export interface ListeningSceneDetail extends ListeningSceneSummary {
+  questions: ListeningQuestion[];
+}
+
+export interface ListeningListResponse {
+  scenes: ListeningSceneSummary[];
+  summary: {
+    sceneCount: number;
+    practicedSceneCount: number;
+    masteredSceneCount: number;
+    totalAttemptCount: number;
+  };
+}
+
+export interface ListeningSceneResponse {
+  scene: ListeningSceneDetail;
+}
+
+export interface ListeningTranscriptLine {
+  speaker: string;
+  text: string;
+  translation: string;
+  note: string;
+}
+
+export interface ListeningSubmissionResult {
+  id: string;
+  sceneId: string;
+  score: number;
+  correctCount: number;
+  totalQuestions: number;
+  listenCount: number;
+  durationSeconds: number;
+  submittedAt: string;
+  answers: Array<{
+    questionId: string;
+    selectedOptionId: string;
+    correctOptionId: string;
+    isCorrect: boolean;
+    explanation: string;
+  }>;
+  transcript: ListeningTranscriptLine[];
+}
+
 export interface MaterialSummary {
   id: string;
   title: string;

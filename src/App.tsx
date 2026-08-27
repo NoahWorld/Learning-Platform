@@ -4,6 +4,7 @@ import { AppShell } from "./components/AppShell";
 import { materialsEnabled } from "./features";
 import { DashboardPage } from "./pages/DashboardPage";
 import { EnglishListeningPage } from "./pages/EnglishListeningPage";
+import { EnglishListeningPracticePage } from "./pages/EnglishListeningPracticePage";
 import { EnglishModulePage } from "./pages/EnglishModulePage";
 import { ExamPage } from "./pages/ExamPage";
 import { ExamsPage } from "./pages/ExamsPage";
@@ -27,6 +28,7 @@ export default function App() {
         <Route path="modules/economics" element={<ModulePreviewPage moduleId="economics" />} />
         <Route path="modules/english" element={<EnglishModulePage />} />
         <Route path="modules/english/listening" element={<EnglishListeningPage />} />
+        <Route path="modules/english/listening/:sceneId" element={<EnglishListeningPracticePage />} />
         <Route element={<AppShell />}>
           <Route index element={<DashboardPage />} />
           {materialsEnabled ? <Route path="materials" element={<MaterialsPage />} /> : null}

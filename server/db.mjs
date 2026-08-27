@@ -2,7 +2,7 @@ import Database from "better-sqlite3";
 import { mkdirSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 
-const CURRENT_SCHEMA_VERSION = 6;
+const CURRENT_SCHEMA_VERSION = 7;
 
 export function openDatabase(databasePath = "./data/study-workbench.sqlite") {
   const resolvedPath = databasePath === ":memory:" ? databasePath : resolve(databasePath);
@@ -149,6 +149,20 @@ function migrate(db) {
           submitted_at TEXT NOT NULL
         );
 
+        CREATE TABLE listening_attempts (
+          id TEXT PRIMARY KEY,
+          user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+          scene_id TEXT NOT NULL,
+          accent TEXT NOT NULL CHECK (accent IN ('us', 'uk')),
+          answers_json TEXT NOT NULL,
+          score INTEGER NOT NULL CHECK (score BETWEEN 0 AND 100),
+          correct_count INTEGER NOT NULL CHECK (correct_count >= 0),
+          total_questions INTEGER NOT NULL CHECK (total_questions > 0),
+          listen_count INTEGER NOT NULL CHECK (listen_count > 0),
+          duration_seconds INTEGER NOT NULL CHECK (duration_seconds >= 0),
+          submitted_at TEXT NOT NULL
+        );
+
         CREATE INDEX idx_materials_status_category
           ON materials(status, category);
 
@@ -184,6 +198,9 @@ function migrate(db) {
 
         CREATE INDEX idx_mistake_practice_user_correct
           ON mistake_practice_attempts(user_id, is_correct);
+
+        CREATE INDEX idx_listening_attempts_user_scene_submitted
+          ON listening_attempts(user_id, scene_id, submitted_at DESC);
       `);
       db.pragma(`user_version = ${CURRENT_SCHEMA_VERSION}`);
       db.pragma("optimize");
@@ -309,6 +326,32 @@ function migrate(db) {
 
         CREATE INDEX idx_mistake_practice_user_correct
           ON mistake_practice_attempts(user_id, is_correct);
+      `);
+      db.pragma("user_version = 6");
+      db.pragma("optimize");
+    })();
+    version = 6;
+  }
+
+  if (version === 6) {
+    db.transaction(() => {
+      db.exec(`
+        CREATE TABLE listening_attempts (
+          id TEXT PRIMARY KEY,
+          user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+          scene_id TEXT NOT NULL,
+          accent TEXT NOT NULL CHECK (accent IN ('us', 'uk')),
+          answers_json TEXT NOT NULL,
+          score INTEGER NOT NULL CHECK (score BETWEEN 0 AND 100),
+          correct_count INTEGER NOT NULL CHECK (correct_count >= 0),
+          total_questions INTEGER NOT NULL CHECK (total_questions > 0),
+          listen_count INTEGER NOT NULL CHECK (listen_count > 0),
+          duration_seconds INTEGER NOT NULL CHECK (duration_seconds >= 0),
+          submitted_at TEXT NOT NULL
+        );
+
+        CREATE INDEX idx_listening_attempts_user_scene_submitted
+          ON listening_attempts(user_id, scene_id, submitted_at DESC);
       `);
       db.pragma(`user_version = ${CURRENT_SCHEMA_VERSION}`);
       db.pragma("optimize");

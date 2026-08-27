@@ -7,6 +7,7 @@ import { fileURLToPath } from "node:url";
 import { z } from "zod";
 import {
   loginSchema,
+  listeningSubmissionSchema,
   mistakePracticeSubmissionSchema,
   submissionSchema,
 } from "./content-schema.mjs";
@@ -23,6 +24,11 @@ import {
 import { openDatabase } from "./db.mjs";
 import { createStorage } from "./storage.mjs";
 import { createCaptchaChallenge } from "./captcha.mjs";
+import {
+  englishListeningScenes,
+  getEnglishListeningScene,
+  toPublicListeningScene,
+} from "./english-listening-content.mjs";
 
 const DEFAULT_STATIC_DIR = fileURLToPath(new URL("../dist", import.meta.url));
 const LEGACY_STUDY_PATH = /^\/(?:exams(?:\/.*)?|mistakes(?:\/.*)?|results(?:\/.*)?)$/;
@@ -348,6 +354,127 @@ function registerApiRoutes(app, db, storage, captchaFactory, materialsEnabled) {
       bestScore: attemptStats.best_score ?? 0,
       mistakeCount,
       recentAttempt: recentAttempt ? mapAttemptSummary(recentAttempt) : null,
+    };
+  });
+
+  app.get("/api/english/listening", async (request) => {
+    const user = requireUser(db, request);
+    const progressByScene = getListeningProgress(db, user.id);
+    const scenes = englishListeningScenes.map((scene) => ({
+      ...toPublicListeningScene(scene),
+      progress: progressByScene.get(scene.id) ?? emptyListeningProgress(),
+    }));
+    const practicedScenes = scenes.filter((scene) => scene.progress.attemptCount > 0);
+
+    return {
+      scenes,
+      summary: {
+        sceneCount: scenes.length,
+        practicedSceneCount: practicedScenes.length,
+        masteredSceneCount: practicedScenes.filter((scene) => scene.progress.bestScore === 100).length,
+        totalAttemptCount: practicedScenes.reduce(
+          (sum, scene) => sum + scene.progress.attemptCount,
+          0,
+        ),
+      },
+    };
+  });
+
+  app.get("/api/english/listening/:sceneId", async (request) => {
+    const user = requireUser(db, request);
+    const scene = getEnglishListeningScene(request.params.sceneId);
+    if (!scene) {
+      throw httpError(404, "听力场景不存在");
+    }
+
+    return {
+      scene: {
+        ...toPublicListeningScene(scene, { includeQuestions: true }),
+        progress: getListeningProgress(db, user.id).get(scene.id) ?? emptyListeningProgress(),
+      },
+    };
+  });
+
+  app.post("/api/english/listening/:sceneId/submissions", async (request, reply) => {
+    const user = requireUser(db, request);
+    const input = parseOrThrow(listeningSubmissionSchema, request.body);
+    const scene = getEnglishListeningScene(request.params.sceneId);
+    if (!scene) {
+      throw httpError(404, "听力场景不存在");
+    }
+
+    const duplicateQuestionIds = findDuplicates(input.answers.map((answer) => answer.questionId));
+    if (duplicateQuestionIds.length > 0) {
+      throw httpError(400, `听力答案包含重复题目：${duplicateQuestionIds.join(", ")}`);
+    }
+
+    const answerMap = new Map(input.answers.map((answer) => [answer.questionId, answer.optionId]));
+    const expectedQuestionIds = new Set(scene.questions.map((question) => question.id));
+    const unknownQuestionIds = [...answerMap.keys()].filter((id) => !expectedQuestionIds.has(id));
+    if (unknownQuestionIds.length > 0) {
+      throw httpError(400, `听力答案包含未知题目：${unknownQuestionIds.join(", ")}`);
+    }
+    const missingQuestionIds = scene.questions
+      .map((question) => question.id)
+      .filter((id) => !answerMap.has(id));
+    if (missingQuestionIds.length > 0) {
+      throw httpError(400, `请完成全部 ${scene.questions.length} 道听力题`);
+    }
+
+    const gradedAnswers = scene.questions.map((question) => {
+      const selectedOptionId = answerMap.get(question.id);
+      const validOption = question.options.some((option) => option.id === selectedOptionId);
+      if (!validOption) {
+        throw httpError(400, `题目 ${question.id} 包含无效选项：${selectedOptionId}`);
+      }
+      return {
+        questionId: question.id,
+        selectedOptionId,
+        correctOptionId: question.correctOptionId,
+        isCorrect: selectedOptionId === question.correctOptionId,
+        explanation: question.explanation,
+      };
+    });
+
+    const correctCount = gradedAnswers.filter((answer) => answer.isCorrect).length;
+    const score = Math.round((correctCount / scene.questions.length) * 100);
+    const id = randomUUID();
+    const submittedAt = new Date().toISOString();
+    db.prepare(
+      `INSERT INTO listening_attempts (
+         id, user_id, scene_id, accent, answers_json, score, correct_count,
+         total_questions, listen_count, duration_seconds, submitted_at
+       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    ).run(
+      id,
+      user.id,
+      scene.id,
+      input.accent,
+      JSON.stringify(input.answers),
+      score,
+      correctCount,
+      scene.questions.length,
+      input.listenCount,
+      input.durationSeconds,
+      submittedAt,
+    );
+
+    request.log.info(
+      { userId: user.id, sceneId: scene.id, listeningAttemptId: id, score },
+      "listening practice submitted",
+    );
+    reply.status(201);
+    return {
+      id,
+      sceneId: scene.id,
+      score,
+      correctCount,
+      totalQuestions: scene.questions.length,
+      listenCount: input.listenCount,
+      durationSeconds: input.durationSeconds,
+      submittedAt,
+      answers: gradedAnswers,
+      transcript: scene.transcript,
     };
   });
 
@@ -1067,6 +1194,42 @@ function requireMaterialsEnabled(materialsEnabled) {
   if (!materialsEnabled) {
     throw httpError(404, "学习资料模块暂未开放");
   }
+}
+
+function getListeningProgress(db, userId) {
+  const rows = db
+    .prepare(
+      `SELECT scene_id, score, submitted_at
+       FROM listening_attempts
+       WHERE user_id = ?
+       ORDER BY submitted_at DESC, id DESC`,
+    )
+    .all(userId);
+  const progress = new Map();
+  for (const row of rows) {
+    const existing = progress.get(row.scene_id);
+    if (!existing) {
+      progress.set(row.scene_id, {
+        attemptCount: 1,
+        bestScore: row.score,
+        latestScore: row.score,
+        lastPracticedAt: row.submitted_at,
+      });
+      continue;
+    }
+    existing.attemptCount += 1;
+    existing.bestScore = Math.max(existing.bestScore, row.score);
+  }
+  return progress;
+}
+
+function emptyListeningProgress() {
+  return {
+    attemptCount: 0,
+    bestScore: null,
+    latestScore: null,
+    lastPracticedAt: null,
+  };
 }
 
 function parseBooleanEnvironment(name, rawValue, fallback) {

@@ -432,6 +432,102 @@ test("materials can be re-enabled explicitly without reimporting their data", as
   assert.match(material.json().content, /主动回忆/);
 });
 
+test("listening practice hides answers until submission and persists per-user progress", async (context) => {
+  const testApp = await createTestApp();
+  context.after(() => testApp.cleanup());
+
+  const unauthenticated = await testApp.app.inject({
+    method: "GET",
+    url: "/api/english/listening",
+  });
+  assert.equal(unauthenticated.statusCode, 401);
+
+  const listBefore = await testApp.app.inject({
+    method: "GET",
+    url: "/api/english/listening",
+    headers: authenticated(testApp.cookie),
+  });
+  assert.equal(listBefore.statusCode, 200, listBefore.body);
+  assert.equal(listBefore.json().scenes.length, 6);
+  assert.equal(listBefore.json().summary.practicedSceneCount, 0);
+  assert.doesNotMatch(listBefore.body, /correctOptionId|explanation|transcript/);
+
+  const detail = await testApp.app.inject({
+    method: "GET",
+    url: "/api/english/listening/coffee-shop",
+    headers: authenticated(testApp.cookie),
+  });
+  assert.equal(detail.statusCode, 200, detail.body);
+  assert.equal(detail.json().scene.questions.length, 3);
+  assert.doesNotMatch(detail.body, /correctOptionId|explanation|transcript/);
+
+  const incomplete = await testApp.app.inject({
+    method: "POST",
+    url: "/api/english/listening/coffee-shop/submissions",
+    headers: authenticated(testApp.cookie),
+    payload: {
+      accent: "us",
+      listenCount: 1,
+      durationSeconds: 20,
+      answers: [{ questionId: "coffee-place", optionId: "cafe" }],
+    },
+  });
+  assert.equal(incomplete.statusCode, 400);
+  assert.match(incomplete.json().error, /请完成全部 3 道听力题/);
+
+  const completed = await testApp.app.inject({
+    method: "POST",
+    url: "/api/english/listening/coffee-shop/submissions",
+    headers: authenticated(testApp.cookie),
+    payload: {
+      accent: "uk",
+      listenCount: 2,
+      durationSeconds: 36,
+      answers: [
+        { questionId: "coffee-place", optionId: "cafe" },
+        { questionId: "coffee-temperature", optionId: "hot" },
+        { questionId: "coffee-sugar", optionId: "none" },
+      ],
+    },
+  });
+  assert.equal(completed.statusCode, 201, completed.body);
+  assert.equal(completed.json().score, 100);
+  assert.equal(completed.json().correctCount, 3);
+  assert.equal(completed.json().transcript.length, 3);
+  assert.equal(completed.json().answers[0].correctOptionId, "cafe");
+
+  const persisted = testApp.app.db
+    .prepare(
+      `SELECT user_id, scene_id, accent, score, listen_count, duration_seconds
+       FROM listening_attempts`,
+    )
+    .all();
+  assert.deepEqual(persisted, [{
+    user_id: testUsername,
+    scene_id: "coffee-shop",
+    accent: "uk",
+    score: 100,
+    listen_count: 2,
+    duration_seconds: 36,
+  }]);
+
+  const listAfter = await testApp.app.inject({
+    method: "GET",
+    url: "/api/english/listening",
+    headers: authenticated(testApp.cookie),
+  });
+  const coffeeProgress = listAfter.json().scenes.find((scene) => scene.id === "coffee-shop").progress;
+  assert.deepEqual(
+    {
+      attemptCount: coffeeProgress.attemptCount,
+      bestScore: coffeeProgress.bestScore,
+      latestScore: coffeeProgress.latestScore,
+    },
+    { attemptCount: 1, bestScore: 100, latestScore: 100 },
+  );
+  assert.equal(listAfter.json().summary.masteredSceneCount, 1);
+});
+
 test("HR master collection imports all source questions and reveals answers only after submission", async (context) => {
   const directory = await mkdtemp(join(tmpdir(), "learning-workbench-hr-master-"));
   const databasePath = join(directory, "test.sqlite");
@@ -811,7 +907,7 @@ test("version 1 databases migrate case-question fields without losing rows", asy
 
   const migratedDb = openDatabase(databasePath);
   context.after(() => migratedDb.close());
-  assert.equal(migratedDb.pragma("user_version", { simple: true }), 6);
+  assert.equal(migratedDb.pragma("user_version", { simple: true }), 7);
   assert.deepEqual(
     migratedDb.prepare("SELECT id, section, passage FROM questions WHERE id = ?").get("legacy-q"),
     { id: "legacy-q", section: "standard", passage: "" },
@@ -847,6 +943,7 @@ test("version 4 migration keeps only the newest session per user", async (contex
   versionFourDb.exec(`
     DROP INDEX idx_sessions_one_per_user;
     DROP TABLE mistake_practice_attempts;
+    DROP TABLE listening_attempts;
     INSERT INTO users (
       id, username, display_name, password_hash, password_salt, created_at, updated_at
     ) VALUES (
@@ -863,7 +960,7 @@ test("version 4 migration keeps only the newest session per user", async (contex
   versionFourDb.close();
 
   migratedDb = openDatabase(databasePath);
-  assert.equal(migratedDb.pragma("user_version", { simple: true }), 6);
+  assert.equal(migratedDb.pragma("user_version", { simple: true }), 7);
   assert.equal(
     migratedDb
       .prepare("SELECT COUNT(*) AS count FROM sqlite_master WHERE type = 'table' AND name = ?")

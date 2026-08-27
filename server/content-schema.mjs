@@ -158,6 +158,21 @@ export const mistakePracticeSubmissionSchema = z.object({
   optionIds: z.array(idSchema).min(1, "请至少选择一个答案").max(12),
 });
 
+export const listeningSubmissionSchema = z.object({
+  accent: z.enum(["us", "uk"]),
+  listenCount: z.number().int().min(1, "请至少完整收听一次").max(100),
+  durationSeconds: z.number().int().min(0).max(3600),
+  answers: z
+    .array(
+      z.object({
+        questionId: idSchema,
+        optionId: idSchema,
+      }),
+    )
+    .min(1)
+    .max(20),
+});
+
 const usernameSchema = z
   .string()
   .transform((value) => value.replace(/\s/g, ""))
