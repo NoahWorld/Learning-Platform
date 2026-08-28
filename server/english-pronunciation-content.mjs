@@ -4,6 +4,15 @@ const SOURCE_AUDIO_ROOT = "https://americanenglish.state.gov/files/ae/cvc_ver6/v
 const AUDIO_OBJECT_PREFIX = "english-pronunciation/color-vowel-chart";
 
 function audioMetadata(fileName, audioByteLength, audioSha256) {
+  if (!Number.isSafeInteger(audioByteLength) || audioByteLength <= 0) {
+    throw new Error(`Invalid audio byte length for ${fileName}: ${audioByteLength}`);
+  }
+  if (!/^[0-9a-f]{64}$/.test(audioSha256)) {
+    throw new Error(
+      `Invalid SHA-256 metadata for ${fileName}: expected 64 lowercase hexadecimal characters, received ${audioSha256.length}`,
+    );
+  }
+
   return {
     audioFileName: fileName,
     audioByteLength,
@@ -27,13 +36,13 @@ function sound(id, number, ipa, cue, keywords, colorClass, fileName, byteLength,
 
 export const englishPronunciationSounds = [
   sound("green-tea", "01", "i", "GREEN TEA", ["GREEN", "TEA"], "green", "GREEN-A.mp3", 15463, "5a8c005b5236fcf77084df495bef41365fcba009a0effa9ec46b0c3a73510461"),
-  sound("silver-pin", "02", "ɪ", "SILVER PIN", ["SILVER", "PIN"], "silver", "SILVER-A.mp3", 15967, "00f6f7b62d09f1a37390154bb8f6146df8bf2be0d443d7db2f7a3f5194e1869"),
+  sound("silver-pin", "02", "ɪ", "SILVER PIN", ["SILVER", "PIN"], "silver", "SILVER-A.mp3", 15967, "00f6f7b62d09f1a37390154bb8f6146df8bf2be0d443d7db2f7a3f5194e1869d"),
   sound("gray-day", "03", "eɪ", "GRAY DAY", ["GRAY", "DAY"], "gray", "GRAY-A.mp3", 16975, "2e7c3982b2aea1e99e7fbc43ad1ed368ba46d8f66ffabd71930559d814956081"),
   sound("red-dress", "04", "ɛ", "RED DRESS", ["RED", "DRESS"], "red", "RED-A.mp3", 15967, "e9b883a58fcdc1602945f8645d6f1235c9361ad9616216f5ede2bf01aedbea9d"),
   sound("black-cat", "05", "æ", "BLACK CAT", ["BLACK", "CAT"], "black", "BLACK-A.mp3", 15715, "7e67cb7998275e605ff8271ee64e4d722504b0bd36e69b86aa9b3eb752650f24"),
   sound("mustard-cup", "06", "ʌ", "A CUP OF MUSTARD", ["CUP", "MUSTARD"], "mustard", "MUSTARD-A.mp3", 15211, "f0d961f6bf21a69d81cd58e10758e2e9ccfae8f43ccb545a073a79b9026ee518"),
   sound("olive-sock", "07", "ɑ", "OLIVE SOCK", ["OLIVE", "SOCK"], "olive", "OLIVE-A.mp3", 15715, "538e6e46848d688e3197715e5ce469452fe60f68a152b16e6470dd8a96b8ac2f"),
-  sound("auburn-dog", "08", "ɔ", "AUBURN DOG", ["AUBURN", "DOG"], "auburn", "AUBURN-A.mp3", 15967, "be0c13441941f6ec9217064edb016929f18bb04532d304a11341d2316cdf6f8"),
+  sound("auburn-dog", "08", "ɔ", "AUBURN DOG", ["AUBURN", "DOG"], "auburn", "AUBURN-A.mp3", 15967, "be0c13441941f6ec9217064edb016929f18dbb04532d304a11341d2316cdf6f8"),
   sound("blue-moon", "09", "u", "BLUE MOON", ["BLUE", "MOON"], "blue", "BLUE-A.mp3", 16975, "a1c14126772635836b6f4142e7125fd61339edd8b31ba8db20f0c507969f9366"),
   sound("wooden-hook", "10", "ʊ", "WOODEN HOOK", ["WOODEN", "HOOK"], "wooden", "WOODEN-A.mp3", 13447, "ae14b35fb6bc7b5dfe237cab7b4917cc2bda823c87049302716a390c9e7858ff"),
   sound("rose-coat", "11", "oʊ", "ROSE COAT", ["ROSE", "COAT"], "rose", "ROSE-A.mp3", 16723, "62b82f513f422819cb30213526226c0d3e5ca1b4c86e10da259db825528e5aae"),
