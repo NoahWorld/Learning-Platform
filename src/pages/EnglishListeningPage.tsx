@@ -11,15 +11,13 @@ import {
   Sparkles,
   Volume2,
 } from "lucide-react";
-import { useEffect, useMemo } from "react";
+import { useEffect } from "react";
 import { Link } from "react-router-dom";
 import { apiGet } from "../api";
 import { ModuleTopBar } from "../components/ModuleTopBar";
 import { ErrorState, LoadingState } from "../components/PageBits";
-import { phonemeGroups } from "../englishContent";
 import type { ListeningListResponse, ListeningSceneSummary } from "../types";
 import { useAudioPlayback } from "../useAudioPlayback";
-import { useEnglishSpeech } from "../useEnglishSpeech";
 import { useRemote } from "../useRemote";
 
 function progressLabel(scene: ListeningSceneSummary) {
@@ -33,12 +31,10 @@ export function EnglishListeningPage() {
     (signal) => apiGet("/api/english/listening", signal),
     [],
   );
-  const { activeAudio, audioError, play: playAudio } = useAudioPlayback();
-  const { activeSpeech, play: playSpeech, speechError } = useEnglishSpeech();
-  const phonemeCount = useMemo(
-    () => phonemeGroups.reduce((count, group) => count + group.items.length, 0),
-    [],
-  );
+  const { activeAudio, audioError, errorAudioId, play: playAudio } = useAudioPlayback();
+  const pronunciationSounds = data?.soundReference.sounds ?? [];
+  const sceneAudioError = audioError && !errorAudioId?.startsWith("pronunciation-");
+  const pronunciationAudioError = audioError && errorAudioId?.startsWith("pronunciation-");
 
   useEffect(() => {
     document.body.dataset.mode = "comic";
@@ -59,7 +55,7 @@ export function EnglishListeningPage() {
             <div className="listening-hero-facts">
               <span><Headphones size={16} /> {data?.summary.sceneCount ?? 10} 个场景</span>
               <span><CheckCircle2 size={16} /> {data?.summary.practicedSceneCount ?? 0} 个已练</span>
-              <span><Volume2 size={16} /> {phonemeCount} 个发音参考</span>
+              <span><Volume2 size={16} /> {data ? pronunciationSounds.length : "—"} 组真人发音</span>
             </div>
           </div>
           <div className="listening-hero-art" aria-hidden="true">
@@ -76,7 +72,7 @@ export function EnglishListeningPage() {
           <div><b>04</b><span><strong>复测</strong><small>正常 / 慢速</small></span></div>
         </section>
 
-        {audioError ? <div className="listening-speech-error" role="alert">{audioError}</div> : null}
+        {sceneAudioError ? <div className="listening-speech-error" role="alert">{audioError}</div> : null}
 
         <section className="listening-section scene-section" aria-labelledby="scene-title">
           <header className="listening-section-heading">
@@ -140,50 +136,73 @@ export function EnglishListeningPage() {
           ) : null}
         </section>
 
-        <details className="phoneme-reference">
+        <details className="pronunciation-reference">
           <summary>
-            <span><Volume2 size={19} /><strong>音标发音参考</strong><small>需要时再查，不作为听力训练起点</small></span>
-            <b>展开 {phonemeCount} 个音标</b>
+            <span><Volume2 size={19} /><strong>真人元音发音参考</strong><small>先听完整记忆词组，再辨认其中共同的元音</small></span>
+            <b>展开 {data ? pronunciationSounds.length : "—"} 组录音</b>
           </summary>
-          <section className="listening-section phoneme-section" aria-labelledby="phoneme-title">
+          <section className="listening-section pronunciation-section" aria-labelledby="pronunciation-title">
             <header className="listening-section-heading">
               <div>
                 <span>02 · SOUND REFERENCE</span>
-                <h2 id="phoneme-title">音标发音地图</h2>
+                <h2 id="pronunciation-title">美式元音声音地图</h2>
               </div>
-              <p><Volume2 size={17} /> 点击音标，听示例词的声音。</p>
+              <p><Volume2 size={17} /> 每段完整读出记忆词组，不朗读音标符号。</p>
             </header>
-            {speechError ? <div className="listening-speech-error" role="alert">{speechError}</div> : null}
-            <div className="phoneme-group-list">
-              {phonemeGroups.map((group) => (
-                <article className={`phoneme-group ${group.tone}`} key={group.englishTitle}>
-                  <header>
-                    <span>{group.englishTitle}</span>
-                    <strong>{group.chineseTitle}</strong>
-                    <i>{group.items.length} SOUNDS</i>
-                  </header>
-                  <div className="phoneme-grid">
-                    {group.items.map((phoneme) => {
-                      const speechId = `phoneme-${phoneme.symbol}`;
-                      const isPlaying = activeSpeech === speechId;
-                      return (
-                        <button
-                          className={isPlaying ? "playing" : ""}
-                          type="button"
-                          onClick={() => playSpeech(speechId, phoneme.example)}
-                          aria-label={`${isPlaying ? "停止" : "播放"}音标 /${phoneme.symbol}/ 的示例词 ${phoneme.example}`}
-                          key={phoneme.symbol}
-                        >
-                          <strong>/{phoneme.symbol}/</strong>
-                          <small>{phoneme.example}</small>
-                          {isPlaying ? <Pause size={14} aria-hidden="true" /> : <Volume2 size={14} aria-hidden="true" />}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </article>
-              ))}
+            <p className="pronunciation-guide">
+              例如先听 <strong>GREEN TEA</strong>，再留意两个词里共同的 <b>/i/</b>。建议先用正常速度，仍不清楚时再听慢速。
+            </p>
+            {pronunciationAudioError ? <div className="listening-speech-error" role="alert">{audioError}</div> : null}
+            <div className="pronunciation-grid">
+              {pronunciationSounds.map((sound) => {
+                const normalId = `pronunciation-${sound.id}-normal`;
+                const slowId = `pronunciation-${sound.id}-slow`;
+                const normalPlaying = activeAudio === normalId;
+                const slowPlaying = activeAudio === slowId;
+                return (
+                  <article className={`pronunciation-card ${sound.colorClass}`} key={sound.id}>
+                    <header>
+                      <span>{sound.number}</span>
+                      <strong>/{sound.ipa}/</strong>
+                    </header>
+                    <h3>{sound.cue}</h3>
+                    <div className="pronunciation-keywords" aria-label={`记忆词：${sound.keywords.join("、")}`}>
+                      {sound.keywords.map((word) => <span key={word}>{word}</span>)}
+                    </div>
+                    <div className="pronunciation-controls">
+                      <button
+                        className={normalPlaying ? "playing" : ""}
+                        type="button"
+                        onClick={() => void playAudio(normalId, sound.audioUrl, "normal")}
+                        aria-label={`${normalPlaying ? "停止" : "正常速度播放"} ${sound.cue}，元音 /${sound.ipa}/`}
+                      >
+                        {normalPlaying ? <Pause size={15} /> : <Play size={15} />} 正常
+                      </button>
+                      <button
+                        className={slowPlaying ? "playing" : ""}
+                        type="button"
+                        onClick={() => void playAudio(slowId, sound.audioUrl, "slow")}
+                        aria-label={`${slowPlaying ? "停止" : "慢速播放"} ${sound.cue}，元音 /${sound.ipa}/`}
+                      >
+                        {slowPlaying ? <Pause size={15} /> : <Volume2 size={15} />} 慢速
+                      </button>
+                    </div>
+                  </article>
+                );
+              })}
             </div>
+            {data ? (
+              <p className="pronunciation-source-note">
+                真人录音与记忆词组来自美国国务院 American English 的
+                <a href={data.soundReference.source.pageUrl} target="_blank" rel="noreferrer">
+                  {data.soundReference.source.title}
+                </a>
+                （{data.soundReference.source.authors}，
+                <a href={data.soundReference.source.licenseUrl} target="_blank" rel="noreferrer">
+                  {data.soundReference.source.licenseName}
+                </a>）。
+              </p>
+            ) : null}
           </section>
         </details>
 

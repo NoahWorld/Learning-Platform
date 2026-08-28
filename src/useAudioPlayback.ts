@@ -8,6 +8,7 @@ export function useAudioPlayback() {
   const playbackTokenRef = useRef(0);
   const [activeAudio, setActiveAudio] = useState<string | null>(null);
   const [audioError, setAudioError] = useState<string | null>(null);
+  const [errorAudioId, setErrorAudioId] = useState<string | null>(null);
 
   function clearCurrentAudio() {
     const audio = audioRef.current;
@@ -37,6 +38,7 @@ export function useAudioPlayback() {
 
   async function play(id: string, audioUrl: string, rate: PlaybackRate = "normal") {
     setAudioError(null);
+    setErrorAudioId(null);
     if (activeIdRef.current === id) {
       stop();
       return false;
@@ -73,6 +75,7 @@ export function useAudioPlayback() {
         if (audioRef.current !== audio) return;
         const mediaCode = audio.error?.code;
         clearCurrentAudio();
+        setErrorAudioId(id);
         setAudioError(
           mediaCode
             ? `真人音频播放中断（媒体错误 ${mediaCode}），请检查网络后重试。`
@@ -91,10 +94,11 @@ export function useAudioPlayback() {
     } catch (error) {
       if (playbackTokenRef.current !== playbackToken) return false;
       clearCurrentAudio();
+      setErrorAudioId(id);
       setAudioError(error instanceof Error ? error.message : "真人音频播放失败");
       return false;
     }
   }
 
-  return { activeAudio, audioError, play, stop };
+  return { activeAudio, audioError, errorAudioId, play, stop };
 }

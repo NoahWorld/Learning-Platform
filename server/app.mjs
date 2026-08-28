@@ -29,6 +29,12 @@ import {
   getEnglishListeningScene,
   toPublicListeningScene,
 } from "./english-listening-content.mjs";
+import {
+  englishPronunciationSounds,
+  englishPronunciationSource,
+  getEnglishPronunciationSound,
+  toPublicEnglishPronunciationSound,
+} from "./english-pronunciation-content.mjs";
 
 const DEFAULT_STATIC_DIR = fileURLToPath(new URL("../dist", import.meta.url));
 const LEGACY_STUDY_PATH = /^\/(?:exams(?:\/.*)?|mistakes(?:\/.*)?|results(?:\/.*)?)$/;
@@ -370,6 +376,10 @@ function registerApiRoutes(app, db, storage, captchaFactory, materialsEnabled) {
 
     return {
       scenes,
+      soundReference: {
+        sounds: englishPronunciationSounds.map(toPublicEnglishPronunciationSound),
+        source: englishPronunciationSource,
+      },
       summary: {
         sceneCount: scenes.length,
         practicedSceneCount: practicedScenes.length,
@@ -403,85 +413,34 @@ function registerApiRoutes(app, db, storage, captchaFactory, materialsEnabled) {
     if (!scene) {
       throw httpError(404, "听力场景不存在");
     }
-    if (!storage) {
-      throw httpError(503, "真人听力音频存储尚未配置，请联系管理员", { expose: true });
-    }
-
-    let objectStat;
-    try {
-      objectStat = await storage.client.statObject(storage.bucket, scene.audioObjectKey);
-    } catch (error) {
-      request.log.error(
-        { err: error, sceneId: scene.id, objectKey: scene.audioObjectKey },
-        "listening audio metadata lookup failed",
-      );
-      if (isMissingStorageObject(error)) {
-        throw httpError(503, `真人听力音频尚未同步：${scene.chineseTitle}`, {
-          expose: true,
-          cause: error,
-        });
-      }
-      throw httpError(502, `真人听力音频读取失败：${scene.chineseTitle}`, {
-        expose: true,
-        cause: error,
-      });
-    }
-
-    const size = Number(objectStat.size);
-    if (!Number.isSafeInteger(size) || size <= 0) {
-      request.log.error(
-        { sceneId: scene.id, objectKey: scene.audioObjectKey, reportedSize: objectStat.size },
-        "listening audio has an invalid object size",
-      );
-      throw httpError(502, `真人听力音频文件无效：${scene.chineseTitle}`, { expose: true });
-    }
-
-    let byteRange;
-    try {
-      byteRange = parseByteRange(request.headers.range, size);
-    } catch (error) {
-      reply.header("Content-Range", `bytes */${size}`);
-      throw error;
-    }
-
-    let objectStream;
-    try {
-      objectStream = byteRange.partial
-        ? await storage.client.getPartialObject(
-          storage.bucket,
-          scene.audioObjectKey,
-          byteRange.start,
-          byteRange.length,
-        )
-        : await storage.client.getObject(storage.bucket, scene.audioObjectKey);
-    } catch (error) {
-      request.log.error(
-        { err: error, sceneId: scene.id, objectKey: scene.audioObjectKey, byteRange },
-        "listening audio stream open failed",
-      );
-      throw httpError(502, `真人听力音频播放失败：${scene.chineseTitle}`, {
-        expose: true,
-        cause: error,
-      });
-    }
-
-    objectStream.on("error", (error) => {
-      request.log.error(
-        { err: error, sceneId: scene.id, objectKey: scene.audioObjectKey, byteRange },
-        "listening audio stream failed",
-      );
+    return sendPrivateMp3({
+      request,
+      reply,
+      storage,
+      objectKey: scene.audioObjectKey,
+      resourceContext: { sceneId: scene.id },
+      displayName: scene.chineseTitle,
+      userFacingLabel: "真人听力音频",
+      logLabel: "listening audio",
     });
+  });
 
-    reply
-      .status(byteRange.partial ? 206 : 200)
-      .header("Content-Type", "audio/mpeg")
-      .header("Content-Length", byteRange.length)
-      .header("Accept-Ranges", "bytes")
-      .header("Cache-Control", "private, max-age=86400");
-    if (byteRange.partial) {
-      reply.header("Content-Range", `bytes ${byteRange.start}-${byteRange.end}/${size}`);
+  app.get("/api/english/pronunciation/:soundId/audio", async (request, reply) => {
+    requireUser(db, request);
+    const sound = getEnglishPronunciationSound(request.params.soundId);
+    if (!sound) {
+      throw httpError(404, "发音参考不存在");
     }
-    return reply.send(objectStream);
+    return sendPrivateMp3({
+      request,
+      reply,
+      storage,
+      objectKey: sound.audioObjectKey,
+      resourceContext: { soundId: sound.id },
+      displayName: sound.cue,
+      userFacingLabel: "真人发音音频",
+      logLabel: "pronunciation audio",
+    });
   });
 
   app.post("/api/english/listening/:sceneId/submissions", async (request, reply) => {
@@ -1340,6 +1299,97 @@ function httpError(statusCode, message, { expose = false, cause } = {}) {
 function isMissingStorageObject(error) {
   return error && typeof error === "object"
     && ["NoSuchKey", "NoSuchObject", "NotFound"].includes(error.code);
+}
+
+async function sendPrivateMp3({
+  request,
+  reply,
+  storage,
+  objectKey,
+  resourceContext,
+  displayName,
+  userFacingLabel,
+  logLabel,
+}) {
+  if (!storage) {
+    throw httpError(503, `${userFacingLabel}存储尚未配置，请联系管理员`, { expose: true });
+  }
+
+  let objectStat;
+  try {
+    objectStat = await storage.client.statObject(storage.bucket, objectKey);
+  } catch (error) {
+    request.log.error(
+      { err: error, ...resourceContext, objectKey },
+      `${logLabel} metadata lookup failed`,
+    );
+    if (isMissingStorageObject(error)) {
+      throw httpError(503, `${userFacingLabel}尚未同步：${displayName}`, {
+        expose: true,
+        cause: error,
+      });
+    }
+    throw httpError(502, `${userFacingLabel}读取失败：${displayName}`, {
+      expose: true,
+      cause: error,
+    });
+  }
+
+  const size = Number(objectStat.size);
+  if (!Number.isSafeInteger(size) || size <= 0) {
+    request.log.error(
+      { ...resourceContext, objectKey, reportedSize: objectStat.size },
+      `${logLabel} has an invalid object size`,
+    );
+    throw httpError(502, `${userFacingLabel}文件无效：${displayName}`, { expose: true });
+  }
+
+  let byteRange;
+  try {
+    byteRange = parseByteRange(request.headers.range, size);
+  } catch (error) {
+    reply.header("Content-Range", `bytes */${size}`);
+    throw error;
+  }
+
+  let objectStream;
+  try {
+    objectStream = byteRange.partial
+      ? await storage.client.getPartialObject(
+        storage.bucket,
+        objectKey,
+        byteRange.start,
+        byteRange.length,
+      )
+      : await storage.client.getObject(storage.bucket, objectKey);
+  } catch (error) {
+    request.log.error(
+      { err: error, ...resourceContext, objectKey, byteRange },
+      `${logLabel} stream open failed`,
+    );
+    throw httpError(502, `${userFacingLabel}播放失败：${displayName}`, {
+      expose: true,
+      cause: error,
+    });
+  }
+
+  objectStream.on("error", (error) => {
+    request.log.error(
+      { err: error, ...resourceContext, objectKey, byteRange },
+      `${logLabel} stream failed`,
+    );
+  });
+
+  reply
+    .status(byteRange.partial ? 206 : 200)
+    .header("Content-Type", "audio/mpeg")
+    .header("Content-Length", byteRange.length)
+    .header("Accept-Ranges", "bytes")
+    .header("Cache-Control", "private, max-age=86400");
+  if (byteRange.partial) {
+    reply.header("Content-Range", `bytes ${byteRange.start}-${byteRange.end}/${size}`);
+  }
+  return reply.send(objectStream);
 }
 
 function parseByteRange(rangeHeader, size) {

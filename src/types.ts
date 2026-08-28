@@ -15,8 +15,6 @@ export interface DashboardSummary {
   recentAttempt: ResultSummary | null;
 }
 
-export type ListeningAccent = "us" | "uk";
-
 export interface ListeningProgress {
   attemptCount: number;
   bestScore: number | null;
@@ -61,12 +59,50 @@ export interface ListeningSceneDetail extends ListeningSceneSummary {
 
 export interface ListeningListResponse {
   scenes: ListeningSceneSummary[];
+  soundReference: {
+    sounds: EnglishPronunciationSound[];
+    source: EnglishPronunciationSource;
+  };
   summary: {
     sceneCount: number;
     practicedSceneCount: number;
     masteredSceneCount: number;
     totalAttemptCount: number;
   };
+}
+
+export interface EnglishPronunciationSound {
+  id: string;
+  number: string;
+  ipa: string;
+  cue: string;
+  keywords: string[];
+  colorClass:
+    | "green"
+    | "silver"
+    | "gray"
+    | "red"
+    | "black"
+    | "mustard"
+    | "olive"
+    | "auburn"
+    | "blue"
+    | "wooden"
+    | "rose"
+    | "brown"
+    | "white"
+    | "purple"
+    | "turquoise";
+  audioUrl: string;
+}
+
+export interface EnglishPronunciationSource {
+  title: string;
+  authors: string;
+  publisher: string;
+  pageUrl: string;
+  licenseName: string;
+  licenseUrl: string;
 }
 
 export interface ListeningSceneResponse {

@@ -450,10 +450,14 @@ test("listening practice hides answers until submission and persists per-user pr
   });
   assert.equal(listBefore.statusCode, 200, listBefore.body);
   assert.equal(listBefore.json().scenes.length, 10);
+  assert.equal(listBefore.json().soundReference.sounds.length, 15);
+  assert.equal(listBefore.json().soundReference.sounds[0].cue, "GREEN TEA");
+  assert.equal(listBefore.json().soundReference.sounds[0].ipa, "i");
+  assert.equal(listBefore.json().soundReference.source.licenseName, "CC BY-NC-ND 4.0");
   assert.equal(listBefore.json().summary.practicedSceneCount, 0);
   assert.doesNotMatch(
     listBefore.body,
-    /correctOptionId|explanation|transcript|audioObjectKey|audioSourceUrl|audioByteLength/,
+    /correctOptionId|explanation|transcript|audioObjectKey|audioSourceUrl|audioByteLength|audioSha256/,
   );
 
   const detail = await testApp.app.inject({
@@ -465,7 +469,7 @@ test("listening practice hides answers until submission and persists per-user pr
   assert.equal(detail.json().scene.questions.length, 3);
   assert.doesNotMatch(
     detail.body,
-    /correctOptionId|explanation|transcript|audioObjectKey|audioSourceUrl|audioByteLength/,
+    /correctOptionId|explanation|transcript|audioObjectKey|audioSourceUrl|audioByteLength|audioSha256/,
   );
 
   const incomplete = await testApp.app.inject({
@@ -598,6 +602,61 @@ test("listening audio is authenticated and supports byte ranges", async (context
   assert.ok(requestedObjects.every((request) => (
     request.bucket === "test-assets"
       && request.objectKey === "english-listening/everyday-conversations/dialogue_2-01_ordering_a_meal.mp3"
+  )));
+});
+
+test("pronunciation audio is authenticated, private, and supports byte ranges", async (context) => {
+  const audio = Buffer.from("pronunciation-audio");
+  const requestedObjects = [];
+  const storage = {
+    bucket: "test-assets",
+    client: {
+      async statObject(bucket, objectKey) {
+        requestedObjects.push({ operation: "stat", bucket, objectKey });
+        return { size: audio.length };
+      },
+      async getObject(bucket, objectKey) {
+        requestedObjects.push({ operation: "full", bucket, objectKey });
+        return Readable.from([audio]);
+      },
+      async getPartialObject(bucket, objectKey, start, length) {
+        requestedObjects.push({ operation: "partial", bucket, objectKey, start, length });
+        return Readable.from([audio.subarray(start, start + length)]);
+      },
+    },
+  };
+  const testApp = await createTestApp({ storage });
+  context.after(() => testApp.cleanup());
+  const url = "/api/english/pronunciation/green-tea/audio";
+
+  const unauthenticated = await testApp.app.inject({ method: "GET", url });
+  assert.equal(unauthenticated.statusCode, 401);
+
+  const partial = await testApp.app.inject({
+    method: "GET",
+    url,
+    headers: { ...authenticated(testApp.cookie), range: "bytes=0-0" },
+  });
+  assert.equal(partial.statusCode, 206, partial.body);
+  assert.equal(partial.headers["content-type"], "audio/mpeg");
+  assert.equal(partial.headers["content-range"], `bytes 0-0/${audio.length}`);
+  assert.equal(partial.headers["cache-control"], "private, max-age=86400");
+  assert.deepEqual(partial.rawPayload, audio.subarray(0, 1));
+
+  const missing = await testApp.app.inject({
+    method: "GET",
+    url: "/api/english/pronunciation/not-a-sound/audio",
+    headers: authenticated(testApp.cookie),
+  });
+  assert.equal(missing.statusCode, 404);
+  assert.match(missing.json().error, /发音参考不存在/);
+
+  assert.ok(requestedObjects.some((request) => (
+    request.operation === "partial" && request.start === 0 && request.length === 1
+  )));
+  assert.ok(requestedObjects.every((request) => (
+    request.bucket === "test-assets"
+      && request.objectKey === "english-pronunciation/color-vowel-chart/GREEN-A.mp3"
   )));
 });
 
