@@ -42,14 +42,31 @@ async function provisionUser(db, {
   username = testUsername,
   password = testPassword,
   displayName = "测试用户",
+  isAdmin = false,
+  moduleIds = ["human-resources", "economics", "english"],
 } = {}) {
   const passwordRecord = await hashPassword(password);
   const now = new Date().toISOString();
   db.prepare(
     `INSERT INTO users (
-       id, username, display_name, password_hash, password_salt, created_at, updated_at
-     ) VALUES (?, ?, ?, ?, ?, ?, ?)`,
-  ).run(username, username, displayName, passwordRecord.hash, passwordRecord.salt, now, now);
+       id, username, display_name, password_hash, password_salt,
+       is_admin, is_active, created_at, updated_at
+     ) VALUES (?, ?, ?, ?, ?, ?, 1, ?, ?)`,
+  ).run(
+    username,
+    username,
+    displayName,
+    passwordRecord.hash,
+    passwordRecord.salt,
+    isAdmin ? 1 : 0,
+    now,
+    now,
+  );
+  const assignModule = db.prepare(
+    `INSERT INTO user_module_access (user_id, module_id, assigned_by, assigned_at)
+     VALUES (?, ?, NULL, ?)`,
+  );
+  for (const moduleId of moduleIds) assignModule.run(username, moduleId, now);
 }
 
 async function loginAs(app, username = testUsername, password = testPassword) {
@@ -85,12 +102,12 @@ function authenticated(cookie) {
   return { cookie };
 }
 
-async function createTestApp({ materialsEnabled = false, storage = null } = {}) {
+async function createTestApp({ materialsEnabled = false, storage = null, userOptions = {} } = {}) {
   const directory = await mkdtemp(join(tmpdir(), "learning-workbench-test-"));
   const databasePath = join(directory, "test.sqlite");
   const db = openDatabase(databasePath);
   importContent(db, fixture);
-  await provisionUser(db);
+  await provisionUser(db, userOptions);
   db.close();
 
   const app = await createApp({
@@ -368,6 +385,137 @@ test("a new login invalidates the same user's previous device session", async (c
   );
 });
 
+test("administrators manage accounts and course access while APIs enforce assignments", async (context) => {
+  const testApp = await createTestApp({ userOptions: { isAdmin: true } });
+  context.after(() => testApp.cleanup());
+
+  const initial = await testApp.app.inject({
+    method: "GET",
+    url: "/api/admin/users",
+    headers: authenticated(testApp.cookie),
+  });
+  assert.equal(initial.statusCode, 200, initial.body);
+  assert.deepEqual(
+    initial.json().modules.map((module) => module.id),
+    ["human-resources", "economics", "english"],
+  );
+  assert.equal(initial.json().users[0].isAdmin, true);
+
+  const created = await testApp.app.inject({
+    method: "POST",
+    url: "/api/admin/users",
+    headers: authenticated(testApp.cookie),
+    payload: {
+      username: " course user ",
+      displayName: "课程用户",
+      password: "Course123",
+      moduleIds: ["english"],
+      isAdmin: false,
+    },
+  });
+  assert.equal(created.statusCode, 201, created.body);
+  const managedUser = created.json().user;
+  assert.equal(managedUser.username, "courseuser");
+  assert.deepEqual(managedUser.moduleIds, ["english"]);
+
+  const courseUserCookie = await loginAs(testApp.app, "courseuser", "Course123");
+  const forbiddenAdmin = await testApp.app.inject({
+    method: "GET",
+    url: "/api/admin/users",
+    headers: authenticated(courseUserCookie),
+  });
+  assert.equal(forbiddenAdmin.statusCode, 403);
+
+  const forbiddenHr = await testApp.app.inject({
+    method: "GET",
+    url: "/api/exams",
+    headers: authenticated(courseUserCookie),
+  });
+  assert.equal(forbiddenHr.statusCode, 403);
+  assert.match(forbiddenHr.json().error, /未开通这门课程/);
+
+  const allowedEnglish = await testApp.app.inject({
+    method: "GET",
+    url: "/api/english/listening",
+    headers: authenticated(courseUserCookie),
+  });
+  assert.equal(allowedEnglish.statusCode, 200, allowedEnglish.body);
+
+  const expanded = await testApp.app.inject({
+    method: "PUT",
+    url: `/api/admin/users/${managedUser.id}`,
+    headers: authenticated(testApp.cookie),
+    payload: {
+      displayName: "课程用户",
+      password: "",
+      moduleIds: ["human-resources", "english"],
+      isAdmin: false,
+      isActive: true,
+    },
+  });
+  assert.equal(expanded.statusCode, 200, expanded.body);
+  assert.equal(expanded.json().sessionsInvalidated, false);
+
+  const allowedHr = await testApp.app.inject({
+    method: "GET",
+    url: "/api/exams",
+    headers: authenticated(courseUserCookie),
+  });
+  assert.equal(allowedHr.statusCode, 200, allowedHr.body);
+
+  const selfDemotion = await testApp.app.inject({
+    method: "PUT",
+    url: `/api/admin/users/${testUsername}`,
+    headers: authenticated(testApp.cookie),
+    payload: {
+      displayName: "测试用户",
+      password: "",
+      moduleIds: ["human-resources", "economics", "english"],
+      isAdmin: false,
+      isActive: true,
+    },
+  });
+  assert.equal(selfDemotion.statusCode, 409);
+
+  const disabled = await testApp.app.inject({
+    method: "PUT",
+    url: `/api/admin/users/${managedUser.id}`,
+    headers: authenticated(testApp.cookie),
+    payload: {
+      displayName: "课程用户",
+      password: "",
+      moduleIds: ["human-resources", "english"],
+      isAdmin: false,
+      isActive: false,
+    },
+  });
+  assert.equal(disabled.statusCode, 200, disabled.body);
+  assert.equal(disabled.json().sessionsInvalidated, true);
+
+  const disabledSession = await testApp.app.inject({
+    method: "GET",
+    url: "/api/auth/me",
+    headers: authenticated(courseUserCookie),
+  });
+  assert.equal(disabledSession.statusCode, 401);
+
+  const deleted = await testApp.app.inject({
+    method: "DELETE",
+    url: `/api/admin/users/${managedUser.id}`,
+    headers: authenticated(testApp.cookie),
+  });
+  assert.equal(deleted.statusCode, 204, deleted.body);
+  assert.equal(
+    testApp.app.db.prepare("SELECT COUNT(*) AS count FROM users WHERE id = ?").get(managedUser.id)
+      .count,
+    0,
+  );
+  assert.equal(
+    testApp.app.db.prepare("SELECT COUNT(*) AS count FROM admin_audit_log").get().count,
+    4,
+  );
+});
+
 test("materials and direct assets stay blocked while exams remain available", async (context) => {
   const testApp = await createTestApp();
   context.after(() => testApp.cleanup());
@@ -398,6 +546,7 @@ test("materials and direct assets stay blocked while exams remain available", as
   const examResponse = await testApp.app.inject({
     method: "GET",
     url: "/api/exams/sample-learning-check",
+    headers: authenticated(testApp.cookie),
   });
   assert.equal(examResponse.statusCode, 200);
   const exam = examResponse.json();
@@ -420,7 +569,11 @@ test("materials can be re-enabled explicitly without reimporting their data", as
   const health = await testApp.app.inject({ method: "GET", url: "/api/health" });
   assert.equal(health.json().capabilities.materials, "enabled");
 
-  const materials = await testApp.app.inject({ method: "GET", url: "/api/materials" });
+  const materials = await testApp.app.inject({
+    method: "GET",
+    url: "/api/materials",
+    headers: authenticated(testApp.cookie),
+  });
   assert.equal(materials.statusCode, 200);
   assert.equal(materials.json().materials.length, 1);
   assert.equal(materials.json().categories[0].category, "学习方法");
@@ -428,6 +581,7 @@ test("materials can be re-enabled explicitly without reimporting their data", as
   const material = await testApp.app.inject({
     method: "GET",
     url: "/api/materials/sample-learning-method",
+    headers: authenticated(testApp.cookie),
   });
   assert.equal(material.statusCode, 200);
   assert.match(material.json().content, /主动回忆/);
@@ -684,7 +838,11 @@ test("HR master collection imports all source questions and reveals answers only
   });
 
   const examId = hrMasterCollectionFixture.exams[0].id;
-  const examResponse = await app.inject({ method: "GET", url: `/api/exams/${examId}` });
+  const examResponse = await app.inject({
+    method: "GET",
+    url: `/api/exams/${examId}`,
+    headers: authenticated(cookie),
+  });
   assert.equal(examResponse.statusCode, 200);
   const publicExam = examResponse.json();
   assert.equal(publicExam.questionCount, 154);
@@ -1039,7 +1197,7 @@ test("version 1 databases migrate case-question fields without losing rows", asy
 
   const migratedDb = openDatabase(databasePath);
   context.after(() => migratedDb.close());
-  assert.equal(migratedDb.pragma("user_version", { simple: true }), 7);
+  assert.equal(migratedDb.pragma("user_version", { simple: true }), 8);
   assert.deepEqual(
     migratedDb.prepare("SELECT id, section, passage FROM questions WHERE id = ?").get("legacy-q"),
     { id: "legacy-q", section: "standard", passage: "" },
@@ -1074,8 +1232,15 @@ test("version 4 migration keeps only the newest session per user", async (contex
   const versionFourDb = openDatabase(databasePath);
   versionFourDb.exec(`
     DROP INDEX idx_sessions_one_per_user;
+    DROP INDEX idx_admin_audit_created;
+    DROP INDEX idx_user_module_access_module;
+    DROP TABLE admin_audit_log;
+    DROP TABLE user_module_access;
+    DROP TABLE learning_modules;
     DROP TABLE mistake_practice_attempts;
     DROP TABLE listening_attempts;
+    ALTER TABLE users DROP COLUMN is_admin;
+    ALTER TABLE users DROP COLUMN is_active;
     INSERT INTO users (
       id, username, display_name, password_hash, password_salt, created_at, updated_at
     ) VALUES (
@@ -1092,7 +1257,7 @@ test("version 4 migration keeps only the newest session per user", async (contex
   versionFourDb.close();
 
   migratedDb = openDatabase(databasePath);
-  assert.equal(migratedDb.pragma("user_version", { simple: true }), 7);
+  assert.equal(migratedDb.pragma("user_version", { simple: true }), 8);
   assert.equal(
     migratedDb
       .prepare("SELECT COUNT(*) AS count FROM sqlite_master WHERE type = 'table' AND name = ?")
@@ -1102,6 +1267,27 @@ test("version 4 migration keeps only the newest session per user", async (contex
   assert.deepEqual(
     migratedDb.prepare("SELECT id FROM sessions WHERE user_id = ?").all("session-user"),
     [{ id: "newer-session" }],
+  );
+  assert.deepEqual(
+    migratedDb
+      .prepare("SELECT is_admin, is_active FROM users WHERE id = ?")
+      .get("session-user"),
+    { is_admin: 1, is_active: 1 },
+  );
+  assert.deepEqual(
+    migratedDb
+      .prepare(
+        `SELECT module_id
+         FROM user_module_access
+         WHERE user_id = ?
+         ORDER BY module_id`,
+      )
+      .all("session-user"),
+    [
+      { module_id: "economics" },
+      { module_id: "english" },
+      { module_id: "human-resources" },
+    ],
   );
   assert.throws(
     () =>

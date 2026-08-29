@@ -9,7 +9,8 @@
 - 服务端：Node.js、Fastify。
 - 数据库：SQLite，默认文件为 `data/study-workbench.sqlite`。
 - 对象存储：私有 MinIO；图片和资料附件存对象存储，SQLite 只保存元数据。
-- 身份策略：用户名为不超过 64 个字符的全局唯一标识，登录和管理员建号时统一移除全部空白字符，不做手机号格式校验；历史手机号账号及其用户 ID 保持不变，新账号使用独立随机 UUID 作为用户 ID。只允许管理员预置账号，暂不开放自助注册。
+- 身份策略：用户名为不超过 64 个字符的全局唯一标识，登录和管理员建号时统一移除全部空白字符，不做手机号格式校验；历史手机号账号及其用户 ID 保持不变，新账号使用独立随机 UUID 作为用户 ID。只允许管理员通过 `/study/admin/users` 或管理命令创建账号，暂不开放自助注册。管理员可分配课程、重置密码、授予管理权限、停用账号，以及删除没有学习记录的账号；已有学习记录的账号只能停用，不能永久删除。
+- 课程权限：`learning_modules` 是课程目录，`user_module_access` 是账号可见课程的唯一事实源。前端课程选择页必须按当前账号的 `moduleIds` 过滤，所有课程专属 API 和前端深层路由也必须独立校验权限，不能只依赖隐藏卡片。管理员页面仅限 `is_admin = 1` 且 `is_active = 1` 的账号进入；系统必须始终保留至少一个启用中的管理员，管理员不能停用、降权或删除自己。
 - 认证策略：密码只保存 scrypt 哈希和随机盐；登录必须通过 3 分钟内有效、只能使用一次且绑定请求 IP 的简单图片选择码。用户名与 IP 组合连续 5 次密码错误或同一 IP 连续 20 次密码错误后锁定 15 分钟；同一 IP 每 10 分钟最多获取 30 组图片选择码。每个用户只允许一个数据库会话，新登录会原子替换旧会话并使之前设备在下次请求时退出。登录后使用 `HttpOnly`、`SameSite=Lax` Cookie，前端不得保存明文密码或会话令牌。
 - 学习资料状态：因原 PDF 水印与版权待核验，当前必须同时保持 `VITE_MATERIALS_ENABLED=false` 和 `MATERIALS_ENABLED=false`。前端不得显示资料导航或路由，服务端必须阻断资料列表、详情、附件接口和历史资料深链；SQLite 与 MinIO 原数据保留，版权确认前不得重新开放。
 - 生产部署：阿里云 Ubuntu，Docker Engine + Compose；应用只公开宿主机 80 端口，MinIO 仅在 Compose 私有网络中提供服务。
@@ -27,13 +28,15 @@
 - 重建短卷系列：`npm run exams:build-short-series`
 - 确认短卷完整后隐藏原长卷：`npm run exams:archive-long`
 - 重建 2026 电子资料包：`python3 scripts/build-electronic-study-pack.py --source-dir '<电子资料包目录>' --bundle-dir imports/electronic-study-pack-2026 --questions-output data/hr-electronic-study-pack-questions-2026.json`
-- 创建或重置用户：`npm run user:upsert -- --username <用户名> --display-name <昵称>`
+- 日常账号配置：管理员登录后访问 `/study/admin/users`。
+- 命令行创建或重置用户：`npm run user:upsert -- --username <用户名> --display-name <昵称> [--modules human-resources,economics,english|none] [--admin true|false]`
 - 迁移旧设备成绩：在创建用户命令后追加 `--adopt-device <旧设备 ID>`；只能接管尚未归属账号的旧记录。
 
 ## 数据与接口约束
 
 - 学习资料、试卷、题目、考试记录均以 SQLite 为权威数据源。
 - 用户、会话、考试成绩和错题归属均以 SQLite 为权威数据源；前端不得使用设备标识或 `localStorage` 作为身份和成绩归属依据。
+- 数据库结构当前为版本 8：`users.is_admin` 与 `users.is_active` 保存管理和启停状态，`learning_modules` 保存课程目录，`user_module_access` 保存课程分配，`admin_audit_log` 保存网页及命令行账号管理记录。所有网页管理写操作必须写入操作者、目标账号、请求 ID、变更摘要和时间，不得记录明文密码。
 - 英语听力场景内容以 `server/english-listening-content.mjs` 为单一事实源；首批内容固定使用美国国务院 American English 的 `Everyday Conversations` 中 `Around Town` 10 个官方真人对话，并为每条内容保留来源页、官方文件名、对象键和预期字节数。列表与练习详情接口不得提前返回原文、正确答案、解析、MinIO 对象键或官方 MP3 直链，只有完成全部题目并提交后才可返回原文与解析。真人 MP3 经登录鉴权的同源接口流式读取，必须支持 HTTP Range；公网不得直连 MinIO。每次练习写入 `listening_attempts` 并绑定当前会话用户，前端只展示该用户自己的练习次数、最近成绩与最好成绩。
 - 英语真人发音参考以 `server/english-pronunciation-content.mjs` 为单一事实源，固定使用美国国务院 American English 的 `The Color Vowel Chart` 15 条原始真人 MP3，作者为 Karen Taylor、Shirley Thompson，许可为 CC BY-NC-ND 4.0。文件必须保持原样，并按清单中的字节数与 SHA-256 双重校验后同步至私有 MinIO；公开接口只返回音标、记忆词组、来源归属和同源音频地址，不得返回 MinIO 对象键或官方 MP3 直链。音频接口必须登录鉴权并支持 HTTP Range，不得使用 Web Speech API 或静默机器音兜底。
 - 错题重练的每次提交写入 `mistake_practice_attempts`；只有完整答对才标记为“已重学”，该状态一旦获得便永久保留，但题目始终保留在错题本并允许继续重练。重练接口在提交前不得泄露正确答案和解析。
@@ -64,7 +67,7 @@
 - 部署后必须检查容器健康状态、`/api/health`、`/study`、`/study` 下的前端深层路由、根地址和旧链接跳转，以及容器日志。
 - 首次部署或音源更新时，把已按预期字节数校验的 10 条官方 MP3 放入只读挂载的 `/app/imports/english-listening-audio`，执行 `docker compose run --rm app npm run audio:sync-listening -- --source-dir /app/imports/english-listening-audio`；同步命令必须逐条回读 MinIO 对象大小并输出对象键、字节数和 SHA-256，随后验证登录鉴权与 Range 播放接口。
 - 首次启用发音参考或音源更新时，把 15 条 `The Color Vowel Chart` 原始 MP3 放入只读挂载的 `/app/imports/color-vowel-audio`，执行 `docker compose run --rm app npm run audio:sync-pronunciation -- --source-dir /app/imports/color-vowel-audio`；同步命令必须校验字节数与清单 SHA-256、逐条回读 MinIO 对象大小，并验证登录鉴权与 Range 播放接口。
-- 部署数据库迁移前必须创建 SQLite 备份；迁移后需核对用户数量、账号成绩数量和未归属旧记录数量。
+- 部署数据库迁移前必须创建 SQLite 备份；迁移到版本 8 时，所有已有账号默认获得当前三门课程，按 `created_at`、`id` 排序最早的已有账号成为首位管理员，以保持旧账号可继续使用。迁移后需核对用户数量、管理员数量、课程分配数量、账号成绩数量和未归属旧记录数量。
 - “人力600母题”当前附件实际只有 154 题，权威导入文件为 `data/hr-600-master-collection.json`，试卷 ID 为 `hr-600-master-collection-v1`；不得用虚构题目补足到 600。答案与解析仅在交卷后的成绩详情中展示。
 - “2026 人力资源电子资料包”由 `scripts/build-electronic-study-pack.py` 从 11 份指定 PDF 生成；纳入版本控制的在线题库是 `data/hr-electronic-study-pack-questions-2026.json`，固定包含 100、199、200 题三套试卷，共 499 题。带 11 份原始 PDF 的生产导入包放在 `imports/electronic-study-pack-2026/`，`imports/` 不提交 Git。
 - `scripts/build-short-exam-series.mjs` 从上述 499 题和当前 154 道母题生成 `data/hr-short-exam-series-2026.json`：历年真题 4 套、知识点强化 7 套、经典母题 7 套、母题集锦 6 套，共 24 套、653 题；拆分时不漏题、不重复题，单套最多 30 题且限时 25 分钟。

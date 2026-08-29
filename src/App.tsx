@@ -1,5 +1,5 @@
 import { Route, Routes } from "react-router-dom";
-import { RequireAuth } from "./auth";
+import { RequireAdmin, RequireAuth, RequireModule } from "./auth";
 import { AppShell } from "./components/AppShell";
 import { materialsEnabled } from "./features";
 import { DashboardPage } from "./pages/DashboardPage";
@@ -18,6 +18,7 @@ import { ModuleSelectionPage } from "./pages/ModuleSelectionPage";
 import { NotFoundPage } from "./pages/NotFoundPage";
 import { ResultDetailPage } from "./pages/ResultDetailPage";
 import { ResultsPage } from "./pages/ResultsPage";
+import { AdminUsersPage } from "./pages/AdminUsersPage";
 
 export default function App() {
   return (
@@ -25,23 +26,32 @@ export default function App() {
       <Route path="login" element={<LoginPage />} />
       <Route element={<RequireAuth />}>
         <Route path="modules" element={<ModuleSelectionPage />} />
-        <Route path="modules/economics" element={<ModulePreviewPage moduleId="economics" />} />
-        <Route path="modules/english" element={<EnglishModulePage />} />
-        <Route path="modules/english/listening" element={<EnglishListeningPage />} />
-        <Route path="modules/english/listening/:sceneId" element={<EnglishListeningPracticePage />} />
-        <Route element={<AppShell />}>
-          <Route index element={<DashboardPage />} />
-          {materialsEnabled ? <Route path="materials" element={<MaterialsPage />} /> : null}
-          {materialsEnabled ? (
-            <Route path="materials/:materialId" element={<MaterialDetailPage />} />
-          ) : null}
-          <Route path="exams" element={<ExamsPage />} />
-          <Route path="exams/:examId" element={<ExamPage />} />
-          <Route path="mistakes/practice" element={<MistakePracticePage />} />
-          <Route path="mistakes" element={<MistakesPage />} />
-          <Route path="results" element={<ResultsPage />} />
-          <Route path="results/:resultId" element={<ResultDetailPage />} />
-          <Route path="*" element={<NotFoundPage />} />
+        <Route element={<RequireAdmin />}>
+          <Route path="admin/users" element={<AdminUsersPage />} />
+        </Route>
+        <Route element={<RequireModule moduleId="economics" />}>
+          <Route path="modules/economics" element={<ModulePreviewPage moduleId="economics" />} />
+        </Route>
+        <Route element={<RequireModule moduleId="english" />}>
+          <Route path="modules/english" element={<EnglishModulePage />} />
+          <Route path="modules/english/listening" element={<EnglishListeningPage />} />
+          <Route path="modules/english/listening/:sceneId" element={<EnglishListeningPracticePage />} />
+        </Route>
+        <Route element={<RequireModule moduleId="human-resources" />}>
+          <Route element={<AppShell />}>
+            <Route index element={<DashboardPage />} />
+            {materialsEnabled ? <Route path="materials" element={<MaterialsPage />} /> : null}
+            {materialsEnabled ? (
+              <Route path="materials/:materialId" element={<MaterialDetailPage />} />
+            ) : null}
+            <Route path="exams" element={<ExamsPage />} />
+            <Route path="exams/:examId" element={<ExamPage />} />
+            <Route path="mistakes/practice" element={<MistakePracticePage />} />
+            <Route path="mistakes" element={<MistakesPage />} />
+            <Route path="results" element={<ResultsPage />} />
+            <Route path="results/:resultId" element={<ResultDetailPage />} />
+            <Route path="*" element={<NotFoundPage />} />
+          </Route>
         </Route>
       </Route>
     </Routes>

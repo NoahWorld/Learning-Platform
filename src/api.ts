@@ -14,6 +14,18 @@ export async function apiPost<T>(path: string, body: unknown): Promise<T> {
   });
 }
 
+export async function apiPut<T>(path: string, body: unknown): Promise<T> {
+  return apiRequest<T>(path, {
+    method: "PUT",
+    headers: JSON_HEADERS,
+    body: JSON.stringify(body),
+  });
+}
+
+export async function apiDelete(path: string): Promise<void> {
+  return apiRequest<void>(path, { method: "DELETE" });
+}
+
 export class ApiError extends Error {
   constructor(message: string, public readonly status: number) {
     super(message);

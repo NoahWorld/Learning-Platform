@@ -14,6 +14,7 @@ interface AuthContextValue {
     captchaOptionId: string,
   ) => Promise<void>;
   logout: () => Promise<void>;
+  refreshUser: () => Promise<User>;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -59,7 +60,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser(null);
   }, []);
 
-  const value = useMemo(() => ({ user, loading, error, login, logout }), [user, loading, error, login, logout]);
+  const refreshUser = useCallback(async () => {
+    const response = await apiGet<{ user: User }>("/api/auth/me");
+    setUser(response.user);
+    return response.user;
+  }, []);
+
+  const value = useMemo(
+    () => ({ user, loading, error, login, logout, refreshUser }),
+    [user, loading, error, login, logout, refreshUser],
+  );
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
@@ -82,5 +92,17 @@ export function RequireAuth() {
   if (!user) {
     return <Navigate to="/login" replace state={{ from: location.pathname }} />;
   }
+  return <Outlet />;
+}
+
+export function RequireAdmin() {
+  const { user } = useAuth();
+  if (!user?.isAdmin) return <Navigate to="/modules" replace />;
+  return <Outlet />;
+}
+
+export function RequireModule({ moduleId }: { moduleId: string }) {
+  const { user } = useAuth();
+  if (!user?.moduleIds.includes(moduleId)) return <Navigate to="/modules" replace />;
   return <Outlet />;
 }

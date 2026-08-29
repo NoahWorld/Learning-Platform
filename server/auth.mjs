@@ -72,10 +72,10 @@ export function getAuthenticatedUser(db, request) {
   return (
     db
       .prepare(
-        `SELECT u.id, u.username, u.display_name, u.created_at
+        `SELECT u.id, u.username, u.display_name, u.is_admin, u.is_active, u.created_at
          FROM sessions s
          JOIN users u ON u.id = s.user_id
-         WHERE s.token_hash = ? AND s.expires_at > ?`,
+         WHERE s.token_hash = ? AND s.expires_at > ? AND u.is_active = 1`,
       )
       .get(hashSessionToken(token), now) ?? null
   );
@@ -107,11 +107,25 @@ export function replaceUserSession(db, session) {
   })();
 }
 
-export function mapUser(row) {
+export function mapUser(db, row) {
+  const moduleIds = db
+    .prepare(
+      `SELECT access.module_id
+       FROM user_module_access access
+       JOIN learning_modules modules ON modules.id = access.module_id
+       WHERE access.user_id = ?
+       ORDER BY modules.display_order ASC, access.module_id ASC`,
+    )
+    .all(row.id)
+    .map((item) => item.module_id);
+
   return {
     id: row.id,
     username: row.username,
     displayName: row.display_name,
+    isAdmin: row.is_admin === 1,
+    isActive: row.is_active === 1,
+    moduleIds,
     createdAt: row.created_at,
   };
 }

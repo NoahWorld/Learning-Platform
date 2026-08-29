@@ -2,6 +2,7 @@ import { ArrowRight, BriefcaseBusiness, Languages, Landmark, Sparkles } from "lu
 import { useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { ModuleTopBar } from "../components/ModuleTopBar";
+import { useAuth } from "../auth";
 import { learningModules, type LearningModuleId } from "../modules";
 
 const moduleIcons = {
@@ -21,8 +22,10 @@ function requestedHumanResourcesPath(state: unknown) {
 }
 
 export function ModuleSelectionPage() {
+  const { user } = useAuth();
   const location = useLocation();
   const humanResourcesRoute = requestedHumanResourcesPath(location.state);
+  const visibleModules = learningModules.filter((item) => user?.moduleIds.includes(item.id));
 
   useEffect(() => {
     document.body.dataset.mode = "comic";
@@ -42,7 +45,7 @@ export function ModuleSelectionPage() {
         </section>
 
         <section className="module-card-grid" aria-label="学习课程">
-          {learningModules.map((learningModule) => {
+          {visibleModules.map((learningModule) => {
             const Icon = moduleIcons[learningModule.id];
             const route = learningModule.id === "human-resources"
               ? humanResourcesRoute
@@ -76,6 +79,13 @@ export function ModuleSelectionPage() {
             );
           })}
         </section>
+        {visibleModules.length === 0 ? (
+          <section className="module-empty-state" role="status">
+            <span>暂未分配课程</span>
+            <h2>请联系管理员开通学习内容</h2>
+            <p>课程分配完成后，重新进入这个页面即可看到。</p>
+          </section>
+        ) : null}
       </main>
     </div>
   );

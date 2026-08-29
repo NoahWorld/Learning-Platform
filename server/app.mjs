@@ -6,6 +6,8 @@ import { randomUUID } from "node:crypto";
 import { fileURLToPath } from "node:url";
 import { z } from "zod";
 import {
+  adminUserCreateSchema,
+  adminUserUpdateSchema,
   loginSchema,
   listeningSubmissionSchema,
   mistakePracticeSubmissionSchema,
@@ -16,6 +18,7 @@ import {
   createSessionRecord,
   deleteCurrentSession,
   getAuthenticatedUser,
+  hashPassword,
   mapUser,
   replaceUserSession,
   setSessionCookie,
@@ -40,6 +43,8 @@ const DEFAULT_STATIC_DIR = fileURLToPath(new URL("../dist", import.meta.url));
 const LEGACY_STUDY_PATH = /^\/(?:exams(?:\/.*)?|mistakes(?:\/.*)?|results(?:\/.*)?)$/;
 const LEGACY_MATERIALS_PATH = /^\/materials(?:\/.*)?$/;
 const STUDY_MATERIALS_PATH = /^\/study\/materials(?:\/.*)?$/;
+const HUMAN_RESOURCES_MODULE_ID = "human-resources";
+const ENGLISH_MODULE_ID = "english";
 
 export async function createApp({
   databasePath = process.env.DATABASE_PATH ?? "./data/study-workbench.sqlite",
@@ -246,9 +251,10 @@ function registerApiRoutes(app, db, storage, captchaFactory, materialsEnabled) {
 
     const row = db
       .prepare(
-        `SELECT id, username, display_name, password_hash, password_salt, created_at
+        `SELECT id, username, display_name, password_hash, password_salt,
+                is_admin, is_active, created_at
          FROM users
-         WHERE username = ?`,
+         WHERE username = ? AND is_active = 1`,
       )
       .get(input.username);
     const valid = row
@@ -271,7 +277,7 @@ function registerApiRoutes(app, db, storage, captchaFactory, materialsEnabled) {
       "user session replaced after successful login",
     );
     setSessionCookie(reply, session.token, request);
-    return { user: mapUser(row) };
+    return { user: mapUser(db, row) };
   });
 
   function recordLoginFailure(target, key, current, limit, nowMs) {
@@ -302,7 +308,7 @@ function registerApiRoutes(app, db, storage, captchaFactory, materialsEnabled) {
 
   app.get("/api/auth/me", async (request) => {
     const user = requireUser(db, request);
-    return { user: mapUser(user) };
+    return { user: mapUser(db, user) };
   });
 
   app.post("/api/auth/logout", async (request, reply) => {
@@ -312,8 +318,198 @@ function registerApiRoutes(app, db, storage, captchaFactory, materialsEnabled) {
     return reply.send();
   });
 
+  app.get("/api/admin/users", async (request) => {
+    requireAdmin(db, request);
+    return {
+      modules: getModuleCatalog(db),
+      users: getAdminUsers(db),
+    };
+  });
+
+  app.post("/api/admin/users", async (request, reply) => {
+    const actor = requireAdmin(db, request);
+    const input = parseOrThrow(adminUserCreateSchema, request.body);
+    assertKnownModuleIds(db, input.moduleIds);
+
+    const existing = db.prepare("SELECT id FROM users WHERE username = ?").get(input.username);
+    if (existing) {
+      throw httpError(409, "这个用户名已经存在");
+    }
+
+    const passwordRecord = await hashPassword(input.password);
+    const userId = randomUUID();
+    const now = new Date().toISOString();
+    db.transaction(() => {
+      db.prepare(
+        `INSERT INTO users (
+           id, username, display_name, password_hash, password_salt,
+           is_admin, is_active, created_at, updated_at
+         ) VALUES (?, ?, ?, ?, ?, ?, 1, ?, ?)`,
+      ).run(
+        userId,
+        input.username,
+        input.displayName,
+        passwordRecord.hash,
+        passwordRecord.salt,
+        input.isAdmin ? 1 : 0,
+        now,
+        now,
+      );
+      replaceModuleAssignments(db, userId, input.moduleIds, actor.id, now);
+      recordAdminAudit(db, {
+        actorUserId: actor.id,
+        action: "user.created",
+        targetUserId: userId,
+        details: {
+          username: input.username,
+          displayName: input.displayName,
+          isAdmin: input.isAdmin,
+          moduleIds: input.moduleIds,
+        },
+        requestId: request.id,
+        createdAt: now,
+      });
+    })();
+
+    request.log.info(
+      { actorUserId: actor.id, targetUserId: userId, moduleIds: input.moduleIds },
+      "administrator created user",
+    );
+    reply.status(201);
+    return { user: getAdminUser(db, userId) };
+  });
+
+  app.put("/api/admin/users/:id", async (request) => {
+    const actor = requireAdmin(db, request);
+    const input = parseOrThrow(adminUserUpdateSchema, request.body);
+    assertKnownModuleIds(db, input.moduleIds);
+
+    const target = db
+      .prepare(
+        `SELECT id, username, display_name, is_admin, is_active
+         FROM users
+         WHERE id = ?`,
+      )
+      .get(request.params.id);
+    if (!target) {
+      throw httpError(404, "账号不存在");
+    }
+    if (target.id === actor.id && (!input.isAdmin || !input.isActive)) {
+      throw httpError(409, "不能取消自己的管理员身份或停用自己的账号");
+    }
+    assertAdminContinuity(db, target, input);
+
+    const passwordRecord = input.password ? await hashPassword(input.password) : null;
+    const now = new Date().toISOString();
+    const previousModuleIds = getModuleIds(db, target.id);
+    const invalidateSessions =
+      (target.is_active === 1 && !input.isActive) || passwordRecord !== null;
+    db.transaction(() => {
+      if (passwordRecord) {
+        db.prepare(
+          `UPDATE users
+           SET display_name = ?, password_hash = ?, password_salt = ?,
+               is_admin = ?, is_active = ?, updated_at = ?
+           WHERE id = ?`,
+        ).run(
+          input.displayName,
+          passwordRecord.hash,
+          passwordRecord.salt,
+          input.isAdmin ? 1 : 0,
+          input.isActive ? 1 : 0,
+          now,
+          target.id,
+        );
+      } else {
+        db.prepare(
+          `UPDATE users
+           SET display_name = ?, is_admin = ?, is_active = ?, updated_at = ?
+           WHERE id = ?`,
+        ).run(
+          input.displayName,
+          input.isAdmin ? 1 : 0,
+          input.isActive ? 1 : 0,
+          now,
+          target.id,
+        );
+      }
+      replaceModuleAssignments(db, target.id, input.moduleIds, actor.id, now);
+      if (invalidateSessions) {
+        db.prepare("DELETE FROM sessions WHERE user_id = ?").run(target.id);
+      }
+      recordAdminAudit(db, {
+        actorUserId: actor.id,
+        action: "user.updated",
+        targetUserId: target.id,
+        details: {
+          displayName: { from: target.display_name, to: input.displayName },
+          isAdmin: { from: target.is_admin === 1, to: input.isAdmin },
+          isActive: { from: target.is_active === 1, to: input.isActive },
+          moduleIds: { from: previousModuleIds, to: input.moduleIds },
+          passwordChanged: passwordRecord !== null,
+          sessionsInvalidated: invalidateSessions,
+        },
+        requestId: request.id,
+        createdAt: now,
+      });
+    })();
+
+    request.log.info(
+      {
+        actorUserId: actor.id,
+        targetUserId: target.id,
+        moduleIds: input.moduleIds,
+        passwordChanged: passwordRecord !== null,
+        sessionsInvalidated: invalidateSessions,
+      },
+      "administrator updated user",
+    );
+    return { user: getAdminUser(db, target.id), sessionsInvalidated: invalidateSessions };
+  });
+
+  app.delete("/api/admin/users/:id", async (request, reply) => {
+    const actor = requireAdmin(db, request);
+    const target = db
+      .prepare("SELECT id, username, is_admin, is_active FROM users WHERE id = ?")
+      .get(request.params.id);
+    if (!target) {
+      throw httpError(404, "账号不存在");
+    }
+    if (target.id === actor.id) {
+      throw httpError(409, "不能删除当前登录的账号");
+    }
+    assertAdminContinuity(db, target, { isAdmin: false, isActive: false });
+
+    const learningRecords = getUserLearningRecordCounts(db, target.id);
+    if (learningRecords.total > 0) {
+      throw httpError(
+        409,
+        `该账号已有 ${learningRecords.total} 条学习记录。为保留成绩和练习数据，请改为停用账号`,
+      );
+    }
+
+    const now = new Date().toISOString();
+    db.transaction(() => {
+      recordAdminAudit(db, {
+        actorUserId: actor.id,
+        action: "user.deleted",
+        targetUserId: target.id,
+        details: { username: target.username },
+        requestId: request.id,
+        createdAt: now,
+      });
+      db.prepare("DELETE FROM users WHERE id = ?").run(target.id);
+    })();
+    request.log.info(
+      { actorUserId: actor.id, targetUserId: target.id, username: target.username },
+      "administrator deleted user",
+    );
+    reply.status(204);
+    return reply.send();
+  });
+
   app.get("/api/dashboard", async (request) => {
-    const user = requireUser(db, request);
+    const user = requireModuleAccess(db, request, HUMAN_RESOURCES_MODULE_ID);
     const materialCount = materialsEnabled
       ? db.prepare("SELECT COUNT(*) AS count FROM materials WHERE status = 'published'").get().count
       : 0;
@@ -366,7 +562,7 @@ function registerApiRoutes(app, db, storage, captchaFactory, materialsEnabled) {
   });
 
   app.get("/api/english/listening", async (request) => {
-    const user = requireUser(db, request);
+    const user = requireModuleAccess(db, request, ENGLISH_MODULE_ID);
     const progressByScene = getListeningProgress(db, user.id);
     const scenes = englishListeningScenes.map((scene) => ({
       ...toPublicListeningScene(scene),
@@ -393,7 +589,7 @@ function registerApiRoutes(app, db, storage, captchaFactory, materialsEnabled) {
   });
 
   app.get("/api/english/listening/:sceneId", async (request) => {
-    const user = requireUser(db, request);
+    const user = requireModuleAccess(db, request, ENGLISH_MODULE_ID);
     const scene = getEnglishListeningScene(request.params.sceneId);
     if (!scene) {
       throw httpError(404, "听力场景不存在");
@@ -408,7 +604,7 @@ function registerApiRoutes(app, db, storage, captchaFactory, materialsEnabled) {
   });
 
   app.get("/api/english/listening/:sceneId/audio", async (request, reply) => {
-    requireUser(db, request);
+    requireModuleAccess(db, request, ENGLISH_MODULE_ID);
     const scene = getEnglishListeningScene(request.params.sceneId);
     if (!scene) {
       throw httpError(404, "听力场景不存在");
@@ -426,7 +622,7 @@ function registerApiRoutes(app, db, storage, captchaFactory, materialsEnabled) {
   });
 
   app.get("/api/english/pronunciation/:soundId/audio", async (request, reply) => {
-    requireUser(db, request);
+    requireModuleAccess(db, request, ENGLISH_MODULE_ID);
     const sound = getEnglishPronunciationSound(request.params.soundId);
     if (!sound) {
       throw httpError(404, "发音参考不存在");
@@ -444,7 +640,7 @@ function registerApiRoutes(app, db, storage, captchaFactory, materialsEnabled) {
   });
 
   app.post("/api/english/listening/:sceneId/submissions", async (request, reply) => {
-    const user = requireUser(db, request);
+    const user = requireModuleAccess(db, request, ENGLISH_MODULE_ID);
     const input = parseOrThrow(listeningSubmissionSchema, request.body);
     const scene = getEnglishListeningScene(request.params.sceneId);
     if (!scene) {
@@ -528,6 +724,7 @@ function registerApiRoutes(app, db, storage, captchaFactory, materialsEnabled) {
 
   app.get("/api/materials", async (request) => {
     requireMaterialsEnabled(materialsEnabled);
+    requireModuleAccess(db, request, HUMAN_RESOURCES_MODULE_ID);
     const query = parseOrThrow(
       z.object({
         search: z.string().max(100).optional(),
@@ -576,6 +773,7 @@ function registerApiRoutes(app, db, storage, captchaFactory, materialsEnabled) {
 
   app.get("/api/materials/:id", async (request) => {
     requireMaterialsEnabled(materialsEnabled);
+    requireModuleAccess(db, request, HUMAN_RESOURCES_MODULE_ID);
     const material = db
       .prepare(
         `SELECT id, title, summary, content, category, estimated_minutes, updated_at,
@@ -617,6 +815,7 @@ function registerApiRoutes(app, db, storage, captchaFactory, materialsEnabled) {
 
   app.get("/api/assets/:id", async (request, reply) => {
     requireMaterialsEnabled(materialsEnabled);
+    requireModuleAccess(db, request, HUMAN_RESOURCES_MODULE_ID);
     const asset = db
       .prepare(
         `SELECT id, object_key, file_name, content_type, size_bytes
@@ -642,7 +841,8 @@ function registerApiRoutes(app, db, storage, captchaFactory, materialsEnabled) {
     return reply.send(objectStream);
   });
 
-  app.get("/api/exams", async () => {
+  app.get("/api/exams", async (request) => {
+    requireModuleAccess(db, request, HUMAN_RESOURCES_MODULE_ID);
     const exams = db
       .prepare(
         `SELECT e.id, e.title, e.description, e.duration_minutes,
@@ -663,6 +863,7 @@ function registerApiRoutes(app, db, storage, captchaFactory, materialsEnabled) {
   });
 
   app.get("/api/exams/:id", async (request) => {
+    requireModuleAccess(db, request, HUMAN_RESOURCES_MODULE_ID);
     const exam = getExam(db, request.params.id, false);
 
     if (!exam) {
@@ -673,7 +874,7 @@ function registerApiRoutes(app, db, storage, captchaFactory, materialsEnabled) {
   });
 
   app.post("/api/exams/:id/submissions", async (request, reply) => {
-    const user = requireUser(db, request);
+    const user = requireModuleAccess(db, request, HUMAN_RESOURCES_MODULE_ID);
     const input = parseOrThrow(submissionSchema, request.body);
     const exam = getExam(db, request.params.id, true);
 
@@ -784,7 +985,7 @@ function registerApiRoutes(app, db, storage, captchaFactory, materialsEnabled) {
   });
 
   app.get("/api/results", async (request) => {
-    const user = requireUser(db, request);
+    const user = requireModuleAccess(db, request, HUMAN_RESOURCES_MODULE_ID);
     const results = db
       .prepare(
         `SELECT a.id, a.exam_id, e.title AS exam_title, a.score,
@@ -803,7 +1004,7 @@ function registerApiRoutes(app, db, storage, captchaFactory, materialsEnabled) {
   });
 
   app.get("/api/results/:id", async (request) => {
-    const user = requireUser(db, request);
+    const user = requireModuleAccess(db, request, HUMAN_RESOURCES_MODULE_ID);
     const result = getAttemptDetails(db, request.params.id, user.id);
 
     if (!result) {
@@ -814,7 +1015,7 @@ function registerApiRoutes(app, db, storage, captchaFactory, materialsEnabled) {
   });
 
   app.get("/api/mistakes", async (request) => {
-    const user = requireUser(db, request);
+    const user = requireModuleAccess(db, request, HUMAN_RESOURCES_MODULE_ID);
     const rows = db
       .prepare(
         `WITH answer_history AS (
@@ -882,7 +1083,7 @@ function registerApiRoutes(app, db, storage, captchaFactory, materialsEnabled) {
   });
 
   app.get("/api/mistakes/practice", async (request) => {
-    const user = requireUser(db, request);
+    const user = requireModuleAccess(db, request, HUMAN_RESOURCES_MODULE_ID);
     const rows = db
       .prepare(
         `WITH mistake_history AS (
@@ -947,7 +1148,7 @@ function registerApiRoutes(app, db, storage, captchaFactory, materialsEnabled) {
   });
 
   app.post("/api/mistakes/:questionId/practice", async (request, reply) => {
-    const user = requireUser(db, request);
+    const user = requireModuleAccess(db, request, HUMAN_RESOURCES_MODULE_ID);
     const input = parseOrThrow(mistakePracticeSubmissionSchema, request.body);
     const question = db
       .prepare(
@@ -1236,6 +1437,184 @@ function requireUser(db, request) {
     throw httpError(401, "请先登录后继续");
   }
   return user;
+}
+
+function requireAdmin(db, request) {
+  const user = requireUser(db, request);
+  if (user.is_admin !== 1) {
+    throw httpError(403, "当前账号没有配置权限");
+  }
+  return user;
+}
+
+function requireModuleAccess(db, request, moduleId) {
+  const user = requireUser(db, request);
+  const access = db
+    .prepare(
+      `SELECT 1 AS allowed
+       FROM user_module_access
+       WHERE user_id = ? AND module_id = ?`,
+    )
+    .get(user.id, moduleId);
+  if (!access) {
+    throw httpError(403, "当前账号未开通这门课程");
+  }
+  return user;
+}
+
+function getModuleCatalog(db) {
+  return db
+    .prepare(
+      `SELECT id, title, display_order
+       FROM learning_modules
+       ORDER BY display_order ASC, id ASC`,
+    )
+    .all()
+    .map((module) => ({
+      id: module.id,
+      title: module.title,
+      displayOrder: module.display_order,
+    }));
+}
+
+function getModuleIds(db, userId) {
+  return db
+    .prepare(
+      `SELECT access.module_id
+       FROM user_module_access access
+       JOIN learning_modules modules ON modules.id = access.module_id
+       WHERE access.user_id = ?
+       ORDER BY modules.display_order ASC, access.module_id ASC`,
+    )
+    .all(userId)
+    .map((row) => row.module_id);
+}
+
+function assertKnownModuleIds(db, moduleIds) {
+  const knownModuleIds = new Set(getModuleCatalog(db).map((module) => module.id));
+  const unknownModuleIds = moduleIds.filter((moduleId) => !knownModuleIds.has(moduleId));
+  if (unknownModuleIds.length > 0) {
+    throw httpError(400, `包含不存在的课程：${unknownModuleIds.join(", ")}`);
+  }
+}
+
+function replaceModuleAssignments(db, userId, moduleIds, actorUserId, assignedAt) {
+  db.prepare("DELETE FROM user_module_access WHERE user_id = ?").run(userId);
+  const insert = db.prepare(
+    `INSERT INTO user_module_access (user_id, module_id, assigned_by, assigned_at)
+     VALUES (?, ?, ?, ?)`,
+  );
+  for (const moduleId of moduleIds) {
+    insert.run(userId, moduleId, actorUserId, assignedAt);
+  }
+}
+
+function getAdminUsers(db) {
+  return getAdminUserRows(db).map((row) => mapAdminUser(db, row));
+}
+
+function getAdminUser(db, userId) {
+  const row = getAdminUserRows(db, userId)[0];
+  if (!row) {
+    throw new Error(`User ${userId} disappeared while serializing the administrator response`);
+  }
+  return mapAdminUser(db, row);
+}
+
+function getAdminUserRows(db, userId) {
+  const condition = userId ? "WHERE users.id = ?" : "";
+  return db
+    .prepare(
+      `SELECT users.id, users.username, users.display_name, users.is_admin,
+              users.is_active, users.created_at, users.updated_at,
+              (SELECT COUNT(*) FROM attempts WHERE attempts.user_id = users.id)
+                AS exam_attempt_count,
+              (SELECT COUNT(*) FROM listening_attempts WHERE listening_attempts.user_id = users.id)
+                AS listening_attempt_count,
+              (SELECT COUNT(*) FROM mistake_practice_attempts
+               WHERE mistake_practice_attempts.user_id = users.id)
+                AS mistake_practice_count,
+              MAX(
+                COALESCE((SELECT MAX(submitted_at) FROM attempts WHERE attempts.user_id = users.id), ''),
+                COALESCE((SELECT MAX(submitted_at) FROM listening_attempts WHERE listening_attempts.user_id = users.id), ''),
+                COALESCE((SELECT MAX(submitted_at) FROM mistake_practice_attempts WHERE mistake_practice_attempts.user_id = users.id), '')
+              ) AS last_activity_at
+       FROM users
+       ${condition}
+       ORDER BY users.created_at ASC, users.username COLLATE NOCASE ASC`,
+    )
+    .all(...(userId ? [userId] : []));
+}
+
+function mapAdminUser(db, row) {
+  return {
+    id: row.id,
+    username: row.username,
+    displayName: row.display_name,
+    isAdmin: row.is_admin === 1,
+    isActive: row.is_active === 1,
+    moduleIds: getModuleIds(db, row.id),
+    examAttemptCount: row.exam_attempt_count,
+    listeningAttemptCount: row.listening_attempt_count,
+    mistakePracticeCount: row.mistake_practice_count,
+    lastActivityAt: row.last_activity_at || null,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  };
+}
+
+function getUserLearningRecordCounts(db, userId) {
+  const counts = db
+    .prepare(
+      `SELECT
+         (SELECT COUNT(*) FROM attempts WHERE user_id = ?) AS exam_attempts,
+         (SELECT COUNT(*) FROM listening_attempts WHERE user_id = ?) AS listening_attempts,
+         (SELECT COUNT(*) FROM mistake_practice_attempts WHERE user_id = ?)
+           AS mistake_practice_attempts`,
+    )
+    .get(userId, userId, userId);
+  return {
+    examAttempts: counts.exam_attempts,
+    listeningAttempts: counts.listening_attempts,
+    mistakePracticeAttempts: counts.mistake_practice_attempts,
+    total: counts.exam_attempts + counts.listening_attempts + counts.mistake_practice_attempts,
+  };
+}
+
+function assertAdminContinuity(db, target, nextState) {
+  const removesActiveAdmin =
+    target.is_admin === 1 && target.is_active === 1 && (!nextState.isAdmin || !nextState.isActive);
+  if (!removesActiveAdmin) return;
+
+  const otherActiveAdmins = db
+    .prepare(
+      `SELECT COUNT(*) AS count
+       FROM users
+       WHERE is_admin = 1 AND is_active = 1 AND id <> ?`,
+    )
+    .get(target.id).count;
+  if (otherActiveAdmins === 0) {
+    throw httpError(409, "必须至少保留一个启用中的管理员账号");
+  }
+}
+
+function recordAdminAudit(
+  db,
+  { actorUserId, action, targetUserId, details, requestId, createdAt },
+) {
+  db.prepare(
+    `INSERT INTO admin_audit_log (
+       id, actor_user_id, action, target_user_id, details_json, request_id, created_at
+     ) VALUES (?, ?, ?, ?, ?, ?, ?)`,
+  ).run(
+    randomUUID(),
+    actorUserId,
+    action,
+    targetUserId,
+    JSON.stringify(details),
+    requestId,
+    createdAt,
+  );
 }
 
 function requireMaterialsEnabled(materialsEnabled) {

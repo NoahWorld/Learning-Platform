@@ -189,3 +189,27 @@ export const loginSchema = z.object({
   captchaId: z.string().min(1, "图片选择码不能为空").max(100),
   captchaOptionId: z.string().min(1, "请选择正确的图片").max(100),
 });
+
+const assignedModuleIdsSchema = z
+  .array(idSchema)
+  .max(100, "课程数量不能超过 100 个")
+  .refine((values) => new Set(values).size === values.length, "课程不能重复分配");
+
+export const adminUserCreateSchema = z.object({
+  username: usernameSchema,
+  displayName: z.string().trim().min(1, "请输入显示名称").max(40, "显示名称最多 40 个字符"),
+  password: z.string().min(8, "密码至少 8 个字符").max(128, "密码最多 128 个字符"),
+  moduleIds: assignedModuleIdsSchema,
+  isAdmin: z.boolean().default(false),
+});
+
+export const adminUserUpdateSchema = z.object({
+  displayName: z.string().trim().min(1, "请输入显示名称").max(40, "显示名称最多 40 个字符"),
+  password: z.union([
+    z.literal(""),
+    z.string().min(8, "新密码至少 8 个字符").max(128, "新密码最多 128 个字符"),
+  ]).optional(),
+  moduleIds: assignedModuleIdsSchema,
+  isAdmin: z.boolean(),
+  isActive: z.boolean(),
+});

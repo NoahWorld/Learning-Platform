@@ -2,7 +2,36 @@ export interface User {
   id: string;
   username: string;
   displayName: string;
+  isAdmin: boolean;
+  isActive: boolean;
+  moduleIds: string[];
   createdAt: string;
+}
+
+export interface ManagedLearningModule {
+  id: string;
+  title: string;
+  displayOrder: number;
+}
+
+export interface ManagedUser {
+  id: string;
+  username: string;
+  displayName: string;
+  isAdmin: boolean;
+  isActive: boolean;
+  moduleIds: string[];
+  examAttemptCount: number;
+  listeningAttemptCount: number;
+  mistakePracticeCount: number;
+  lastActivityAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface AdminUsersResponse {
+  modules: ManagedLearningModule[];
+  users: ManagedUser[];
 }
 
 export interface DashboardSummary {

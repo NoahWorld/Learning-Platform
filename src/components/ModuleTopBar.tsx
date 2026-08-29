@@ -1,11 +1,12 @@
-import { BookOpenCheck, LayoutGrid, LogOut, UserRound } from "lucide-react";
+import { BookOpenCheck, LayoutGrid, LogOut, Settings, UserRound } from "lucide-react";
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../auth";
 
 export function ModuleTopBar({ compact = false }: { compact?: boolean }) {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [logoutError, setLogoutError] = useState<string | null>(null);
 
   async function handleLogout() {
@@ -27,6 +28,11 @@ export function ModuleTopBar({ compact = false }: { compact?: boolean }) {
         </Link>
 
         <div className="module-account">
+          {user?.isAdmin && location.pathname !== "/admin/users" ? (
+            <Link className="module-switch-button" to="/admin/users">
+              <Settings size={17} aria-hidden="true" /> 账号配置
+            </Link>
+          ) : null}
           {compact ? (
             <Link className="module-switch-button" to="/modules">
               <LayoutGrid size={17} aria-hidden="true" /> 所有课程

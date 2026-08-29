@@ -2,7 +2,7 @@ import Database from "better-sqlite3";
 import { mkdirSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 
-const CURRENT_SCHEMA_VERSION = 7;
+const CURRENT_SCHEMA_VERSION = 8;
 
 export function openDatabase(databasePath = "./data/study-workbench.sqlite") {
   const resolvedPath = databasePath === ":memory:" ? databasePath : resolve(databasePath);
@@ -105,9 +105,40 @@ function migrate(db) {
           display_name TEXT NOT NULL,
           password_hash TEXT NOT NULL,
           password_salt TEXT NOT NULL,
+          is_admin INTEGER NOT NULL DEFAULT 0 CHECK (is_admin IN (0, 1)),
+          is_active INTEGER NOT NULL DEFAULT 1 CHECK (is_active IN (0, 1)),
           created_at TEXT NOT NULL,
           updated_at TEXT NOT NULL
         );
+
+        CREATE TABLE learning_modules (
+          id TEXT PRIMARY KEY,
+          title TEXT NOT NULL UNIQUE,
+          display_order INTEGER NOT NULL CHECK (display_order >= 0)
+        );
+
+        CREATE TABLE user_module_access (
+          user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+          module_id TEXT NOT NULL REFERENCES learning_modules(id) ON DELETE CASCADE,
+          assigned_by TEXT REFERENCES users(id) ON DELETE SET NULL,
+          assigned_at TEXT NOT NULL,
+          PRIMARY KEY (user_id, module_id)
+        );
+
+        CREATE TABLE admin_audit_log (
+          id TEXT PRIMARY KEY,
+          actor_user_id TEXT REFERENCES users(id) ON DELETE SET NULL,
+          action TEXT NOT NULL,
+          target_user_id TEXT NOT NULL,
+          details_json TEXT NOT NULL,
+          request_id TEXT NOT NULL,
+          created_at TEXT NOT NULL
+        );
+
+        INSERT INTO learning_modules (id, title, display_order) VALUES
+          ('human-resources', '中级经济师·人力资源', 10),
+          ('economics', '中级经济师·经济学', 20),
+          ('english', '英语', 30);
 
         CREATE TABLE sessions (
           id TEXT PRIMARY KEY,
@@ -189,6 +220,12 @@ function migrate(db) {
 
         CREATE UNIQUE INDEX idx_sessions_one_per_user
           ON sessions(user_id);
+
+        CREATE INDEX idx_user_module_access_module
+          ON user_module_access(module_id, user_id);
+
+        CREATE INDEX idx_admin_audit_created
+          ON admin_audit_log(created_at DESC);
 
         CREATE INDEX idx_attempt_answers_question_correct
           ON attempt_answers(question_id, is_correct);
@@ -352,6 +389,69 @@ function migrate(db) {
 
         CREATE INDEX idx_listening_attempts_user_scene_submitted
           ON listening_attempts(user_id, scene_id, submitted_at DESC);
+      `);
+      db.pragma("user_version = 7");
+      db.pragma("optimize");
+    })();
+    version = 7;
+  }
+
+  if (version === 7) {
+    db.transaction(() => {
+      db.exec(`
+        ALTER TABLE users
+          ADD COLUMN is_admin INTEGER NOT NULL DEFAULT 0 CHECK (is_admin IN (0, 1));
+        ALTER TABLE users
+          ADD COLUMN is_active INTEGER NOT NULL DEFAULT 1 CHECK (is_active IN (0, 1));
+
+        CREATE TABLE learning_modules (
+          id TEXT PRIMARY KEY,
+          title TEXT NOT NULL UNIQUE,
+          display_order INTEGER NOT NULL CHECK (display_order >= 0)
+        );
+
+        CREATE TABLE user_module_access (
+          user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+          module_id TEXT NOT NULL REFERENCES learning_modules(id) ON DELETE CASCADE,
+          assigned_by TEXT REFERENCES users(id) ON DELETE SET NULL,
+          assigned_at TEXT NOT NULL,
+          PRIMARY KEY (user_id, module_id)
+        );
+
+        CREATE TABLE admin_audit_log (
+          id TEXT PRIMARY KEY,
+          actor_user_id TEXT REFERENCES users(id) ON DELETE SET NULL,
+          action TEXT NOT NULL,
+          target_user_id TEXT NOT NULL,
+          details_json TEXT NOT NULL,
+          request_id TEXT NOT NULL,
+          created_at TEXT NOT NULL
+        );
+
+        INSERT INTO learning_modules (id, title, display_order) VALUES
+          ('human-resources', '中级经济师·人力资源', 10),
+          ('economics', '中级经济师·经济学', 20),
+          ('english', '英语', 30);
+
+        INSERT INTO user_module_access (user_id, module_id, assigned_by, assigned_at)
+        SELECT users.id, learning_modules.id, NULL, users.created_at
+        FROM users
+        CROSS JOIN learning_modules;
+
+        UPDATE users
+        SET is_admin = 1, updated_at = strftime('%Y-%m-%dT%H:%M:%fZ', 'now')
+        WHERE id = (
+          SELECT id
+          FROM users
+          ORDER BY created_at ASC, id ASC
+          LIMIT 1
+        );
+
+        CREATE INDEX idx_user_module_access_module
+          ON user_module_access(module_id, user_id);
+
+        CREATE INDEX idx_admin_audit_created
+          ON admin_audit_log(created_at DESC);
       `);
       db.pragma(`user_version = ${CURRENT_SCHEMA_VERSION}`);
       db.pragma("optimize");

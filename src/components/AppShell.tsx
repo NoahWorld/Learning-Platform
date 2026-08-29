@@ -6,6 +6,7 @@ import {
   LayoutGrid,
   LogOut,
   RotateCcw,
+  Settings,
   Trophy,
   UserRound,
   X,
@@ -98,6 +99,7 @@ export function AppShell() {
           <span>当前课程</span>
           <strong>中级经济师<br />人力资源</strong>
           <Link to="/modules"><LayoutGrid size={15} aria-hidden="true" /> 切换课程</Link>
+          {user?.isAdmin ? <Link to="/admin/users"><Settings size={15} aria-hidden="true" /> 账号配置</Link> : null}
         </div>
 
         <nav className="desktop-nav" aria-label="主导航">
