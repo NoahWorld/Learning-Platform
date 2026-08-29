@@ -173,6 +173,20 @@ export const listeningSubmissionSchema = z.object({
     .max(20),
 });
 
+export const dailyListeningSubmissionSchema = z.object({
+  listenCount: z.number().int().min(1, "请至少完整收听一次").max(100),
+  durationSeconds: z.number().int().min(0).max(3600),
+  answers: z
+    .array(
+      z.object({
+        questionId: idSchema,
+        optionId: idSchema,
+      }),
+    )
+    .min(1)
+    .max(20),
+});
+
 const usernameSchema = z
   .string()
   .transform((value) => value.replace(/\s/g, ""))

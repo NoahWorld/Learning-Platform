@@ -8,6 +8,7 @@ import { z } from "zod";
 import {
   adminUserCreateSchema,
   adminUserUpdateSchema,
+  dailyListeningSubmissionSchema,
   loginSchema,
   listeningSubmissionSchema,
   mistakePracticeSubmissionSchema,
@@ -32,6 +33,11 @@ import {
   getEnglishListeningScene,
   toPublicListeningScene,
 } from "./english-listening-content.mjs";
+import {
+  englishDailyListeningStories,
+  getEnglishDailyListeningStory,
+  toPublicEnglishDailyListeningStory,
+} from "./english-daily-listening-content.mjs";
 import {
   englishPronunciationSounds,
   englishPronunciationSource,
@@ -585,6 +591,147 @@ function registerApiRoutes(app, db, storage, captchaFactory, materialsEnabled) {
           0,
         ),
       },
+    };
+  });
+
+  app.get("/api/english/daily-listening", async (request) => {
+    const user = requireModuleAccess(db, request, ENGLISH_MODULE_ID);
+    const progressByStory = getDailyListeningProgress(db, user.id);
+    const stories = englishDailyListeningStories.map((story) => ({
+      ...toPublicEnglishDailyListeningStory(story),
+      progress: progressByStory.get(story.id) ?? emptyListeningProgress(),
+    }));
+    const practicedStories = stories.filter((story) => story.progress.attemptCount > 0);
+
+    return {
+      stories,
+      summary: {
+        storyCount: stories.length,
+        practicedStoryCount: practicedStories.length,
+        masteredStoryCount: practicedStories.filter(
+          (story) => story.progress.bestScore === 100,
+        ).length,
+        totalAttemptCount: practicedStories.reduce(
+          (sum, story) => sum + story.progress.attemptCount,
+          0,
+        ),
+      },
+    };
+  });
+
+  app.get("/api/english/daily-listening/:storyId", async (request) => {
+    const user = requireModuleAccess(db, request, ENGLISH_MODULE_ID);
+    const story = getEnglishDailyListeningStory(request.params.storyId);
+    if (!story) {
+      throw httpError(404, "每日听闻不存在");
+    }
+
+    return {
+      story: {
+        ...toPublicEnglishDailyListeningStory(story, { includeQuestions: true }),
+        progress:
+          getDailyListeningProgress(db, user.id).get(story.id) ?? emptyListeningProgress(),
+      },
+    };
+  });
+
+  app.get("/api/english/daily-listening/:storyId/audio", async (request, reply) => {
+    requireModuleAccess(db, request, ENGLISH_MODULE_ID);
+    const story = getEnglishDailyListeningStory(request.params.storyId);
+    if (!story) {
+      throw httpError(404, "每日听闻不存在");
+    }
+    return sendPrivateMp3({
+      request,
+      reply,
+      storage,
+      objectKey: story.audioObjectKey,
+      resourceContext: { storyId: story.id },
+      displayName: story.chineseTitle,
+      userFacingLabel: "每日听闻真人音频",
+      logLabel: "daily listening audio",
+    });
+  });
+
+  app.post("/api/english/daily-listening/:storyId/submissions", async (request, reply) => {
+    const user = requireModuleAccess(db, request, ENGLISH_MODULE_ID);
+    const input = parseOrThrow(dailyListeningSubmissionSchema, request.body);
+    const story = getEnglishDailyListeningStory(request.params.storyId);
+    if (!story) {
+      throw httpError(404, "每日听闻不存在");
+    }
+
+    const duplicateQuestionIds = findDuplicates(input.answers.map((answer) => answer.questionId));
+    if (duplicateQuestionIds.length > 0) {
+      throw httpError(400, `每日听闻答案包含重复题目：${duplicateQuestionIds.join(", ")}`);
+    }
+
+    const answerMap = new Map(input.answers.map((answer) => [answer.questionId, answer.optionId]));
+    const expectedQuestionIds = new Set(story.questions.map((question) => question.id));
+    const unknownQuestionIds = [...answerMap.keys()].filter((id) => !expectedQuestionIds.has(id));
+    if (unknownQuestionIds.length > 0) {
+      throw httpError(400, `每日听闻答案包含未知题目：${unknownQuestionIds.join(", ")}`);
+    }
+    const missingQuestionIds = story.questions
+      .map((question) => question.id)
+      .filter((id) => !answerMap.has(id));
+    if (missingQuestionIds.length > 0) {
+      throw httpError(400, `请完成全部 ${story.questions.length} 道听力题`);
+    }
+
+    const gradedAnswers = story.questions.map((question) => {
+      const selectedOptionId = answerMap.get(question.id);
+      const validOption = question.options.some((option) => option.id === selectedOptionId);
+      if (!validOption) {
+        throw httpError(400, `题目 ${question.id} 包含无效选项：${selectedOptionId}`);
+      }
+      return {
+        questionId: question.id,
+        selectedOptionId,
+        correctOptionId: question.correctOptionId,
+        isCorrect: selectedOptionId === question.correctOptionId,
+        explanation: question.explanation,
+      };
+    });
+
+    const correctCount = gradedAnswers.filter((answer) => answer.isCorrect).length;
+    const score = Math.round((correctCount / story.questions.length) * 100);
+    const id = randomUUID();
+    const submittedAt = new Date().toISOString();
+    db.prepare(
+      `INSERT INTO daily_listening_attempts (
+         id, user_id, story_id, answers_json, score, correct_count,
+         total_questions, listen_count, duration_seconds, submitted_at
+       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    ).run(
+      id,
+      user.id,
+      story.id,
+      JSON.stringify(input.answers),
+      score,
+      correctCount,
+      story.questions.length,
+      input.listenCount,
+      input.durationSeconds,
+      submittedAt,
+    );
+
+    request.log.info(
+      { userId: user.id, storyId: story.id, dailyListeningAttemptId: id, score },
+      "daily listening practice submitted",
+    );
+    reply.status(201);
+    return {
+      id,
+      storyId: story.id,
+      score,
+      correctCount,
+      totalQuestions: story.questions.length,
+      listenCount: input.listenCount,
+      durationSeconds: input.durationSeconds,
+      submittedAt,
+      answers: gradedAnswers,
+      transcript: story.transcript,
     };
   });
 
@@ -1529,7 +1676,11 @@ function getAdminUserRows(db, userId) {
               users.is_active, users.created_at, users.updated_at,
               (SELECT COUNT(*) FROM attempts WHERE attempts.user_id = users.id)
                 AS exam_attempt_count,
-              (SELECT COUNT(*) FROM listening_attempts WHERE listening_attempts.user_id = users.id)
+              ((SELECT COUNT(*) FROM listening_attempts
+                WHERE listening_attempts.user_id = users.id)
+               +
+               (SELECT COUNT(*) FROM daily_listening_attempts
+                WHERE daily_listening_attempts.user_id = users.id))
                 AS listening_attempt_count,
               (SELECT COUNT(*) FROM mistake_practice_attempts
                WHERE mistake_practice_attempts.user_id = users.id)
@@ -1537,6 +1688,7 @@ function getAdminUserRows(db, userId) {
               MAX(
                 COALESCE((SELECT MAX(submitted_at) FROM attempts WHERE attempts.user_id = users.id), ''),
                 COALESCE((SELECT MAX(submitted_at) FROM listening_attempts WHERE listening_attempts.user_id = users.id), ''),
+                COALESCE((SELECT MAX(submitted_at) FROM daily_listening_attempts WHERE daily_listening_attempts.user_id = users.id), ''),
                 COALESCE((SELECT MAX(submitted_at) FROM mistake_practice_attempts WHERE mistake_practice_attempts.user_id = users.id), '')
               ) AS last_activity_at
        FROM users
@@ -1568,11 +1720,13 @@ function getUserLearningRecordCounts(db, userId) {
     .prepare(
       `SELECT
          (SELECT COUNT(*) FROM attempts WHERE user_id = ?) AS exam_attempts,
-         (SELECT COUNT(*) FROM listening_attempts WHERE user_id = ?) AS listening_attempts,
+         ((SELECT COUNT(*) FROM listening_attempts WHERE user_id = ?)
+          +
+          (SELECT COUNT(*) FROM daily_listening_attempts WHERE user_id = ?)) AS listening_attempts,
          (SELECT COUNT(*) FROM mistake_practice_attempts WHERE user_id = ?)
            AS mistake_practice_attempts`,
     )
-    .get(userId, userId, userId);
+    .get(userId, userId, userId, userId);
   return {
     examAttempts: counts.exam_attempts,
     listeningAttempts: counts.listening_attempts,
@@ -1637,6 +1791,33 @@ function getListeningProgress(db, userId) {
     const existing = progress.get(row.scene_id);
     if (!existing) {
       progress.set(row.scene_id, {
+        attemptCount: 1,
+        bestScore: row.score,
+        latestScore: row.score,
+        lastPracticedAt: row.submitted_at,
+      });
+      continue;
+    }
+    existing.attemptCount += 1;
+    existing.bestScore = Math.max(existing.bestScore, row.score);
+  }
+  return progress;
+}
+
+function getDailyListeningProgress(db, userId) {
+  const rows = db
+    .prepare(
+      `SELECT story_id, score, submitted_at
+       FROM daily_listening_attempts
+       WHERE user_id = ?
+       ORDER BY submitted_at DESC, id DESC`,
+    )
+    .all(userId);
+  const progress = new Map();
+  for (const row of rows) {
+    const existing = progress.get(row.story_id);
+    if (!existing) {
+      progress.set(row.story_id, {
         attemptCount: 1,
         bestScore: row.score,
         latestScore: row.score,

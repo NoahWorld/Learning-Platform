@@ -26,18 +26,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const controller = new AbortController();
+    let active = true;
     apiGet<{ user: User }>("/api/auth/me", controller.signal)
-      .then((response) => setUser(response.user))
+      .then((response) => {
+        if (active) setUser(response.user);
+      })
       .catch((error) => {
         if (error instanceof DOMException && error.name === "AbortError") return;
+        if (!active) return;
         if (error instanceof ApiError && error.status === 401) {
           setUser(null);
           return;
         }
         setError(error instanceof Error ? error.message : "无法确认登录状态");
       })
-      .finally(() => setLoading(false));
-    return () => controller.abort();
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+    return () => {
+      active = false;
+      controller.abort();
+    };
   }, []);
 
   const login = useCallback(async (

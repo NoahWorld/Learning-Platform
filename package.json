@@ -14,6 +14,8 @@
     "import:data": "node server/import-content.mjs",
     "audio:sync-listening": "node server/sync-listening-audio.mjs",
     "audio:sync-pronunciation": "node server/sync-pronunciation-audio.mjs",
+    "audio:build-daily": "node scripts/build-daily-listening-audio.mjs",
+    "audio:sync-daily": "node server/sync-daily-listening-audio.mjs",
     "exams:build-short-series": "node scripts/build-short-exam-series.mjs",
     "exams:archive-long": "node server/archive-long-exams.mjs",
     "user:upsert": "node server/manage-user.mjs upsert"

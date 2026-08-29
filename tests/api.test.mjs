@@ -693,6 +693,175 @@ test("listening practice hides answers until submission and persists per-user pr
   assert.equal(listAfter.json().summary.masteredSceneCount, 1);
 });
 
+test("daily listening hides answers until submission and persists per-user progress", async (context) => {
+  const testApp = await createTestApp();
+  context.after(() => testApp.cleanup());
+  const storyId = "english-clubs-speaking-practice";
+
+  const unauthenticated = await testApp.app.inject({
+    method: "GET",
+    url: "/api/english/daily-listening",
+  });
+  assert.equal(unauthenticated.statusCode, 401);
+
+  const listBefore = await testApp.app.inject({
+    method: "GET",
+    url: "/api/english/daily-listening",
+    headers: authenticated(testApp.cookie),
+  });
+  assert.equal(listBefore.statusCode, 200, listBefore.body);
+  assert.equal(listBefore.json().stories.length, 1);
+  assert.equal(listBefore.json().stories[0].durationSeconds, 48);
+  assert.equal(listBefore.json().stories[0].questionCount, 3);
+  assert.equal(listBefore.json().summary.practicedStoryCount, 0);
+  assert.doesNotMatch(
+    listBefore.body,
+    /correctOptionId|explanation|transcript|audioObjectKey|audioSourceUrl|audioByteLength|audioSha256/,
+  );
+
+  const detail = await testApp.app.inject({
+    method: "GET",
+    url: `/api/english/daily-listening/${storyId}`,
+    headers: authenticated(testApp.cookie),
+  });
+  assert.equal(detail.statusCode, 200, detail.body);
+  assert.equal(detail.json().story.questions.length, 3);
+  assert.doesNotMatch(
+    detail.body,
+    /correctOptionId|explanation|transcript|audioObjectKey|audioSourceUrl|audioByteLength|audioSha256/,
+  );
+
+  const incomplete = await testApp.app.inject({
+    method: "POST",
+    url: `/api/english/daily-listening/${storyId}/submissions`,
+    headers: authenticated(testApp.cookie),
+    payload: {
+      listenCount: 1,
+      durationSeconds: 24,
+      answers: [{ questionId: "clubs-main-idea", optionId: "practice" }],
+    },
+  });
+  assert.equal(incomplete.statusCode, 400);
+  assert.match(incomplete.json().error, /请完成全部 3 道听力题/);
+
+  const completed = await testApp.app.inject({
+    method: "POST",
+    url: `/api/english/daily-listening/${storyId}/submissions`,
+    headers: authenticated(testApp.cookie),
+    payload: {
+      listenCount: 2,
+      durationSeconds: 75,
+      answers: [
+        { questionId: "clubs-main-idea", optionId: "practice" },
+        { questionId: "clubs-hardest-part", optionId: "speaking" },
+        { questionId: "clubs-suggestion", optionId: "club" },
+      ],
+    },
+  });
+  assert.equal(completed.statusCode, 201, completed.body);
+  assert.equal(completed.json().score, 100);
+  assert.equal(completed.json().correctCount, 3);
+  assert.equal(completed.json().transcript.length, 4);
+  assert.equal(completed.json().answers[0].correctOptionId, "practice");
+
+  const persisted = testApp.app.db
+    .prepare(
+      `SELECT user_id, story_id, score, listen_count, duration_seconds
+       FROM daily_listening_attempts`,
+    )
+    .all();
+  assert.deepEqual(persisted, [{
+    user_id: testUsername,
+    story_id: storyId,
+    score: 100,
+    listen_count: 2,
+    duration_seconds: 75,
+  }]);
+
+  const listAfter = await testApp.app.inject({
+    method: "GET",
+    url: "/api/english/daily-listening",
+    headers: authenticated(testApp.cookie),
+  });
+  assert.deepEqual(
+    listAfter.json().stories[0].progress,
+    {
+      attemptCount: 1,
+      bestScore: 100,
+      latestScore: 100,
+      lastPracticedAt: completed.json().submittedAt,
+    },
+  );
+  assert.deepEqual(listAfter.json().summary, {
+    storyCount: 1,
+    practicedStoryCount: 1,
+    masteredStoryCount: 1,
+    totalAttemptCount: 1,
+  });
+
+  await provisionUser(testApp.app.db, {
+    username: "english-other-user",
+    password: "AnotherPass1!",
+    displayName: "另一位英语用户",
+    moduleIds: ["english"],
+  });
+  const otherCookie = await loginAs(testApp.app, "english-other-user", "AnotherPass1!");
+  const otherList = await testApp.app.inject({
+    method: "GET",
+    url: "/api/english/daily-listening",
+    headers: authenticated(otherCookie),
+  });
+  assert.equal(otherList.statusCode, 200, otherList.body);
+  assert.equal(otherList.json().stories[0].progress.attemptCount, 0);
+});
+
+test("daily listening audio is authenticated, private, and supports byte ranges", async (context) => {
+  const audio = Buffer.from("daily-human-audio");
+  const requestedObjects = [];
+  const storage = {
+    bucket: "test-assets",
+    client: {
+      async statObject(bucket, objectKey) {
+        requestedObjects.push({ operation: "stat", bucket, objectKey });
+        return { size: audio.length };
+      },
+      async getObject(bucket, objectKey) {
+        requestedObjects.push({ operation: "full", bucket, objectKey });
+        return Readable.from([audio]);
+      },
+      async getPartialObject(bucket, objectKey, start, length) {
+        requestedObjects.push({ operation: "partial", bucket, objectKey, start, length });
+        return Readable.from([audio.subarray(start, start + length)]);
+      },
+    },
+  };
+  const testApp = await createTestApp({ storage });
+  context.after(() => testApp.cleanup());
+  const url = "/api/english/daily-listening/english-clubs-speaking-practice/audio";
+
+  const unauthenticated = await testApp.app.inject({ method: "GET", url });
+  assert.equal(unauthenticated.statusCode, 401);
+
+  const partial = await testApp.app.inject({
+    method: "GET",
+    url,
+    headers: { ...authenticated(testApp.cookie), range: "bytes=2-6" },
+  });
+  assert.equal(partial.statusCode, 206, partial.body);
+  assert.equal(partial.headers["content-type"], "audio/mpeg");
+  assert.equal(partial.headers["content-range"], `bytes 2-6/${audio.length}`);
+  assert.equal(partial.headers["cache-control"], "private, max-age=86400");
+  assert.deepEqual(partial.rawPayload, audio.subarray(2, 7));
+
+  assert.ok(requestedObjects.some((request) => (
+    request.operation === "partial" && request.start === 2 && request.length === 5
+  )));
+  assert.ok(requestedObjects.every((request) => (
+    request.bucket === "test-assets"
+      && request.objectKey === "english-listening/daily/voa-english-clubs-opening-48s.mp3"
+  )));
+});
+
 test("listening audio is authenticated and supports byte ranges", async (context) => {
   const audio = Buffer.from("0123456789");
   const requestedObjects = [];
@@ -1197,7 +1366,7 @@ test("version 1 databases migrate case-question fields without losing rows", asy
 
   const migratedDb = openDatabase(databasePath);
   context.after(() => migratedDb.close());
-  assert.equal(migratedDb.pragma("user_version", { simple: true }), 8);
+  assert.equal(migratedDb.pragma("user_version", { simple: true }), 9);
   assert.deepEqual(
     migratedDb.prepare("SELECT id, section, passage FROM questions WHERE id = ?").get("legacy-q"),
     { id: "legacy-q", section: "standard", passage: "" },
@@ -1238,6 +1407,8 @@ test("version 4 migration keeps only the newest session per user", async (contex
     DROP TABLE user_module_access;
     DROP TABLE learning_modules;
     DROP TABLE mistake_practice_attempts;
+    DROP INDEX idx_daily_listening_attempts_user_story_submitted;
+    DROP TABLE daily_listening_attempts;
     DROP TABLE listening_attempts;
     ALTER TABLE users DROP COLUMN is_admin;
     ALTER TABLE users DROP COLUMN is_active;
@@ -1257,11 +1428,17 @@ test("version 4 migration keeps only the newest session per user", async (contex
   versionFourDb.close();
 
   migratedDb = openDatabase(databasePath);
-  assert.equal(migratedDb.pragma("user_version", { simple: true }), 8);
+  assert.equal(migratedDb.pragma("user_version", { simple: true }), 9);
   assert.equal(
     migratedDb
       .prepare("SELECT COUNT(*) AS count FROM sqlite_master WHERE type = 'table' AND name = ?")
       .get("mistake_practice_attempts").count,
+    1,
+  );
+  assert.equal(
+    migratedDb
+      .prepare("SELECT COUNT(*) AS count FROM sqlite_master WHERE type = 'table' AND name = ?")
+      .get("daily_listening_attempts").count,
     1,
   );
   assert.deepEqual(

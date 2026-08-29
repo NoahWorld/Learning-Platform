@@ -164,6 +164,92 @@ export interface ListeningSubmissionResult {
   transcript: ListeningTranscriptLine[];
 }
 
+export interface DailyListeningKeyword {
+  word: string;
+  phonetic: string;
+  meaning: string;
+}
+
+export interface DailyListeningSource {
+  title: string;
+  publisher: string;
+  author: string;
+  pageUrl: string;
+  sourcePublishedAt: string;
+  licenseName: string;
+  licenseUrl: string;
+  credit: string;
+}
+
+export interface DailyListeningStorySummary {
+  id: string;
+  number: string;
+  releaseDate: string;
+  englishTitle: string;
+  chineseTitle: string;
+  category: string;
+  level: string;
+  accent: string;
+  duration: string;
+  durationSeconds: number;
+  background: string;
+  listeningGoal: string;
+  keywords: DailyListeningKeyword[];
+  questionCount: number;
+  audioUrl: string;
+  source: DailyListeningSource;
+  progress: ListeningProgress;
+}
+
+export interface DailyListeningQuestion extends ListeningQuestion {
+  kind: "main" | "detail";
+}
+
+export interface DailyListeningStoryDetail extends DailyListeningStorySummary {
+  questions: DailyListeningQuestion[];
+}
+
+export interface DailyListeningListResponse {
+  stories: DailyListeningStorySummary[];
+  summary: {
+    storyCount: number;
+    practicedStoryCount: number;
+    masteredStoryCount: number;
+    totalAttemptCount: number;
+  };
+}
+
+export interface DailyListeningStoryResponse {
+  story: DailyListeningStoryDetail;
+}
+
+export interface DailyListeningTranscriptLine {
+  startSeconds: number;
+  endSeconds: number;
+  text: string;
+  translation: string;
+  note: string;
+}
+
+export interface DailyListeningSubmissionResult {
+  id: string;
+  storyId: string;
+  score: number;
+  correctCount: number;
+  totalQuestions: number;
+  listenCount: number;
+  durationSeconds: number;
+  submittedAt: string;
+  answers: Array<{
+    questionId: string;
+    selectedOptionId: string;
+    correctOptionId: string;
+    isCorrect: boolean;
+    explanation: string;
+  }>;
+  transcript: DailyListeningTranscriptLine[];
+}
+
 export interface MaterialSummary {
   id: string;
   title: string;

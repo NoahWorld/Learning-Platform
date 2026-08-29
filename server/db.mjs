@@ -2,7 +2,7 @@ import Database from "better-sqlite3";
 import { mkdirSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 
-const CURRENT_SCHEMA_VERSION = 8;
+const CURRENT_SCHEMA_VERSION = 9;
 
 export function openDatabase(databasePath = "./data/study-workbench.sqlite") {
   const resolvedPath = databasePath === ":memory:" ? databasePath : resolve(databasePath);
@@ -194,6 +194,19 @@ function migrate(db) {
           submitted_at TEXT NOT NULL
         );
 
+        CREATE TABLE daily_listening_attempts (
+          id TEXT PRIMARY KEY,
+          user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+          story_id TEXT NOT NULL,
+          answers_json TEXT NOT NULL,
+          score INTEGER NOT NULL CHECK (score BETWEEN 0 AND 100),
+          correct_count INTEGER NOT NULL CHECK (correct_count >= 0),
+          total_questions INTEGER NOT NULL CHECK (total_questions > 0),
+          listen_count INTEGER NOT NULL CHECK (listen_count > 0),
+          duration_seconds INTEGER NOT NULL CHECK (duration_seconds >= 0),
+          submitted_at TEXT NOT NULL
+        );
+
         CREATE INDEX idx_materials_status_category
           ON materials(status, category);
 
@@ -238,6 +251,9 @@ function migrate(db) {
 
         CREATE INDEX idx_listening_attempts_user_scene_submitted
           ON listening_attempts(user_id, scene_id, submitted_at DESC);
+
+        CREATE INDEX idx_daily_listening_attempts_user_story_submitted
+          ON daily_listening_attempts(user_id, story_id, submitted_at DESC);
       `);
       db.pragma(`user_version = ${CURRENT_SCHEMA_VERSION}`);
       db.pragma("optimize");
@@ -452,6 +468,31 @@ function migrate(db) {
 
         CREATE INDEX idx_admin_audit_created
           ON admin_audit_log(created_at DESC);
+      `);
+      db.pragma("user_version = 8");
+      db.pragma("optimize");
+    })();
+    version = 8;
+  }
+
+  if (version === 8) {
+    db.transaction(() => {
+      db.exec(`
+        CREATE TABLE daily_listening_attempts (
+          id TEXT PRIMARY KEY,
+          user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+          story_id TEXT NOT NULL,
+          answers_json TEXT NOT NULL,
+          score INTEGER NOT NULL CHECK (score BETWEEN 0 AND 100),
+          correct_count INTEGER NOT NULL CHECK (correct_count >= 0),
+          total_questions INTEGER NOT NULL CHECK (total_questions > 0),
+          listen_count INTEGER NOT NULL CHECK (listen_count > 0),
+          duration_seconds INTEGER NOT NULL CHECK (duration_seconds >= 0),
+          submitted_at TEXT NOT NULL
+        );
+
+        CREATE INDEX idx_daily_listening_attempts_user_story_submitted
+          ON daily_listening_attempts(user_id, story_id, submitted_at DESC);
       `);
       db.pragma(`user_version = ${CURRENT_SCHEMA_VERSION}`);
       db.pragma("optimize");

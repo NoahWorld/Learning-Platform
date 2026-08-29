@@ -3,6 +3,7 @@ import { RequireAdmin, RequireAuth, RequireModule } from "./auth";
 import { AppShell } from "./components/AppShell";
 import { materialsEnabled } from "./features";
 import { DashboardPage } from "./pages/DashboardPage";
+import { EnglishDailyListeningPage } from "./pages/EnglishDailyListeningPage";
 import { EnglishListeningPage } from "./pages/EnglishListeningPage";
 import { EnglishListeningPracticePage } from "./pages/EnglishListeningPracticePage";
 import { EnglishModulePage } from "./pages/EnglishModulePage";
@@ -35,6 +36,7 @@ export default function App() {
         <Route element={<RequireModule moduleId="english" />}>
           <Route path="modules/english" element={<EnglishModulePage />} />
           <Route path="modules/english/listening" element={<EnglishListeningPage />} />
+          <Route path="modules/english/listening/daily/:storyId" element={<EnglishDailyListeningPage />} />
           <Route path="modules/english/listening/:sceneId" element={<EnglishListeningPracticePage />} />
         </Route>
         <Route element={<RequireModule moduleId="human-resources" />}>

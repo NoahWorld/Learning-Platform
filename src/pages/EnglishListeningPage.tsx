@@ -9,6 +9,7 @@ import {
   Pause,
   Play,
   Sparkles,
+  Target,
   Volume2,
 } from "lucide-react";
 import { useEffect } from "react";
@@ -16,7 +17,11 @@ import { Link } from "react-router-dom";
 import { apiGet } from "../api";
 import { ModuleTopBar } from "../components/ModuleTopBar";
 import { ErrorState, LoadingState } from "../components/PageBits";
-import type { ListeningListResponse, ListeningSceneSummary } from "../types";
+import type {
+  DailyListeningListResponse,
+  ListeningListResponse,
+  ListeningSceneSummary,
+} from "../types";
 import { useAudioPlayback } from "../useAudioPlayback";
 import { useRemote } from "../useRemote";
 
@@ -29,6 +34,14 @@ function progressLabel(scene: ListeningSceneSummary) {
 export function EnglishListeningPage() {
   const { data, loading, error } = useRemote<ListeningListResponse>(
     (signal) => apiGet("/api/english/listening", signal),
+    [],
+  );
+  const {
+    data: dailyData,
+    loading: dailyLoading,
+    error: dailyError,
+  } = useRemote<DailyListeningListResponse>(
+    (signal) => apiGet("/api/english/daily-listening", signal),
     [],
   );
   const { activeAudio, audioError, errorAudioId, play: playAudio } = useAudioPlayback();
@@ -70,6 +83,58 @@ export function EnglishListeningPage() {
           <div><b>02</b><span><strong>作答</strong><small>锁定细节</small></span></div>
           <div><b>03</b><span><strong>精析</strong><small>核对原文</small></span></div>
           <div><b>04</b><span><strong>复测</strong><small>正常 / 慢速</small></span></div>
+        </section>
+
+        <section className="daily-listening-section" aria-labelledby="daily-listening-title">
+          <header className="listening-section-heading">
+            <div>
+              <span>DAILY LISTEN · 每日听闻</span>
+              <h2 id="daily-listening-title">每天听懂一小段</h2>
+            </div>
+            <p><Headphones size={17} /> 短原声、少量关键词，只要求抓住主旨。</p>
+          </header>
+          {dailyLoading ? <LoadingState label="正在准备今日原声…" /> : null}
+          {dailyError ? <ErrorState message={dailyError} /> : null}
+          {dailyData ? (
+            <div className="daily-listening-grid">
+              {dailyData.stories.map((story) => (
+                <article className="daily-listening-card" key={story.id}>
+                  <div className="daily-listening-date">
+                    <small>TODAY</small>
+                    <strong>{story.durationSeconds}</strong>
+                    <span>SEC</span>
+                  </div>
+                  <div className="daily-listening-card-copy">
+                    <div className="daily-listening-eyebrow">
+                      <span>{story.category}</span>
+                      <span>{story.level}</span>
+                      <span>{story.accent}</span>
+                    </div>
+                    <small>{story.englishTitle}</small>
+                    <h3>{story.chineseTitle}</h3>
+                    <p>{story.background}</p>
+                    <div className="daily-listening-keyword-preview">
+                      {story.keywords.map((keyword) => (
+                        <span key={keyword.word}>{keyword.word}</span>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="daily-listening-card-action">
+                    <span><Target size={16} /> {story.questionCount} 个听力检查点</span>
+                    <strong>
+                      {story.progress.bestScore === null
+                        ? "今天还没听"
+                        : `最好 ${story.progress.bestScore} 分`}
+                    </strong>
+                    <Link to={`/modules/english/listening/daily/${story.id}`}>
+                      {story.progress.attemptCount > 0 ? "再听一遍" : "开始今日听闻"}
+                      <ArrowRight size={18} />
+                    </Link>
+                  </div>
+                </article>
+              ))}
+            </div>
+          ) : null}
         </section>
 
         {sceneAudioError ? <div className="listening-speech-error" role="alert">{audioError}</div> : null}
