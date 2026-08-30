@@ -516,6 +516,133 @@ test("administrators manage accounts and course access while APIs enforce assign
   );
 });
 
+test("administrator homework stays private and streams verified PDFs with byte ranges", async (context) => {
+  const pdf = Buffer.alloc(317967, 0x20);
+  pdf.write("%PDF-", 0, "ascii");
+  const requestedObjects = [];
+  const storage = {
+    bucket: "test-assets",
+    client: {
+      async statObject(bucket, objectKey) {
+        requestedObjects.push({ operation: "stat", bucket, objectKey });
+        return { size: pdf.length };
+      },
+      async getObject(bucket, objectKey) {
+        requestedObjects.push({ operation: "full", bucket, objectKey });
+        return Readable.from([pdf]);
+      },
+      async getPartialObject(bucket, objectKey, start, length) {
+        requestedObjects.push({ operation: "partial", bucket, objectKey, start, length });
+        return Readable.from([pdf.subarray(start, start + length)]);
+      },
+    },
+  };
+  const testApp = await createTestApp({ storage, userOptions: { isAdmin: true } });
+  context.after(() => testApp.cleanup());
+  const listUrl = "/api/admin/homework";
+  const fileUrl = "/api/admin/homework/chapter-01/file";
+
+  const unauthenticatedList = await testApp.app.inject({ method: "GET", url: listUrl });
+  assert.equal(unauthenticatedList.statusCode, 401);
+
+  const list = await testApp.app.inject({
+    method: "GET",
+    url: listUrl,
+    headers: authenticated(testApp.cookie),
+  });
+  assert.equal(list.statusCode, 200, list.body);
+  assert.equal(list.headers["cache-control"], "private, no-store");
+  assert.equal(list.json().collection.chapterCount, 19);
+  assert.equal(list.json().collection.pageCount, 236);
+  assert.equal(list.json().collection.byteLength, 5861709);
+  assert.equal(list.json().chapters.length, 19);
+  assert.equal(list.json().chapters[0].id, "chapter-01");
+  assert.equal(list.json().chapters[18].id, "chapter-19");
+  assert.equal(list.json().chapters[0].fileUrl, fileUrl);
+  assert.equal(list.body.includes("objectKey"), false);
+  assert.equal(list.body.includes("sourceFileName"), false);
+  assert.equal(list.body.includes("sha256"), false);
+
+  const unauthenticatedFile = await testApp.app.inject({ method: "GET", url: fileUrl });
+  assert.equal(unauthenticatedFile.statusCode, 401);
+
+  await provisionUser(testApp.app.db, {
+    username: "homework-student",
+    password: "Student123",
+    displayName: "课后题学生",
+    isAdmin: false,
+  });
+  const studentCookie = await loginAs(testApp.app, "homework-student", "Student123");
+  const forbiddenList = await testApp.app.inject({
+    method: "GET",
+    url: listUrl,
+    headers: authenticated(studentCookie),
+  });
+  assert.equal(forbiddenList.statusCode, 403);
+  const forbiddenFile = await testApp.app.inject({
+    method: "GET",
+    url: fileUrl,
+    headers: authenticated(studentCookie),
+  });
+  assert.equal(forbiddenFile.statusCode, 403);
+
+  const partial = await testApp.app.inject({
+    method: "GET",
+    url: fileUrl,
+    headers: { ...authenticated(testApp.cookie), range: "bytes=1-4" },
+  });
+  assert.equal(partial.statusCode, 206, partial.body);
+  assert.equal(partial.headers["content-type"], "application/pdf");
+  assert.equal(partial.headers["content-range"], `bytes 1-4/${pdf.length}`);
+  assert.equal(partial.headers["content-length"], "4");
+  assert.equal(partial.headers["cache-control"], "private, max-age=3600");
+  assert.match(partial.headers["content-disposition"], /^inline; filename="chapter-01\.pdf"/);
+  assert.deepEqual(partial.rawPayload, pdf.subarray(1, 5));
+  assert.deepEqual(requestedObjects, [
+    {
+      operation: "stat",
+      bucket: "test-assets",
+      objectKey: "admin-homework/hr-intensive-course-2026/chapter-01.pdf",
+    },
+    {
+      operation: "partial",
+      bucket: "test-assets",
+      objectKey: "admin-homework/hr-intensive-course-2026/chapter-01.pdf",
+      start: 1,
+      length: 4,
+    },
+  ]);
+
+  const missing = await testApp.app.inject({
+    method: "GET",
+    url: "/api/admin/homework/chapter-20/file",
+    headers: authenticated(testApp.cookie),
+  });
+  assert.equal(missing.statusCode, 404);
+  assert.match(missing.json().error, /章节不存在/);
+});
+
+test("administrator homework rejects a stored PDF whose size differs from the verified manifest", async (context) => {
+  const storage = {
+    bucket: "test-assets",
+    client: {
+      async statObject() {
+        return { size: 99 };
+      },
+    },
+  };
+  const testApp = await createTestApp({ storage, userOptions: { isAdmin: true } });
+  context.after(() => testApp.cleanup());
+
+  const response = await testApp.app.inject({
+    method: "GET",
+    url: "/api/admin/homework/chapter-01/file",
+    headers: authenticated(testApp.cookie),
+  });
+  assert.equal(response.statusCode, 502);
+  assert.match(response.json().error, /文件校验失败/);
+});
+
 test("materials and direct assets stay blocked while exams remain available", async (context) => {
   const testApp = await createTestApp();
   context.after(() => testApp.cleanup());

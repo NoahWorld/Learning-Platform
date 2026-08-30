@@ -44,6 +44,12 @@ import {
   getEnglishPronunciationSound,
   toPublicEnglishPronunciationSound,
 } from "./english-pronunciation-content.mjs";
+import {
+  adminHomeworkChapters,
+  adminHomeworkSummary,
+  getAdminHomeworkChapter,
+  toPublicAdminHomeworkChapter,
+} from "./admin-homework-content.mjs";
 
 const DEFAULT_STATIC_DIR = fileURLToPath(new URL("../dist", import.meta.url));
 const LEGACY_STUDY_PATH = /^\/(?:exams(?:\/.*)?|mistakes(?:\/.*)?|results(?:\/.*)?)$/;
@@ -330,6 +336,41 @@ function registerApiRoutes(app, db, storage, captchaFactory, materialsEnabled) {
       modules: getModuleCatalog(db),
       users: getAdminUsers(db),
     };
+  });
+
+  app.get("/api/admin/homework", async (request, reply) => {
+    requireAdmin(db, request);
+    reply.header("Cache-Control", "private, no-store");
+    return {
+      collection: adminHomeworkSummary(),
+      chapters: adminHomeworkChapters.map(toPublicAdminHomeworkChapter),
+    };
+  });
+
+  app.get("/api/admin/homework/:chapterId/file", async (request, reply) => {
+    const actor = requireAdmin(db, request);
+    const chapter = getAdminHomeworkChapter(request.params.chapterId);
+    if (!chapter) {
+      throw httpError(404, "课后作业章节不存在");
+    }
+
+    return sendPrivateStoredObject({
+      request,
+      reply,
+      storage,
+      objectKey: chapter.objectKey,
+      expectedByteLength: chapter.byteLength,
+      resourceContext: { actorUserId: actor.id, homeworkChapterId: chapter.id },
+      displayName: `第 ${chapter.chapterNumber} 章 ${chapter.title}`,
+      userFacingLabel: "管理员课后作业",
+      logLabel: "administrator homework PDF",
+      contentType: "application/pdf",
+      contentDisposition:
+        `inline; filename="chapter-${chapter.number}.pdf"; filename*=UTF-8''${encodeURIComponent(`${chapter.number}.第${chapter.chapterNumber}章-${chapter.title}.pdf`)}`,
+      cacheControl: "private, max-age=3600",
+      rangeLabel: "PDF",
+      streamFailureAction: "打开",
+    });
   });
 
   app.post("/api/admin/users", async (request, reply) => {
@@ -1871,6 +1912,38 @@ async function sendPrivateMp3({
   userFacingLabel,
   logLabel,
 }) {
+  return sendPrivateStoredObject({
+    request,
+    reply,
+    storage,
+    objectKey,
+    resourceContext,
+    displayName,
+    userFacingLabel,
+    logLabel,
+    contentType: "audio/mpeg",
+    cacheControl: "private, max-age=86400",
+    rangeLabel: "音频",
+    streamFailureAction: "播放",
+  });
+}
+
+async function sendPrivateStoredObject({
+  request,
+  reply,
+  storage,
+  objectKey,
+  expectedByteLength,
+  resourceContext,
+  displayName,
+  userFacingLabel,
+  logLabel,
+  contentType,
+  contentDisposition,
+  cacheControl,
+  rangeLabel,
+  streamFailureAction,
+}) {
   if (!storage) {
     throw httpError(503, `${userFacingLabel}存储尚未配置，请联系管理员`, { expose: true });
   }
@@ -1903,10 +1976,17 @@ async function sendPrivateMp3({
     );
     throw httpError(502, `${userFacingLabel}文件无效：${displayName}`, { expose: true });
   }
+  if (expectedByteLength !== undefined && size !== expectedByteLength) {
+    request.log.error(
+      { ...resourceContext, objectKey, reportedSize: size, expectedByteLength },
+      `${logLabel} size does not match the verified manifest`,
+    );
+    throw httpError(502, `${userFacingLabel}文件校验失败：${displayName}`, { expose: true });
+  }
 
   let byteRange;
   try {
-    byteRange = parseByteRange(request.headers.range, size);
+    byteRange = parseByteRange(request.headers.range, size, rangeLabel);
   } catch (error) {
     reply.header("Content-Range", `bytes */${size}`);
     throw error;
@@ -1927,7 +2007,7 @@ async function sendPrivateMp3({
       { err: error, ...resourceContext, objectKey, byteRange },
       `${logLabel} stream open failed`,
     );
-    throw httpError(502, `${userFacingLabel}播放失败：${displayName}`, {
+    throw httpError(502, `${userFacingLabel}${streamFailureAction}失败：${displayName}`, {
       expose: true,
       cause: error,
     });
@@ -1942,24 +2022,27 @@ async function sendPrivateMp3({
 
   reply
     .status(byteRange.partial ? 206 : 200)
-    .header("Content-Type", "audio/mpeg")
+    .header("Content-Type", contentType)
     .header("Content-Length", byteRange.length)
     .header("Accept-Ranges", "bytes")
-    .header("Cache-Control", "private, max-age=86400");
+    .header("Cache-Control", cacheControl);
+  if (contentDisposition) {
+    reply.header("Content-Disposition", contentDisposition);
+  }
   if (byteRange.partial) {
     reply.header("Content-Range", `bytes ${byteRange.start}-${byteRange.end}/${size}`);
   }
   return reply.send(objectStream);
 }
 
-function parseByteRange(rangeHeader, size) {
+function parseByteRange(rangeHeader, size, rangeLabel = "文件") {
   if (!rangeHeader) {
     return { partial: false, start: 0, end: size - 1, length: size };
   }
 
   const match = /^bytes=(\d*)-(\d*)$/.exec(rangeHeader.trim());
   if (!match || (!match[1] && !match[2])) {
-    throw httpError(416, "音频范围请求无效");
+    throw httpError(416, `${rangeLabel}范围请求无效`);
   }
 
   let start;
@@ -1967,7 +2050,7 @@ function parseByteRange(rangeHeader, size) {
   if (!match[1]) {
     const suffixLength = Number.parseInt(match[2], 10);
     if (!Number.isSafeInteger(suffixLength) || suffixLength <= 0) {
-      throw httpError(416, "音频范围请求无效");
+      throw httpError(416, `${rangeLabel}范围请求无效`);
     }
     start = Math.max(size - suffixLength, 0);
     end = size - 1;
@@ -1983,7 +2066,7 @@ function parseByteRange(rangeHeader, size) {
     || end < start
     || start >= size
   ) {
-    throw httpError(416, "音频范围请求超出文件大小");
+    throw httpError(416, `${rangeLabel}范围请求超出文件大小`);
   }
 
   end = Math.min(end, size - 1);

@@ -16,6 +16,7 @@ import { useNavigate } from "react-router-dom";
 import { apiDelete, apiGet, apiPost, apiPut } from "../api";
 import { useAuth } from "../auth";
 import { ModuleTopBar } from "../components/ModuleTopBar";
+import { AdminSectionNav } from "../components/AdminSectionNav";
 import type { AdminUsersResponse, ManagedLearningModule, ManagedUser } from "../types";
 
 interface CreateDraft {
@@ -213,6 +214,8 @@ export function AdminUsersPage() {
           </div>
           <div className="admin-count"><strong>{data?.users.length ?? 0}</strong><span>个账号</span></div>
         </header>
+
+        <AdminSectionNav />
 
         {error ? <div className="admin-feedback error" role="alert">{error}</div> : null}
         {notice ? <div className="admin-feedback success" role="status"><Check size={17} /> {notice}</div> : null}

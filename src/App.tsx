@@ -20,6 +20,7 @@ import { NotFoundPage } from "./pages/NotFoundPage";
 import { ResultDetailPage } from "./pages/ResultDetailPage";
 import { ResultsPage } from "./pages/ResultsPage";
 import { AdminUsersPage } from "./pages/AdminUsersPage";
+import { AdminHomeworkPage } from "./pages/AdminHomeworkPage";
 
 export default function App() {
   return (
@@ -29,6 +30,7 @@ export default function App() {
         <Route path="modules" element={<ModuleSelectionPage />} />
         <Route element={<RequireAdmin />}>
           <Route path="admin/users" element={<AdminUsersPage />} />
+          <Route path="admin/homework" element={<AdminHomeworkPage />} />
         </Route>
         <Route element={<RequireModule moduleId="economics" />}>
           <Route path="modules/economics" element={<ModulePreviewPage moduleId="economics" />} />

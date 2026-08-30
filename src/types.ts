@@ -34,6 +34,30 @@ export interface AdminUsersResponse {
   users: ManagedUser[];
 }
 
+export interface AdminHomeworkChapter {
+  id: string;
+  number: string;
+  chapterNumber: number;
+  title: string;
+  pageCount: number;
+  byteLength: number;
+  hasTextbookUpdate: boolean;
+  fileUrl: string;
+}
+
+export interface AdminHomeworkResponse {
+  collection: {
+    id: string;
+    title: string;
+    courseName: string;
+    instructor: string;
+    chapterCount: number;
+    pageCount: number;
+    byteLength: number;
+  };
+  chapters: AdminHomeworkChapter[];
+}
+
 export interface DashboardSummary {
   materialCount: number;
   examCount: number;

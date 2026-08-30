@@ -1,5 +1,6 @@
 import {
   BookOpen,
+  FileText,
   BrainCircuit,
   ClipboardCheck,
   Home,
@@ -100,6 +101,7 @@ export function AppShell() {
           <strong>中级经济师<br />人力资源</strong>
           <Link to="/modules"><LayoutGrid size={15} aria-hidden="true" /> 切换课程</Link>
           {user?.isAdmin ? <Link to="/admin/users"><Settings size={15} aria-hidden="true" /> 账号配置</Link> : null}
+          {user?.isAdmin ? <Link to="/admin/homework"><FileText size={15} aria-hidden="true" /> 课后作业</Link> : null}
         </div>
 
         <nav className="desktop-nav" aria-label="主导航">

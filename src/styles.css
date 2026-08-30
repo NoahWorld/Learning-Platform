@@ -2184,6 +2184,10 @@ img {
 .admin-feedback { display: flex; align-items: center; gap: 7px; margin-bottom: 16px; padding: 11px 14px; border: 2px solid var(--ink); font-size: 13px; font-weight: 800; }
 .admin-feedback.error { border-color: #8f2a3e; color: #8f2a3e; background: #fff0f1; }
 .admin-feedback.success { color: #205b49; background: #dff7c9; }
+.admin-section-nav { display: flex; flex-wrap: wrap; gap: 9px; margin: -4px 0 22px; }
+.admin-section-nav a { display: inline-flex; min-height: 42px; align-items: center; gap: 7px; padding: 0 14px; border: 2px solid #9da4b2; background: white; font-size: 12px; font-weight: 900; }
+.admin-section-nav a:hover { border-color: var(--ink); }
+.admin-section-nav a.active { border-color: var(--ink); background: var(--blue); box-shadow: 3px 3px 0 var(--ink); }
 .admin-loading { min-height: 280px; display: grid; place-items: center; border: var(--border); background: var(--paper); color: var(--muted); font-weight: 850; }
 .admin-layout { display: grid; grid-template-columns: minmax(250px, 330px) minmax(0, 1fr); gap: 24px; align-items: start; }
 .admin-user-list-panel,
@@ -2257,6 +2261,33 @@ img {
 .admin-primary-action:disabled,
 .admin-delete-action:disabled { cursor: not-allowed; opacity: .5; }
 .admin-delete-note { margin: -11px 0 0; color: #7a5961; font-size: 10px; font-weight: 750; }
+
+/* Administrator-only chapter homework library. */
+.admin-homework-main { width: min(1500px, 100%); }
+.admin-homework-heading { margin-bottom: 24px; }
+.homework-summary { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-bottom: 24px; }
+.homework-summary > div { display: flex; min-height: 76px; align-items: center; gap: 12px; padding: 14px 17px; border: var(--border); background: var(--paper); box-shadow: 4px 4px 0 var(--ink); }
+.homework-summary > div:nth-child(1) { background: var(--yellow); }
+.homework-summary > div:nth-child(2) { background: var(--blue); }
+.homework-summary > div:nth-child(3) { background: var(--green); }
+.homework-summary span { display: flex; align-items: baseline; gap: 5px; font-size: 11px; font-weight: 900; }
+.homework-summary strong { font-size: 25px; letter-spacing: -.03em; }
+.homework-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 17px; }
+.homework-card { position: relative; display: flex; min-width: 0; min-height: 265px; flex-direction: column; overflow: hidden; padding: 17px; border: var(--border); background: var(--paper); box-shadow: 5px 5px 0 var(--ink); }
+.homework-card:nth-child(4n + 1) { background: #fff1ae; }
+.homework-card:nth-child(4n + 2) { background: #cfefff; }
+.homework-card:nth-child(4n + 3) { background: #ffd8e6; }
+.homework-card:nth-child(4n) { background: #dff7c9; }
+.homework-card > header { position: relative; z-index: 1; display: flex; min-height: 24px; align-items: flex-start; justify-content: space-between; gap: 8px; }
+.homework-card > header > span { color: #5c6579; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 9px; font-weight: 950; letter-spacing: .12em; }
+.homework-card > header > b { padding: 3px 5px; border: 1.5px solid var(--ink); background: white; font-size: 8px; line-height: 1; white-space: nowrap; transform: rotate(2deg); }
+.homework-card-number { position: absolute; top: 33px; right: 13px; color: rgba(24, 37, 64, .12); font-size: 72px; font-weight: 1000; letter-spacing: -.09em; line-height: 1; }
+.homework-card-copy { position: relative; z-index: 1; display: flex; min-height: 0; flex: 1; flex-direction: column; justify-content: flex-end; padding: 25px 0 15px; }
+.homework-card-copy p { margin: 0 0 7px; color: #4f5b72; font-size: 11px; font-weight: 900; }
+.homework-card-copy h2 { margin: 0; font-size: clamp(20px, 2vw, 27px); font-weight: 1000; letter-spacing: -.045em; line-height: 1.18; }
+.homework-card-copy small { margin-top: 11px; color: #566077; font-size: 10px; font-weight: 850; }
+.homework-card > a { position: relative; z-index: 1; display: flex; min-height: 39px; align-items: center; justify-content: space-between; gap: 8px; padding: 0 11px; border: 2px solid var(--ink); color: white; background: var(--ink); box-shadow: 3px 3px 0 rgba(255, 255, 255, .8); font-size: 11px; font-weight: 950; }
+.homework-card > a:hover { transform: translate(1px, 1px); box-shadow: 2px 2px 0 rgba(255, 255, 255, .8); }
 
 .module-card {
   position: relative;
@@ -4544,6 +4575,8 @@ img {
   .admin-heading p { max-width: 92%; font-size: 11px; line-height: 1.5; }
   .admin-count { width: 75px; min-height: 65px; }
   .admin-count strong { font-size: 24px; }
+  .admin-section-nav { gap: 7px; margin-bottom: 17px; }
+  .admin-section-nav a { min-height: 38px; flex: 1; justify-content: center; padding: 0 8px; font-size: 10px; }
   .admin-layout { display: block; }
   .admin-user-list-panel { position: static; margin-bottom: 17px; padding: 12px; box-shadow: 4px 4px 0 var(--ink); }
   .admin-user-list { max-height: 230px; }
@@ -4555,6 +4588,21 @@ img {
   .admin-toggle-stack { grid-template-columns: 1fr; }
   .admin-account-stats span { padding: 8px 4px; }
   .admin-account-stats strong { font-size: 19px; }
+  .homework-summary { gap: 7px; margin-bottom: 17px; }
+  .homework-summary > div { min-height: 60px; gap: 6px; padding: 8px; box-shadow: 2px 2px 0 var(--ink); }
+  .homework-summary > div > svg { width: 17px; height: 17px; }
+  .homework-summary span { display: block; font-size: 8px; }
+  .homework-summary strong { display: block; font-size: 16px; }
+  .homework-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+  .homework-card { min-height: 220px; padding: 12px; box-shadow: 3px 3px 0 var(--ink); }
+  .homework-card > header > span { font-size: 7px; }
+  .homework-card > header > b { padding: 2px 3px; font-size: 7px; }
+  .homework-card-number { top: 32px; right: 10px; font-size: 46px; }
+  .homework-card-copy { padding: 25px 0 11px; }
+  .homework-card-copy p { margin-bottom: 4px; font-size: 9px; }
+  .homework-card-copy h2 { font-size: clamp(15px, 4.7vw, 19px); line-height: 1.2; }
+  .homework-card-copy small { margin-top: 7px; font-size: 8px; }
+  .homework-card > a { min-height: 34px; padding: 0 8px; font-size: 9px; }
   .module-preview-hero { display: block; min-height: 0; box-shadow: 5px 5px 0 var(--ink); }
   .module-preview-copy { padding: 38px 25px 27px; }
   .module-preview-copy h1 { font-size: clamp(42px, 12vw, 58px); }

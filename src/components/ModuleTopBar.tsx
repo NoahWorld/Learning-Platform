@@ -28,9 +28,9 @@ export function ModuleTopBar({ compact = false }: { compact?: boolean }) {
         </Link>
 
         <div className="module-account">
-          {user?.isAdmin && location.pathname !== "/admin/users" ? (
+          {user?.isAdmin && !location.pathname.startsWith("/admin/") ? (
             <Link className="module-switch-button" to="/admin/users">
-              <Settings size={17} aria-hidden="true" /> 账号配置
+              <Settings size={17} aria-hidden="true" /> 管理中心
             </Link>
           ) : null}
           {compact ? (
