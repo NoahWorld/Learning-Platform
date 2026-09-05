@@ -48,8 +48,19 @@ import {
   adminHomeworkChapters,
   adminHomeworkSummary,
   getAdminHomeworkChapter,
+  getAdminHomeworkQuestionAsset,
+  getAdminHomeworkQuestionAssetForQuestion,
   toPublicAdminHomeworkChapter,
+  toPublicAdminHomeworkQuestionAsset,
 } from "./admin-homework-content.mjs";
+import { getAdminHomeworkExam } from "./admin-homework-quiz-content.mjs";
+import {
+  getPmpLearningMaterial,
+  pmpExamProfile,
+  pmpLearningMaterials,
+  pmpOfficialResources,
+  toPmpLearningMaterialSummary,
+} from "./pmp-content.mjs";
 
 const DEFAULT_STATIC_DIR = fileURLToPath(new URL("../dist", import.meta.url));
 const LEGACY_STUDY_PATH = /^\/(?:exams(?:\/.*)?|mistakes(?:\/.*)?|results(?:\/.*)?)$/;
@@ -57,6 +68,7 @@ const LEGACY_MATERIALS_PATH = /^\/materials(?:\/.*)?$/;
 const STUDY_MATERIALS_PATH = /^\/study\/materials(?:\/.*)?$/;
 const HUMAN_RESOURCES_MODULE_ID = "human-resources";
 const ENGLISH_MODULE_ID = "english";
+const PMP_MODULE_ID = "pmp";
 
 export async function createApp({
   databasePath = process.env.DATABASE_PATH ?? "./data/study-workbench.sqlite",
@@ -339,12 +351,218 @@ function registerApiRoutes(app, db, storage, captchaFactory, materialsEnabled) {
   });
 
   app.get("/api/admin/homework", async (request, reply) => {
-    requireAdmin(db, request);
+    const actor = requireAdmin(db, request);
+    const chapters = adminHomeworkChapters.map((chapter) => {
+      const exam = assertAdminHomeworkExam(db, chapter);
+      return {
+        ...toPublicAdminHomeworkChapter(chapter),
+        ...getAdminHomeworkProgress(db, actor.id, exam.id),
+      };
+    });
     reply.header("Cache-Control", "private, no-store");
     return {
-      collection: adminHomeworkSummary(),
-      chapters: adminHomeworkChapters.map(toPublicAdminHomeworkChapter),
+      collection: {
+        ...adminHomeworkSummary(),
+        attemptedQuestionCount: chapters.reduce(
+          (sum, chapter) => sum + chapter.attemptedQuestionCount,
+          0,
+        ),
+        wrongQuestionCount: chapters.reduce(
+          (sum, chapter) => sum + chapter.wrongQuestionCount,
+          0,
+        ),
+        totalAttemptCount: chapters.reduce(
+          (sum, chapter) => sum + chapter.totalAttemptCount,
+          0,
+        ),
+      },
+      chapters,
     };
+  });
+
+  app.get("/api/admin/homework/:chapterId/questions", async (request, reply) => {
+    const actor = requireAdmin(db, request);
+    const chapter = getAdminHomeworkChapter(request.params.chapterId);
+    if (!chapter) {
+      throw httpError(404, "课后作业章节不存在");
+    }
+    const exam = assertAdminHomeworkExam(db, chapter);
+    const questions = db
+      .prepare(
+        `SELECT q.id, q.type, q.section, q.passage, q.prompt, q.points, q.position,
+                COUNT(homework.id) AS attempt_count,
+                SUM(CASE WHEN homework.is_correct = 0 THEN 1 ELSE 0 END) AS wrong_count,
+                MAX(homework.submitted_at) AS last_answered_at
+         FROM questions q
+         LEFT JOIN homework_question_attempts homework
+           ON homework.question_id = q.id AND homework.user_id = ?
+         WHERE q.exam_id = ?
+         GROUP BY q.id, q.type, q.section, q.passage, q.prompt, q.points, q.position
+         ORDER BY q.position ASC`,
+      )
+      .all(actor.id, exam.id);
+    if (questions.length !== chapter.questionCount) {
+      throw new Error(
+        `Administrator homework ${chapter.id} returned ${questions.length} questions; expected ${chapter.questionCount}`,
+      );
+    }
+    const optionsStatement = db.prepare(
+      `SELECT id, label, content
+       FROM question_options
+       WHERE question_id = ?
+       ORDER BY position ASC`,
+    );
+    const progress = getAdminHomeworkProgress(db, actor.id, exam.id);
+
+    reply.header("Cache-Control", "private, no-store");
+    return {
+      chapter: {
+        ...toPublicAdminHomeworkChapter(chapter),
+        ...progress,
+      },
+      questions: questions.map((question) => ({
+        id: question.id,
+        type: question.type,
+        section: question.section,
+        passage: question.passage,
+        prompt: question.prompt,
+        points: question.points,
+        position: question.position,
+        attemptCount: question.attempt_count,
+        wrongCount: question.wrong_count,
+        lastAnsweredAt: question.last_answered_at,
+        image: toPublicAdminHomeworkImage(question.id),
+        options: optionsStatement.all(question.id),
+      })),
+    };
+  });
+
+  app.post(
+    "/api/admin/homework/:chapterId/questions/:questionId/answer",
+    async (request, reply) => {
+      const actor = requireAdmin(db, request);
+      const input = parseOrThrow(mistakePracticeSubmissionSchema, request.body);
+      const chapter = getAdminHomeworkChapter(request.params.chapterId);
+      if (!chapter) {
+        throw httpError(404, "课后作业章节不存在");
+      }
+      const exam = assertAdminHomeworkExam(db, chapter);
+      const question = db
+        .prepare(
+          `SELECT id, explanation
+           FROM questions
+           WHERE id = ? AND exam_id = ?`,
+        )
+        .get(request.params.questionId, exam.id);
+      if (!question) {
+        throw httpError(404, "课后题不存在或不属于当前章节");
+      }
+
+      const duplicateOptionIds = findDuplicates(input.optionIds);
+      if (duplicateOptionIds.length > 0) {
+        throw httpError(400, `答题数据包含重复选项：${duplicateOptionIds.join(", ")}`);
+      }
+      const options = db
+        .prepare(
+          `SELECT id, label, content, is_correct
+           FROM question_options
+           WHERE question_id = ?
+           ORDER BY position ASC`,
+        )
+        .all(question.id);
+      const validOptionIds = new Set(options.map((option) => option.id));
+      const invalidOptionIds = input.optionIds.filter((id) => !validOptionIds.has(id));
+      if (invalidOptionIds.length > 0) {
+        throw httpError(400, `答题数据包含不属于这道题的选项：${invalidOptionIds.join(", ")}`);
+      }
+      const correctOptionIds = options
+        .filter((option) => option.is_correct === 1)
+        .map((option) => option.id);
+      const isCorrect = sameSet(input.optionIds, correctOptionIds);
+      const answerId = randomUUID();
+      const submittedAt = new Date().toISOString();
+      db.prepare(
+        `INSERT INTO homework_question_attempts (
+           id, user_id, question_id, selected_option_ids, is_correct, submitted_at
+         ) VALUES (?, ?, ?, ?, ?, ?)`,
+      ).run(
+        answerId,
+        actor.id,
+        question.id,
+        JSON.stringify(input.optionIds),
+        isCorrect ? 1 : 0,
+        submittedAt,
+      );
+      const questionProgress = db
+        .prepare(
+          `SELECT COUNT(*) AS attempt_count,
+                  SUM(CASE WHEN is_correct = 0 THEN 1 ELSE 0 END) AS wrong_count
+           FROM homework_question_attempts
+           WHERE user_id = ? AND question_id = ?`,
+        )
+        .get(actor.id, question.id);
+
+      request.log.info(
+        {
+          actorUserId: actor.id,
+          homeworkChapterId: chapter.id,
+          questionId: question.id,
+          homeworkAnswerId: answerId,
+          isCorrect,
+          attemptCount: questionProgress.attempt_count,
+        },
+        "administrator homework answer recorded",
+      );
+      reply.status(201).header("Cache-Control", "private, no-store");
+      return {
+        id: answerId,
+        questionId: question.id,
+        selectedOptionIds: input.optionIds,
+        isCorrect,
+        submittedAt,
+        attemptCount: questionProgress.attempt_count,
+        wrongCount: questionProgress.wrong_count,
+        correctOptions: options
+          .filter((option) => option.is_correct === 1)
+          .map(({ id, label, content }) => ({ id, label, content })),
+        explanation: question.explanation,
+        chapterProgress: getAdminHomeworkProgress(db, actor.id, exam.id),
+      };
+    },
+  );
+
+  app.get("/api/admin/homework/:chapterId/assets/:assetId", async (request, reply) => {
+    const actor = requireAdmin(db, request);
+    const chapter = getAdminHomeworkChapter(request.params.chapterId);
+    if (!chapter) {
+      throw httpError(404, "课后作业章节不存在");
+    }
+    assertAdminHomeworkExam(db, chapter);
+    const asset = getAdminHomeworkQuestionAsset(chapter.id, request.params.assetId);
+    if (!asset) {
+      throw httpError(404, "课后题图片不存在");
+    }
+
+    return sendPrivateStoredObject({
+      request,
+      reply,
+      storage,
+      objectKey: asset.objectKey,
+      expectedByteLength: asset.byteLength,
+      resourceContext: {
+        actorUserId: actor.id,
+        homeworkChapterId: chapter.id,
+        homeworkAssetId: asset.id,
+      },
+      displayName: asset.alt,
+      userFacingLabel: "管理员课后题图片",
+      logLabel: "administrator homework question image",
+      contentType: asset.contentType,
+      contentDisposition: `inline; filename="${asset.fileName}"`,
+      cacheControl: "private, max-age=3600",
+      rangeLabel: "图片",
+      streamFailureAction: "打开",
+    });
   });
 
   app.get("/api/admin/homework/:chapterId/file", async (request, reply) => {
@@ -561,29 +779,51 @@ function registerApiRoutes(app, db, storage, captchaFactory, materialsEnabled) {
       ? db.prepare("SELECT COUNT(*) AS count FROM materials WHERE status = 'published'").get().count
       : 0;
     const examCount = db
-      .prepare("SELECT COUNT(*) AS count FROM exams WHERE status = 'published'")
-      .get().count;
+      .prepare(
+        `SELECT COUNT(*) AS count
+         FROM exams e
+         JOIN exam_modules em ON em.exam_id = e.id
+         WHERE e.status = 'published' AND em.module_id = ?`,
+      )
+      .get(HUMAN_RESOURCES_MODULE_ID).count;
     const attemptStats = db
       .prepare(
         `SELECT COUNT(*) AS count, ROUND(AVG(score)) AS average_score,
                 MAX(score) AS best_score
-         FROM attempts
-         WHERE user_id = ?`,
+         FROM attempts a
+         JOIN exam_modules em ON em.exam_id = a.exam_id
+         WHERE a.user_id = ? AND em.module_id = ?`,
       )
-      .get(user.id);
+      .get(user.id, HUMAN_RESOURCES_MODULE_ID);
     const mistakeCount = db
       .prepare(
         `SELECT COUNT(*) AS count
          FROM (
-           SELECT aa.question_id
-           FROM attempt_answers aa
-           JOIN attempts a ON a.id = aa.attempt_id
-           WHERE a.user_id = ?
-           GROUP BY aa.question_id
-           HAVING SUM(CASE WHEN aa.is_correct = 0 THEN 1 ELSE 0 END) > 0
+           SELECT history.question_id
+           FROM (
+             SELECT aa.question_id, aa.is_correct
+             FROM attempt_answers aa
+             JOIN attempts a ON a.id = aa.attempt_id
+             JOIN exam_modules em ON em.exam_id = a.exam_id
+             WHERE a.user_id = ? AND em.module_id = ?
+             UNION ALL
+             SELECT homework.question_id, homework.is_correct
+             FROM homework_question_attempts homework
+             JOIN questions q ON q.id = homework.question_id
+             JOIN exam_modules em ON em.exam_id = q.exam_id
+             WHERE homework.user_id = ? AND em.module_id = ? AND ? = 1
+           ) history
+           GROUP BY history.question_id
+           HAVING SUM(CASE WHEN history.is_correct = 0 THEN 1 ELSE 0 END) > 0
          )`,
       )
-      .get(user.id).count;
+      .get(
+        user.id,
+        HUMAN_RESOURCES_MODULE_ID,
+        user.id,
+        HUMAN_RESOURCES_MODULE_ID,
+        user.is_admin,
+      ).count;
     const recentAttempt = db
       .prepare(
         `SELECT a.id, a.exam_id, e.title AS exam_title, a.score,
@@ -591,11 +831,12 @@ function registerApiRoutes(app, db, storage, captchaFactory, materialsEnabled) {
                 a.duration_seconds, e.passing_score, a.submitted_at
          FROM attempts a
          JOIN exams e ON e.id = a.exam_id
-         WHERE a.user_id = ?
+         JOIN exam_modules em ON em.exam_id = a.exam_id
+         WHERE a.user_id = ? AND em.module_id = ?
          ORDER BY a.submitted_at DESC
          LIMIT 1`,
       )
-      .get(user.id);
+      .get(user.id, HUMAN_RESOURCES_MODULE_ID);
 
     return {
       materialCount,
@@ -1029,30 +1270,86 @@ function registerApiRoutes(app, db, storage, captchaFactory, materialsEnabled) {
     return reply.send(objectStream);
   });
 
+  app.get("/api/pmp", async (request, reply) => {
+    const user = requireModuleAccess(db, request, PMP_MODULE_ID);
+    const recentResults = db
+      .prepare(
+        `SELECT a.id, a.exam_id, e.title AS exam_title, a.score,
+                a.correct_count, a.wrong_count, a.total_questions,
+                a.duration_seconds, a.submitted_at, e.passing_score
+         FROM attempts a
+         JOIN exams e ON e.id = a.exam_id
+         JOIN exam_modules em ON em.exam_id = a.exam_id
+         WHERE a.user_id = ? AND em.module_id = ?
+         ORDER BY a.submitted_at DESC
+         LIMIT 6`,
+      )
+      .all(user.id, PMP_MODULE_ID)
+      .map(mapAttemptSummary);
+
+    reply.header("Cache-Control", "private, no-store");
+    return {
+      examProfile: pmpExamProfile,
+      materials: pmpLearningMaterials.map(toPmpLearningMaterialSummary),
+      officialResources: pmpOfficialResources,
+      exams: listPublishedExams(db, PMP_MODULE_ID),
+      recentResults,
+    };
+  });
+
+  app.get("/api/pmp/materials/:materialId", async (request, reply) => {
+    requireModuleAccess(db, request, PMP_MODULE_ID);
+    const material = getPmpLearningMaterial(request.params.materialId);
+    if (!material) {
+      throw httpError(404, "PMP 学习资料不存在");
+    }
+
+    reply.header("Cache-Control", "private, no-store");
+    return material;
+  });
+
+  app.get("/api/pmp/exams/:id", async (request, reply) => {
+    requireModuleAccess(db, request, PMP_MODULE_ID);
+    const exam = getExam(db, request.params.id, false, PMP_MODULE_ID);
+    if (!exam) {
+      throw httpError(404, "PMP 模拟考试不存在或尚未发布");
+    }
+
+    reply.header("Cache-Control", "private, no-store");
+    return exam;
+  });
+
+  app.post("/api/pmp/exams/:id/submissions", async (request, reply) => {
+    const user = requireModuleAccess(db, request, PMP_MODULE_ID);
+    const input = parseOrThrow(submissionSchema, request.body);
+    const exam = getExam(db, request.params.id, true, PMP_MODULE_ID);
+    if (!exam) {
+      throw httpError(404, "PMP 模拟考试不存在或尚未发布");
+    }
+
+    reply.status(201).header("Cache-Control", "private, no-store");
+    return recordExamSubmission(db, user, exam, input, PMP_MODULE_ID);
+  });
+
+  app.get("/api/pmp/results/:id", async (request, reply) => {
+    const user = requireModuleAccess(db, request, PMP_MODULE_ID);
+    const result = getAttemptDetails(db, request.params.id, user.id, PMP_MODULE_ID);
+    if (!result) {
+      throw httpError(404, "PMP 考试记录不存在或不属于当前用户");
+    }
+
+    reply.header("Cache-Control", "private, no-store");
+    return result;
+  });
+
   app.get("/api/exams", async (request) => {
     requireModuleAccess(db, request, HUMAN_RESOURCES_MODULE_ID);
-    const exams = db
-      .prepare(
-        `SELECT e.id, e.title, e.description, e.duration_minutes,
-                e.passing_score, e.series_id, e.series_title,
-                e.series_description, e.series_order, e.paper_order,
-                e.updated_at, COUNT(q.id) AS question_count,
-                COALESCE(SUM(q.points), 0) AS total_points
-         FROM exams e
-         LEFT JOIN questions q ON q.exam_id = e.id
-         WHERE e.status = 'published'
-         GROUP BY e.id
-         ORDER BY e.series_order ASC, e.paper_order ASC, e.updated_at DESC, e.title ASC`,
-      )
-      .all()
-      .map(mapExamSummary);
-
-    return { exams };
+    return { exams: listPublishedExams(db, HUMAN_RESOURCES_MODULE_ID) };
   });
 
   app.get("/api/exams/:id", async (request) => {
     requireModuleAccess(db, request, HUMAN_RESOURCES_MODULE_ID);
-    const exam = getExam(db, request.params.id, false);
+    const exam = getExam(db, request.params.id, false, HUMAN_RESOURCES_MODULE_ID);
 
     if (!exam) {
       throw httpError(404, "模拟考试不存在或尚未发布");
@@ -1064,112 +1361,14 @@ function registerApiRoutes(app, db, storage, captchaFactory, materialsEnabled) {
   app.post("/api/exams/:id/submissions", async (request, reply) => {
     const user = requireModuleAccess(db, request, HUMAN_RESOURCES_MODULE_ID);
     const input = parseOrThrow(submissionSchema, request.body);
-    const exam = getExam(db, request.params.id, true);
+    const exam = getExam(db, request.params.id, true, HUMAN_RESOURCES_MODULE_ID);
 
     if (!exam) {
       throw httpError(404, "模拟考试不存在或尚未发布");
     }
 
-    if (exam.questions.length === 0) {
-      throw httpError(409, "这套试卷尚未配置题目，无法提交");
-    }
-
-    const duplicateQuestionIds = findDuplicates(input.answers.map((answer) => answer.questionId));
-    if (duplicateQuestionIds.length > 0) {
-      throw httpError(400, `答题数据包含重复题目：${duplicateQuestionIds.join(", ")}`);
-    }
-
-    const answerMap = new Map(input.answers.map((answer) => [answer.questionId, answer.optionIds]));
-    const knownQuestionIds = new Set(exam.questions.map((question) => question.id));
-    const unknownQuestionIds = [...answerMap.keys()].filter((id) => !knownQuestionIds.has(id));
-    if (unknownQuestionIds.length > 0) {
-      throw httpError(400, `答题数据包含不属于这套试卷的题目：${unknownQuestionIds.join(", ")}`);
-    }
-
-    let earnedPoints = 0;
-    let correctCount = 0;
-    const gradedAnswers = exam.questions.map((question) => {
-      const selectedOptionIds = answerMap.get(question.id) ?? [];
-      const duplicateOptionIds = findDuplicates(selectedOptionIds);
-      if (duplicateOptionIds.length > 0) {
-        throw httpError(400, `题目 ${question.id} 包含重复选项`);
-      }
-
-      const validOptionIds = new Set(question.options.map((option) => option.id));
-      const invalidOptionIds = selectedOptionIds.filter((id) => !validOptionIds.has(id));
-      if (invalidOptionIds.length > 0) {
-        throw httpError(400, `题目 ${question.id} 包含无效选项：${invalidOptionIds.join(", ")}`);
-      }
-
-      const correctOptionIds = question.options
-        .filter((option) => option.correct)
-        .map((option) => option.id);
-      const isCorrect = sameSet(selectedOptionIds, correctOptionIds);
-      const hasWrongSelection = selectedOptionIds.some((id) => !correctOptionIds.includes(id));
-      const questionPoints = isCorrect
-        ? question.points
-        : question.type === "multiple" && !hasWrongSelection
-          ? Math.min(question.points, selectedOptionIds.length * 0.5)
-          : 0;
-
-      if (isCorrect) {
-        correctCount += 1;
-      }
-      earnedPoints += questionPoints;
-
-      return {
-        questionId: question.id,
-        selectedOptionIds,
-        correctOptionIds,
-        isCorrect,
-        earnedPoints: questionPoints,
-      };
-    });
-
-    const totalPoints = exam.questions.reduce((sum, question) => sum + question.points, 0);
-    const score = Math.round((earnedPoints / totalPoints) * 100);
-    const attemptId = randomUUID();
-    const submittedAt = new Date().toISOString();
-    const startedAt = input.startedAt ?? submittedAt;
-
-    db.transaction(() => {
-      db.prepare(
-        `INSERT INTO attempts (
-           id, device_id, user_id, exam_id, score, correct_count, wrong_count,
-           total_questions, duration_seconds, started_at, submitted_at
-         ) VALUES (?, '', ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      ).run(
-        attemptId,
-        user.id,
-        exam.id,
-        score,
-        correctCount,
-        exam.questions.length - correctCount,
-        exam.questions.length,
-        input.durationSeconds,
-        startedAt,
-        submittedAt,
-      );
-
-      const insertAnswer = db.prepare(
-        `INSERT INTO attempt_answers (
-           attempt_id, question_id, selected_option_ids, is_correct, earned_points
-         ) VALUES (?, ?, ?, ?, ?)`,
-      );
-
-      for (const answer of gradedAnswers) {
-        insertAnswer.run(
-          attemptId,
-          answer.questionId,
-          JSON.stringify(answer.selectedOptionIds),
-          answer.isCorrect ? 1 : 0,
-          answer.earnedPoints,
-        );
-      }
-    })();
-
     reply.status(201);
-    return getAttemptDetails(db, attemptId, user.id);
+    return recordExamSubmission(db, user, exam, input, HUMAN_RESOURCES_MODULE_ID);
   });
 
   app.get("/api/results", async (request) => {
@@ -1181,11 +1380,12 @@ function registerApiRoutes(app, db, storage, captchaFactory, materialsEnabled) {
                 a.duration_seconds, a.submitted_at, e.passing_score
          FROM attempts a
          JOIN exams e ON e.id = a.exam_id
-         WHERE a.user_id = ?
+         JOIN exam_modules em ON em.exam_id = a.exam_id
+         WHERE a.user_id = ? AND em.module_id = ?
          ORDER BY a.submitted_at DESC
          LIMIT 200`,
       )
-      .all(user.id)
+      .all(user.id, HUMAN_RESOURCES_MODULE_ID)
       .map(mapAttemptSummary);
 
     return { results };
@@ -1193,7 +1393,12 @@ function registerApiRoutes(app, db, storage, captchaFactory, materialsEnabled) {
 
   app.get("/api/results/:id", async (request) => {
     const user = requireModuleAccess(db, request, HUMAN_RESOURCES_MODULE_ID);
-    const result = getAttemptDetails(db, request.params.id, user.id);
+    const result = getAttemptDetails(
+      db,
+      request.params.id,
+      user.id,
+      HUMAN_RESOURCES_MODULE_ID,
+    );
 
     if (!result) {
       throw httpError(404, "考试记录不存在或不属于当前用户");
@@ -1206,19 +1411,33 @@ function registerApiRoutes(app, db, storage, captchaFactory, materialsEnabled) {
     const user = requireModuleAccess(db, request, HUMAN_RESOURCES_MODULE_ID);
     const rows = db
       .prepare(
-        `WITH answer_history AS (
+        `WITH raw_answer_history AS (
            SELECT q.id AS question_id, q.prompt, q.explanation, q.type,
                   e.id AS exam_id, e.title AS exam_title,
-                  aa.is_correct, a.submitted_at,
-                  ROW_NUMBER() OVER (
-                    PARTITION BY q.id
-                    ORDER BY a.submitted_at DESC, a.id DESC
-                  ) AS recency
+                  aa.is_correct, a.submitted_at, a.id AS source_id
            FROM attempt_answers aa
            JOIN attempts a ON a.id = aa.attempt_id
            JOIN questions q ON q.id = aa.question_id
            JOIN exams e ON e.id = q.exam_id
-           WHERE a.user_id = ?
+           JOIN exam_modules em ON em.exam_id = e.id
+           WHERE a.user_id = ? AND em.module_id = ?
+           UNION ALL
+           SELECT q.id AS question_id, q.prompt, q.explanation, q.type,
+                  e.id AS exam_id, e.title AS exam_title,
+                  homework.is_correct, homework.submitted_at, homework.id AS source_id
+           FROM homework_question_attempts homework
+           JOIN questions q ON q.id = homework.question_id
+           JOIN exams e ON e.id = q.exam_id
+           JOIN exam_modules em ON em.exam_id = e.id
+           WHERE homework.user_id = ? AND em.module_id = ? AND ? = 1
+         ),
+         answer_history AS (
+           SELECT *,
+                  ROW_NUMBER() OVER (
+                    PARTITION BY question_id
+                    ORDER BY submitted_at DESC, source_id DESC
+                  ) AS recency
+           FROM raw_answer_history
          ),
          practice_stats AS (
            SELECT question_id, COUNT(*) AS practice_count,
@@ -1242,7 +1461,14 @@ function registerApiRoutes(app, db, storage, captchaFactory, materialsEnabled) {
          HAVING SUM(CASE WHEN ah.is_correct = 0 THEN 1 ELSE 0 END) > 0
          ORDER BY last_wrong_at DESC`,
       )
-      .all(user.id, user.id);
+      .all(
+        user.id,
+        HUMAN_RESOURCES_MODULE_ID,
+        user.id,
+        HUMAN_RESOURCES_MODULE_ID,
+        user.is_admin,
+        user.id,
+      );
     const optionsStatement = db.prepare(
       `SELECT id, label, content
        FROM question_options
@@ -1265,6 +1491,7 @@ function registerApiRoutes(app, db, storage, captchaFactory, materialsEnabled) {
         practiceCount: row.practice_count,
         lastPracticedAt: row.last_practiced_at,
         relearned: row.relearned === 1,
+        image: toPublicAdminHomeworkImage(row.question_id),
         correctOptions: optionsStatement.all(row.question_id),
       })),
     };
@@ -1282,7 +1509,17 @@ function registerApiRoutes(app, db, storage, captchaFactory, materialsEnabled) {
            JOIN attempts a ON a.id = aa.attempt_id
            JOIN questions q ON q.id = aa.question_id
            JOIN exams e ON e.id = q.exam_id
-           WHERE a.user_id = ?
+           JOIN exam_modules em ON em.exam_id = e.id
+           WHERE a.user_id = ? AND em.module_id = ?
+           UNION ALL
+           SELECT q.id AS question_id, q.prompt, q.type, q.section, q.passage,
+                  q.points, e.id AS exam_id, e.title AS exam_title,
+                  homework.is_correct, homework.submitted_at
+           FROM homework_question_attempts homework
+           JOIN questions q ON q.id = homework.question_id
+           JOIN exams e ON e.id = q.exam_id
+           JOIN exam_modules em ON em.exam_id = e.id
+           WHERE homework.user_id = ? AND em.module_id = ? AND ? = 1
          ),
          mistakes AS (
            SELECT question_id, prompt, type, section, passage, points,
@@ -1307,7 +1544,14 @@ function registerApiRoutes(app, db, storage, captchaFactory, materialsEnabled) {
          LEFT JOIN practice_stats ps ON ps.question_id = m.question_id
          ORDER BY relearned ASC, m.last_wrong_at DESC, m.question_id ASC`,
       )
-      .all(user.id, user.id);
+      .all(
+        user.id,
+        HUMAN_RESOURCES_MODULE_ID,
+        user.id,
+        HUMAN_RESOURCES_MODULE_ID,
+        user.is_admin,
+        user.id,
+      );
     const optionsStatement = db.prepare(
       `SELECT id, label, content
        FROM question_options
@@ -1330,6 +1574,7 @@ function registerApiRoutes(app, db, storage, captchaFactory, materialsEnabled) {
         practiceCount: row.practice_count,
         lastPracticedAt: row.last_practiced_at,
         relearned: row.relearned === 1,
+        image: toPublicAdminHomeworkImage(row.question_id),
         options: optionsStatement.all(row.question_id),
       })),
     };
@@ -1342,17 +1587,37 @@ function registerApiRoutes(app, db, storage, captchaFactory, materialsEnabled) {
       .prepare(
         `SELECT q.id, q.explanation
          FROM questions q
+         JOIN exam_modules em ON em.exam_id = q.exam_id
          WHERE q.id = ?
-           AND EXISTS (
-             SELECT 1
-             FROM attempt_answers aa
-             JOIN attempts a ON a.id = aa.attempt_id
-             WHERE aa.question_id = q.id
-               AND a.user_id = ?
-               AND aa.is_correct = 0
+           AND em.module_id = ?
+           AND (
+             EXISTS (
+               SELECT 1
+               FROM attempt_answers aa
+               JOIN attempts a ON a.id = aa.attempt_id
+               WHERE aa.question_id = q.id
+                 AND a.user_id = ?
+                 AND aa.is_correct = 0
+             )
+             OR (
+               ? = 1
+               AND EXISTS (
+                 SELECT 1
+                 FROM homework_question_attempts homework
+                 WHERE homework.question_id = q.id
+                   AND homework.user_id = ?
+                   AND homework.is_correct = 0
+               )
+             )
            )`,
       )
-      .get(request.params.questionId, user.id);
+      .get(
+        request.params.questionId,
+        HUMAN_RESOURCES_MODULE_ID,
+        user.id,
+        user.is_admin,
+        user.id,
+      );
 
     if (!question) {
       throw httpError(404, "这道题不在当前用户的错题本中");
@@ -1433,16 +1698,196 @@ function registerApiRoutes(app, db, storage, captchaFactory, materialsEnabled) {
   });
 }
 
-function getExam(db, examId, includeAnswers) {
+function assertAdminHomeworkExam(db, chapter) {
+  const contentExam = getAdminHomeworkExam(chapter.id);
+  if (!contentExam) {
+    throw new Error(`Administrator homework content is missing ${chapter.id}`);
+  }
+  const row = db
+    .prepare(
+      `SELECT e.id, e.title, e.status, e.series_id, em.module_id,
+              COUNT(q.id) AS question_count
+       FROM exams e
+       LEFT JOIN exam_modules em ON em.exam_id = e.id
+       LEFT JOIN questions q ON q.exam_id = e.id
+       WHERE e.id = ?
+       GROUP BY e.id, e.title, e.status, e.series_id, em.module_id`,
+    )
+    .get(contentExam.id);
+  if (!row) {
+    throw new Error(`Administrator homework database exam ${contentExam.id} is missing`);
+  }
+  if (
+    row.status !== "draft"
+    || row.series_id !== "hr-admin-homework-2026"
+    || row.module_id !== HUMAN_RESOURCES_MODULE_ID
+    || row.question_count !== chapter.questionCount
+  ) {
+    throw new Error(
+      `Administrator homework database exam ${contentExam.id} is inconsistent: `
+        + `status=${row.status}, series=${row.series_id}, module=${row.module_id}, `
+        + `questions=${row.question_count}, expectedQuestions=${chapter.questionCount}`,
+    );
+  }
+  return row;
+}
+
+function getAdminHomeworkProgress(db, userId, examId) {
+  const row = db
+    .prepare(
+      `SELECT COUNT(DISTINCT homework.question_id) AS attempted_question_count,
+              COUNT(DISTINCT CASE WHEN homework.is_correct = 0 THEN homework.question_id END)
+                AS wrong_question_count,
+              COUNT(homework.id) AS total_attempt_count,
+              MAX(homework.submitted_at) AS last_practiced_at
+       FROM homework_question_attempts homework
+       JOIN questions q ON q.id = homework.question_id
+       WHERE homework.user_id = ? AND q.exam_id = ?`,
+    )
+    .get(userId, examId);
+  return {
+    attemptedQuestionCount: row.attempted_question_count,
+    wrongQuestionCount: row.wrong_question_count,
+    totalAttemptCount: row.total_attempt_count,
+    lastPracticedAt: row.last_practiced_at,
+  };
+}
+
+function toPublicAdminHomeworkImage(questionId) {
+  const asset = getAdminHomeworkQuestionAssetForQuestion(questionId);
+  return asset ? toPublicAdminHomeworkQuestionAsset(asset) : null;
+}
+
+function recordExamSubmission(db, user, exam, input, moduleId) {
+  if (exam.questions.length === 0) {
+    throw httpError(409, "这套试卷尚未配置题目，无法提交");
+  }
+
+  const duplicateQuestionIds = findDuplicates(input.answers.map((answer) => answer.questionId));
+  if (duplicateQuestionIds.length > 0) {
+    throw httpError(400, `答题数据包含重复题目：${duplicateQuestionIds.join(", ")}`);
+  }
+
+  const answerMap = new Map(input.answers.map((answer) => [answer.questionId, answer.optionIds]));
+  const knownQuestionIds = new Set(exam.questions.map((question) => question.id));
+  const unknownQuestionIds = [...answerMap.keys()].filter((id) => !knownQuestionIds.has(id));
+  if (unknownQuestionIds.length > 0) {
+    throw httpError(400, `答题数据包含不属于这套试卷的题目：${unknownQuestionIds.join(", ")}`);
+  }
+
+  let earnedPoints = 0;
+  let correctCount = 0;
+  const gradedAnswers = exam.questions.map((question) => {
+    const selectedOptionIds = answerMap.get(question.id) ?? [];
+    const duplicateOptionIds = findDuplicates(selectedOptionIds);
+    if (duplicateOptionIds.length > 0) {
+      throw httpError(400, `题目 ${question.id} 包含重复选项`);
+    }
+
+    const validOptionIds = new Set(question.options.map((option) => option.id));
+    const invalidOptionIds = selectedOptionIds.filter((id) => !validOptionIds.has(id));
+    if (invalidOptionIds.length > 0) {
+      throw httpError(400, `题目 ${question.id} 包含无效选项：${invalidOptionIds.join(", ")}`);
+    }
+
+    const correctOptionIds = question.options
+      .filter((option) => option.correct)
+      .map((option) => option.id);
+    const isCorrect = sameSet(selectedOptionIds, correctOptionIds);
+    const hasWrongSelection = selectedOptionIds.some((id) => !correctOptionIds.includes(id));
+    const questionPoints = isCorrect
+      ? question.points
+      : question.type === "multiple" && !hasWrongSelection
+        ? Math.min(question.points, selectedOptionIds.length * 0.5)
+        : 0;
+
+    if (isCorrect) {
+      correctCount += 1;
+    }
+    earnedPoints += questionPoints;
+
+    return {
+      questionId: question.id,
+      selectedOptionIds,
+      isCorrect,
+      earnedPoints: questionPoints,
+    };
+  });
+
+  const totalPoints = exam.questions.reduce((sum, question) => sum + question.points, 0);
+  const score = Math.round((earnedPoints / totalPoints) * 100);
+  const attemptId = randomUUID();
+  const submittedAt = new Date().toISOString();
+  const startedAt = input.startedAt ?? submittedAt;
+
+  db.transaction(() => {
+    db.prepare(
+      `INSERT INTO attempts (
+         id, device_id, user_id, exam_id, score, correct_count, wrong_count,
+         total_questions, duration_seconds, started_at, submitted_at
+       ) VALUES (?, '', ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    ).run(
+      attemptId,
+      user.id,
+      exam.id,
+      score,
+      correctCount,
+      exam.questions.length - correctCount,
+      exam.questions.length,
+      input.durationSeconds,
+      startedAt,
+      submittedAt,
+    );
+
+    const insertAnswer = db.prepare(
+      `INSERT INTO attempt_answers (
+         attempt_id, question_id, selected_option_ids, is_correct, earned_points
+       ) VALUES (?, ?, ?, ?, ?)`,
+    );
+    for (const answer of gradedAnswers) {
+      insertAnswer.run(
+        attemptId,
+        answer.questionId,
+        JSON.stringify(answer.selectedOptionIds),
+        answer.isCorrect ? 1 : 0,
+        answer.earnedPoints,
+      );
+    }
+  })();
+
+  return getAttemptDetails(db, attemptId, user.id, moduleId);
+}
+
+function listPublishedExams(db, moduleId) {
+  return db
+    .prepare(
+      `SELECT e.id, e.title, e.description, e.duration_minutes,
+              e.passing_score, e.series_id, e.series_title,
+              e.series_description, e.series_order, e.paper_order,
+              e.updated_at, COUNT(q.id) AS question_count,
+              COALESCE(SUM(q.points), 0) AS total_points
+       FROM exams e
+       JOIN exam_modules em ON em.exam_id = e.id
+       LEFT JOIN questions q ON q.exam_id = e.id
+       WHERE e.status = 'published' AND em.module_id = ?
+       GROUP BY e.id
+       ORDER BY e.series_order ASC, e.paper_order ASC, e.updated_at DESC, e.title ASC`,
+    )
+    .all(moduleId)
+    .map(mapExamSummary);
+}
+
+function getExam(db, examId, includeAnswers, moduleId) {
   const exam = db
     .prepare(
-      `SELECT id, title, description, duration_minutes, passing_score,
-              series_id, series_title, series_description, series_order,
-              paper_order, updated_at
-       FROM exams
-       WHERE id = ? AND status = 'published'`,
+      `SELECT e.id, e.title, e.description, e.duration_minutes, e.passing_score,
+              e.series_id, e.series_title, e.series_description, e.series_order,
+              e.paper_order, e.updated_at
+       FROM exams e
+       JOIN exam_modules em ON em.exam_id = e.id
+       WHERE e.id = ? AND e.status = 'published' AND em.module_id = ?`,
     )
-    .get(examId);
+    .get(examId, moduleId);
 
   if (!exam) {
     return null;
@@ -1487,7 +1932,7 @@ function getExam(db, examId, includeAnswers) {
   };
 }
 
-function getAttemptDetails(db, attemptId, userId) {
+function getAttemptDetails(db, attemptId, userId, moduleId) {
   const attempt = db
     .prepare(
       `SELECT a.id, a.exam_id, e.title AS exam_title, a.score,
@@ -1496,9 +1941,10 @@ function getAttemptDetails(db, attemptId, userId) {
               e.passing_score
        FROM attempts a
        JOIN exams e ON e.id = a.exam_id
-       WHERE a.id = ? AND a.user_id = ?`,
+       JOIN exam_modules em ON em.exam_id = a.exam_id
+       WHERE a.id = ? AND a.user_id = ? AND em.module_id = ?`,
     )
-    .get(attemptId, userId);
+    .get(attemptId, userId, moduleId);
 
   if (!attempt) {
     return null;
@@ -1726,11 +2172,15 @@ function getAdminUserRows(db, userId) {
               (SELECT COUNT(*) FROM mistake_practice_attempts
                WHERE mistake_practice_attempts.user_id = users.id)
                 AS mistake_practice_count,
+              (SELECT COUNT(*) FROM homework_question_attempts
+               WHERE homework_question_attempts.user_id = users.id)
+                AS homework_attempt_count,
               MAX(
                 COALESCE((SELECT MAX(submitted_at) FROM attempts WHERE attempts.user_id = users.id), ''),
                 COALESCE((SELECT MAX(submitted_at) FROM listening_attempts WHERE listening_attempts.user_id = users.id), ''),
                 COALESCE((SELECT MAX(submitted_at) FROM daily_listening_attempts WHERE daily_listening_attempts.user_id = users.id), ''),
-                COALESCE((SELECT MAX(submitted_at) FROM mistake_practice_attempts WHERE mistake_practice_attempts.user_id = users.id), '')
+                COALESCE((SELECT MAX(submitted_at) FROM mistake_practice_attempts WHERE mistake_practice_attempts.user_id = users.id), ''),
+                COALESCE((SELECT MAX(submitted_at) FROM homework_question_attempts WHERE homework_question_attempts.user_id = users.id), '')
               ) AS last_activity_at
        FROM users
        ${condition}
@@ -1750,6 +2200,7 @@ function mapAdminUser(db, row) {
     examAttemptCount: row.exam_attempt_count,
     listeningAttemptCount: row.listening_attempt_count,
     mistakePracticeCount: row.mistake_practice_count,
+    homeworkAttemptCount: row.homework_attempt_count,
     lastActivityAt: row.last_activity_at || null,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
@@ -1765,14 +2216,21 @@ function getUserLearningRecordCounts(db, userId) {
           +
           (SELECT COUNT(*) FROM daily_listening_attempts WHERE user_id = ?)) AS listening_attempts,
          (SELECT COUNT(*) FROM mistake_practice_attempts WHERE user_id = ?)
-           AS mistake_practice_attempts`,
+           AS mistake_practice_attempts,
+         (SELECT COUNT(*) FROM homework_question_attempts WHERE user_id = ?)
+           AS homework_attempts`,
     )
-    .get(userId, userId, userId, userId);
+    .get(userId, userId, userId, userId, userId);
   return {
     examAttempts: counts.exam_attempts,
     listeningAttempts: counts.listening_attempts,
     mistakePracticeAttempts: counts.mistake_practice_attempts,
-    total: counts.exam_attempts + counts.listening_attempts + counts.mistake_practice_attempts,
+    homeworkAttempts: counts.homework_attempts,
+    total:
+      counts.exam_attempts
+      + counts.listening_attempts
+      + counts.mistake_practice_attempts
+      + counts.homework_attempts,
   };
 }
 

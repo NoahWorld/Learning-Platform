@@ -1,4 +1,4 @@
-export type LearningModuleId = "human-resources" | "economics" | "english";
+export type LearningModuleId = "human-resources" | "economics" | "english" | "pmp";
 
 export interface LearningModule {
   id: LearningModuleId;
@@ -53,6 +53,19 @@ export const learningModules: LearningModule[] = [
     status: "ready",
     color: "pink",
     highlights: ["音标参考", "场景听力", "理解训练"],
+  },
+  {
+    id: "pmp",
+    number: "04",
+    title: "PMP－项目管理专业人士",
+    shortTitle: "PMP 项目管理",
+    category: "项目管理认证",
+    eyebrow: "PMP · PROJECT MANAGEMENT",
+    description: "按 2026 新版考纲学习项目管理，并用原创情境题持续训练。",
+    route: "/modules/pmp",
+    status: "ready",
+    color: "blue",
+    highlights: ["考纲笔记", "官方资源", "原创模拟题"],
   },
 ];
 

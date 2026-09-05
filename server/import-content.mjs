@@ -21,6 +21,15 @@ export function importContent(db, rawContent, uploadedAssets = []) {
 
   const content = validation.data;
   const now = new Date().toISOString();
+  const knownModuleIds = new Set(
+    db.prepare("SELECT id FROM learning_modules").all().map((module) => module.id),
+  );
+
+  for (const exam of content.exams) {
+    if (!knownModuleIds.has(exam.moduleId)) {
+      throw new Error(`Exam ${exam.id} references unknown module ${exam.moduleId}`);
+    }
+  }
 
   if (content.assets.length !== uploadedAssets.length) {
     throw new Error(
@@ -113,14 +122,28 @@ export function importContent(db, rawContent, uploadedAssets = []) {
         id, question_id, label, content, is_correct, position
       ) VALUES (?, ?, ?, ?, ?, ?)
     `);
+    const upsertExamModule = db.prepare(`
+      INSERT INTO exam_modules (exam_id, module_id)
+      VALUES (?, ?)
+      ON CONFLICT(exam_id) DO UPDATE SET
+        module_id = excluded.module_id
+    `);
     const countAttempts = db.prepare("SELECT COUNT(*) AS count FROM attempts WHERE exam_id = ?");
+    const countHomeworkAttempts = db.prepare(`
+      SELECT COUNT(*) AS count
+      FROM homework_question_attempts homework
+      JOIN questions ON questions.id = homework.question_id
+      WHERE questions.exam_id = ?
+    `);
     const deleteQuestions = db.prepare("DELETE FROM questions WHERE exam_id = ?");
 
     for (const exam of content.exams) {
       const attemptCount = countAttempts.get(exam.id).count;
-      if (attemptCount > 0) {
+      const homeworkAttemptCount = countHomeworkAttempts.get(exam.id).count;
+      if (attemptCount > 0 || homeworkAttemptCount > 0) {
         throw new Error(
-          `Exam ${exam.id} already has ${attemptCount} attempt(s). ` +
+          `Exam ${exam.id} already has ${attemptCount} attempt(s) and ` +
+            `${homeworkAttemptCount} homework answer(s). ` +
             "Create a new exam ID instead of changing historical questions.",
         );
       }
@@ -140,6 +163,7 @@ export function importContent(db, rawContent, uploadedAssets = []) {
         now,
         now,
       );
+      upsertExamModule.run(exam.id, exam.moduleId);
       deleteQuestions.run(exam.id);
 
       exam.questions.forEach((question, questionIndex) => {

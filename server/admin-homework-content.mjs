@@ -1,4 +1,7 @@
 const HOMEWORK_OBJECT_PREFIX = "admin-homework/hr-intensive-course-2026";
+const HOMEWORK_QUESTION_COUNTS = Object.freeze([
+  23, 15, 23, 23, 15, 20, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 18, 13,
+]);
 
 function chapter({
   chapterNumber,
@@ -15,6 +18,7 @@ function chapter({
     chapterNumber,
     number,
     title,
+    questionCount: HOMEWORK_QUESTION_COUNTS[chapterNumber - 1],
     sourceFileName,
     pageCount,
     byteLength,
@@ -53,10 +57,70 @@ export const adminHomeworkChapters = Object.freeze([
   chapter({ chapterNumber: 19, title: "劳动关系", sourceFileName: "19.【新教材变动】第19章-劳动关系.pdf", pageCount: 7, byteLength: 242280, sha256: "c425ef51cd5a65506131e3a5e176270f1966cd4a0335639f69f1bcf961f4b01b", hasTextbookUpdate: true }),
 ]);
 
+export const adminHomeworkQuestionAssets = Object.freeze([
+  Object.freeze({
+    id: "organization-chart",
+    chapterId: "chapter-09",
+    questionIds: Object.freeze([
+      "hr-hw-ch09-q020",
+      "hr-hw-ch09-q021",
+      "hr-hw-ch09-q022",
+      "hr-hw-ch09-q023",
+    ]),
+    fileName: "chapter-09-organization-chart.jpg",
+    objectKey: `${HOMEWORK_OBJECT_PREFIX}/question-assets/chapter-09-organization-chart.jpg`,
+    contentType: "image/jpeg",
+    byteLength: 29574,
+    sha256: "7c75ea9352a9968df6f8d12f2c866e50cdc54fcd9dc3b6aeea1018f0840df008",
+    width: 918,
+    height: 199,
+    alt: "某生产制造企业组织结构图",
+  }),
+  Object.freeze({
+    id: "markov-table",
+    chapterId: "chapter-14",
+    questionIds: Object.freeze([
+      "hr-hw-ch14-q020",
+      "hr-hw-ch14-q021",
+      "hr-hw-ch14-q022",
+      "hr-hw-ch14-q023",
+    ]),
+    fileName: "chapter-14-markov-table.jpg",
+    objectKey: `${HOMEWORK_OBJECT_PREFIX}/question-assets/chapter-14-markov-table.jpg`,
+    contentType: "image/jpeg",
+    byteLength: 31038,
+    sha256: "881eb285d7156b7ec3bba7d25f30d3464d95da3fb7b1113cff5c5e047031c5c9",
+    width: 611,
+    height: 348,
+    alt: "市场营销人员岗位变动概率表",
+  }),
+]);
+
 validateManifest(adminHomeworkChapters);
+validateQuestionAssets(adminHomeworkQuestionAssets);
 
 export function getAdminHomeworkChapter(chapterId) {
   return adminHomeworkChapters.find((item) => item.id === chapterId) ?? null;
+}
+
+export function getAdminHomeworkQuestionAsset(chapterId, assetId) {
+  return adminHomeworkQuestionAssets.find(
+    (item) => item.chapterId === chapterId && item.id === assetId,
+  ) ?? null;
+}
+
+export function getAdminHomeworkQuestionAssetForQuestion(questionId) {
+  return adminHomeworkQuestionAssets.find((item) => item.questionIds.includes(questionId)) ?? null;
+}
+
+export function toPublicAdminHomeworkQuestionAsset(item) {
+  return {
+    id: item.id,
+    url: `/api/admin/homework/${encodeURIComponent(item.chapterId)}/assets/${encodeURIComponent(item.id)}`,
+    alt: item.alt,
+    width: item.width,
+    height: item.height,
+  };
 }
 
 export function toPublicAdminHomeworkChapter(item) {
@@ -65,6 +129,7 @@ export function toPublicAdminHomeworkChapter(item) {
     number: item.number,
     chapterNumber: item.chapterNumber,
     title: item.title,
+    questionCount: item.questionCount,
     pageCount: item.pageCount,
     byteLength: item.byteLength,
     hasTextbookUpdate: item.hasTextbookUpdate,
@@ -76,6 +141,7 @@ export function adminHomeworkSummary() {
   return {
     ...adminHomeworkCollection,
     chapterCount: adminHomeworkChapters.length,
+    questionCount: adminHomeworkChapters.reduce((sum, item) => sum + item.questionCount, 0),
     pageCount: adminHomeworkChapters.reduce((sum, item) => sum + item.pageCount, 0),
     byteLength: adminHomeworkChapters.reduce((sum, item) => sum + item.byteLength, 0),
   };
@@ -98,6 +164,9 @@ function validateManifest(chapters) {
     if (!Number.isSafeInteger(item.pageCount) || item.pageCount <= 0) {
       throw new Error(`Invalid page count for ${item.id}: ${item.pageCount}`);
     }
+    if (!Number.isSafeInteger(item.questionCount) || item.questionCount <= 0) {
+      throw new Error(`Invalid question count for ${item.id}: ${item.questionCount}`);
+    }
     if (!Number.isSafeInteger(item.byteLength) || item.byteLength <= 5) {
       throw new Error(`Invalid byte length for ${item.id}: ${item.byteLength}`);
     }
@@ -112,5 +181,39 @@ function validateManifest(chapters) {
       if (set.has(value)) throw new Error(`Duplicate admin homework ${label}: ${value}`);
       set.add(value);
     }
+  }
+}
+
+function validateQuestionAssets(assets) {
+  const assetIds = new Set();
+  const objectKeys = new Set();
+  const questionIds = new Set();
+  for (const item of assets) {
+    if (!getAdminHomeworkChapter(item.chapterId)) {
+      throw new Error(`Admin homework question asset ${item.id} has unknown chapter ${item.chapterId}`);
+    }
+    if (assetIds.has(item.id)) {
+      throw new Error(`Duplicate admin homework question asset ID: ${item.id}`);
+    }
+    if (objectKeys.has(item.objectKey)) {
+      throw new Error(`Duplicate admin homework question asset object key: ${item.objectKey}`);
+    }
+    if (!Number.isSafeInteger(item.byteLength) || item.byteLength <= 0) {
+      throw new Error(`Invalid byte length for admin homework question asset ${item.id}`);
+    }
+    if (!/^[0-9a-f]{64}$/.test(item.sha256)) {
+      throw new Error(`Invalid SHA-256 for admin homework question asset ${item.id}`);
+    }
+    if (item.questionIds.length === 0) {
+      throw new Error(`Admin homework question asset ${item.id} must reference questions`);
+    }
+    for (const questionId of item.questionIds) {
+      if (questionIds.has(questionId)) {
+        throw new Error(`Admin homework question ${questionId} has more than one image asset`);
+      }
+      questionIds.add(questionId);
+    }
+    assetIds.add(item.id);
+    objectKeys.add(item.objectKey);
   }
 }

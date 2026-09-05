@@ -6,7 +6,7 @@ const args = parseArgs(process.argv.slice(2));
 
 if (args.command !== "upsert") {
   throw new Error(
-    "Usage: node server/manage-user.mjs upsert --username <name> --display-name <name> [--modules human-resources,economics,english] [--admin true|false] [--adopt-device <legacy-device-id>]",
+    "Usage: node server/manage-user.mjs upsert --username <name> --display-name <name> [--modules human-resources,economics,english,pmp] [--admin true|false] [--adopt-device <legacy-device-id>]",
   );
 }
 
@@ -50,12 +50,15 @@ try {
       .prepare("SELECT id FROM learning_modules ORDER BY display_order ASC, id ASC")
       .all()
       .map((row) => row.id);
+    const defaultModuleIds = username.toLocaleLowerCase("en-US") === "doudou"
+      ? knownModuleIds
+      : knownModuleIds.filter((moduleId) => moduleId !== "pmp");
     const moduleIds = args.modules ?? (existing
       ? db
           .prepare("SELECT module_id FROM user_module_access WHERE user_id = ?")
           .all(userId)
           .map((row) => row.module_id)
-      : knownModuleIds);
+      : defaultModuleIds);
     const unknownModuleIds = moduleIds.filter((moduleId) => !knownModuleIds.includes(moduleId));
     if (unknownModuleIds.length > 0) {
       throw new Error(`Unknown module IDs: ${unknownModuleIds.join(", ")}`);

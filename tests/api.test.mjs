@@ -397,7 +397,7 @@ test("administrators manage accounts and course access while APIs enforce assign
   assert.equal(initial.statusCode, 200, initial.body);
   assert.deepEqual(
     initial.json().modules.map((module) => module.id),
-    ["human-resources", "economics", "english"],
+    ["human-resources", "economics", "english", "pmp"],
   );
   assert.equal(initial.json().users[0].isAdmin, true);
 
@@ -553,10 +553,16 @@ test("administrator homework stays private and streams verified PDFs with byte r
   assert.equal(list.statusCode, 200, list.body);
   assert.equal(list.headers["cache-control"], "private, no-store");
   assert.equal(list.json().collection.chapterCount, 19);
+  assert.equal(list.json().collection.questionCount, 403);
   assert.equal(list.json().collection.pageCount, 236);
   assert.equal(list.json().collection.byteLength, 5861709);
+  assert.equal(list.json().collection.attemptedQuestionCount, 0);
+  assert.equal(list.json().collection.wrongQuestionCount, 0);
+  assert.equal(list.json().collection.totalAttemptCount, 0);
   assert.equal(list.json().chapters.length, 19);
   assert.equal(list.json().chapters[0].id, "chapter-01");
+  assert.equal(list.json().chapters[0].questionCount, 23);
+  assert.equal(list.json().chapters[0].attemptedQuestionCount, 0);
   assert.equal(list.json().chapters[18].id, "chapter-19");
   assert.equal(list.json().chapters[0].fileUrl, fileUrl);
   assert.equal(list.body.includes("objectKey"), false);
@@ -585,6 +591,12 @@ test("administrator homework stays private and streams verified PDFs with byte r
     headers: authenticated(studentCookie),
   });
   assert.equal(forbiddenFile.statusCode, 403);
+  const forbiddenQuestions = await testApp.app.inject({
+    method: "GET",
+    url: "/api/admin/homework/chapter-01/questions",
+    headers: authenticated(studentCookie),
+  });
+  assert.equal(forbiddenQuestions.statusCode, 403);
 
   const partial = await testApp.app.inject({
     method: "GET",
@@ -620,6 +632,243 @@ test("administrator homework stays private and streams verified PDFs with byte r
   });
   assert.equal(missing.statusCode, 404);
   assert.match(missing.json().error, /章节不存在/);
+});
+
+test("administrator homework is scoreless practice and feeds the relearning mistake book", async (context) => {
+  const testApp = await createTestApp({ userOptions: { isAdmin: true } });
+  context.after(() => testApp.cleanup());
+  const questionsUrl = "/api/admin/homework/chapter-01/questions";
+  const answerUrl = `${questionsUrl}/hr-hw-ch01-q001/answer`;
+
+  const unauthenticated = await testApp.app.inject({ method: "GET", url: questionsUrl });
+  assert.equal(unauthenticated.statusCode, 401);
+
+  const chapterResponse = await testApp.app.inject({
+    method: "GET",
+    url: questionsUrl,
+    headers: authenticated(testApp.cookie),
+  });
+  assert.equal(chapterResponse.statusCode, 200, chapterResponse.body);
+  assert.equal(chapterResponse.headers["cache-control"], "private, no-store");
+  const chapter = chapterResponse.json();
+  assert.equal(chapter.chapter.id, "chapter-01");
+  assert.equal(chapter.chapter.questionCount, 23);
+  assert.equal(chapter.questions.length, 23);
+  assert.equal(chapter.questions[0].id, "hr-hw-ch01-q001");
+  assert.equal(chapter.questions[0].attemptCount, 0);
+  assert.equal(chapter.questions[0].wrongCount, 0);
+  assert.equal(chapter.questions[0].image, null);
+  assert.equal(Object.hasOwn(chapter.questions[0], "explanation"), false);
+  assert.ok(
+    chapter.questions[0].options.every((option) => !Object.hasOwn(option, "correct")),
+    "homework questions must not reveal answers before submission",
+  );
+
+  const invalidOption = await testApp.app.inject({
+    method: "POST",
+    url: answerUrl,
+    headers: authenticated(testApp.cookie),
+    payload: { optionIds: ["not-an-option"] },
+  });
+  assert.equal(invalidOption.statusCode, 400);
+  assert.match(invalidOption.json().error, /不属于这道题/);
+
+  const wrongAnswer = await testApp.app.inject({
+    method: "POST",
+    url: answerUrl,
+    headers: authenticated(testApp.cookie),
+    payload: { optionIds: ["hr-hw-ch01-q001-a"] },
+  });
+  assert.equal(wrongAnswer.statusCode, 201, wrongAnswer.body);
+  assert.equal(wrongAnswer.json().isCorrect, false);
+  assert.equal(wrongAnswer.json().attemptCount, 1);
+  assert.equal(wrongAnswer.json().wrongCount, 1);
+  assert.deepEqual(
+    wrongAnswer.json().correctOptions.map((option) => option.id),
+    ["hr-hw-ch01-q001-b"],
+  );
+  assert.match(wrongAnswer.json().explanation, /固定期限劳动合同/);
+  assert.equal(wrongAnswer.json().chapterProgress.attemptedQuestionCount, 1);
+  assert.equal(wrongAnswer.json().chapterProgress.wrongQuestionCount, 1);
+
+  assert.equal(
+    testApp.app.db.prepare("SELECT COUNT(*) AS count FROM homework_question_attempts").get().count,
+    1,
+  );
+  assert.equal(
+    testApp.app.db.prepare("SELECT COUNT(*) AS count FROM attempts").get().count,
+    0,
+    "homework answers must never create scored exam attempts",
+  );
+
+  const results = await testApp.app.inject({
+    method: "GET",
+    url: "/api/results",
+    headers: authenticated(testApp.cookie),
+  });
+  assert.equal(results.statusCode, 200);
+  assert.deepEqual(results.json().results, []);
+
+  const dashboard = await testApp.app.inject({
+    method: "GET",
+    url: "/api/dashboard",
+    headers: authenticated(testApp.cookie),
+  });
+  assert.equal(dashboard.statusCode, 200);
+  assert.equal(dashboard.json().attemptCount, 0);
+  assert.equal(dashboard.json().mistakeCount, 1);
+
+  const refreshedChapters = await testApp.app.inject({
+    method: "GET",
+    url: "/api/admin/homework",
+    headers: authenticated(testApp.cookie),
+  });
+  assert.equal(refreshedChapters.json().collection.attemptedQuestionCount, 1);
+  assert.equal(refreshedChapters.json().collection.wrongQuestionCount, 1);
+  assert.equal(refreshedChapters.json().chapters[0].totalAttemptCount, 1);
+
+  const mistakes = await testApp.app.inject({
+    method: "GET",
+    url: "/api/mistakes",
+    headers: authenticated(testApp.cookie),
+  });
+  assert.equal(mistakes.statusCode, 200, mistakes.body);
+  assert.equal(mistakes.json().mistakes.length, 1);
+  assert.equal(mistakes.json().mistakes[0].questionId, "hr-hw-ch01-q001");
+  assert.equal(mistakes.json().mistakes[0].corrected, false);
+  assert.equal(mistakes.json().mistakes[0].relearned, false);
+
+  const practice = await testApp.app.inject({
+    method: "GET",
+    url: "/api/mistakes/practice",
+    headers: authenticated(testApp.cookie),
+  });
+  assert.equal(practice.statusCode, 200, practice.body);
+  assert.equal(practice.json().questions.length, 1);
+  assert.equal(practice.json().questions[0].questionId, "hr-hw-ch01-q001");
+
+  const relearned = await testApp.app.inject({
+    method: "POST",
+    url: "/api/mistakes/hr-hw-ch01-q001/practice",
+    headers: authenticated(testApp.cookie),
+    payload: { optionIds: ["hr-hw-ch01-q001-b"] },
+  });
+  assert.equal(relearned.statusCode, 201, relearned.body);
+  assert.equal(relearned.json().isCorrect, true);
+  assert.equal(relearned.json().relearned, true);
+
+  const relearnedList = await testApp.app.inject({
+    method: "GET",
+    url: "/api/mistakes/practice",
+    headers: authenticated(testApp.cookie),
+  });
+  assert.equal(relearnedList.json().questions.length, 1);
+  assert.equal(relearnedList.json().questions[0].relearned, true);
+
+  const replacementContent = {
+    materials: [],
+    assets: [],
+    exams: [{
+      ...fixture.exams[0],
+      id: "hr-admin-homework-chapter-01",
+      moduleId: "human-resources",
+    }],
+  };
+  assert.throws(
+    () => importContent(testApp.app.db, replacementContent),
+    /0 attempt\(s\) and 1 homework answer\(s\)/,
+    "homework questions must stay immutable after an answer exists",
+  );
+});
+
+test("administrator homework case images stay private and match their manifest", async (context) => {
+  const image = Buffer.alloc(29574, 0x20);
+  image[0] = 0xff;
+  image[1] = 0xd8;
+  image[image.length - 2] = 0xff;
+  image[image.length - 1] = 0xd9;
+  const requestedObjects = [];
+  const storage = {
+    bucket: "test-assets",
+    client: {
+      async statObject(bucket, objectKey) {
+        requestedObjects.push({ operation: "stat", bucket, objectKey });
+        return { size: image.length };
+      },
+      async getObject(bucket, objectKey) {
+        requestedObjects.push({ operation: "full", bucket, objectKey });
+        return Readable.from([image]);
+      },
+    },
+  };
+  const testApp = await createTestApp({ storage, userOptions: { isAdmin: true } });
+  context.after(() => testApp.cleanup());
+
+  const chapterResponse = await testApp.app.inject({
+    method: "GET",
+    url: "/api/admin/homework/chapter-09/questions",
+    headers: authenticated(testApp.cookie),
+  });
+  assert.equal(chapterResponse.statusCode, 200, chapterResponse.body);
+  const imageQuestion = chapterResponse.json().questions.find(
+    (question) => question.id === "hr-hw-ch09-q020",
+  );
+  assert.deepEqual(imageQuestion.image, {
+    id: "organization-chart",
+    url: "/api/admin/homework/chapter-09/assets/organization-chart",
+    alt: "某生产制造企业组织结构图",
+    width: 918,
+    height: 199,
+  });
+
+  const unauthenticated = await testApp.app.inject({
+    method: "GET",
+    url: imageQuestion.image.url,
+  });
+  assert.equal(unauthenticated.statusCode, 401);
+
+  await provisionUser(testApp.app.db, {
+    username: "homework-image-student",
+    password: "Student123",
+    displayName: "课后题图片学生",
+  });
+  const studentCookie = await loginAs(
+    testApp.app,
+    "homework-image-student",
+    "Student123",
+  );
+  const forbidden = await testApp.app.inject({
+    method: "GET",
+    url: imageQuestion.image.url,
+    headers: authenticated(studentCookie),
+  });
+  assert.equal(forbidden.statusCode, 403);
+
+  const response = await testApp.app.inject({
+    method: "GET",
+    url: imageQuestion.image.url,
+    headers: authenticated(testApp.cookie),
+  });
+  assert.equal(response.statusCode, 200, response.body);
+  assert.equal(response.headers["content-type"], "image/jpeg");
+  assert.equal(response.headers["content-length"], String(image.length));
+  assert.equal(response.headers["cache-control"], "private, max-age=3600");
+  assert.match(response.headers["content-disposition"], /^inline; filename=/);
+  assert.deepEqual(response.rawPayload, image);
+  assert.deepEqual(requestedObjects, [
+    {
+      operation: "stat",
+      bucket: "test-assets",
+      objectKey:
+        "admin-homework/hr-intensive-course-2026/question-assets/chapter-09-organization-chart.jpg",
+    },
+    {
+      operation: "full",
+      bucket: "test-assets",
+      objectKey:
+        "admin-homework/hr-intensive-course-2026/question-assets/chapter-09-organization-chart.jpg",
+    },
+  ]);
 });
 
 test("administrator homework rejects a stored PDF whose size differs from the verified manifest", async (context) => {
@@ -712,6 +961,140 @@ test("materials can be re-enabled explicitly without reimporting their data", as
   });
   assert.equal(material.statusCode, 200);
   assert.match(material.json().content, /主动回忆/);
+});
+
+test("PMP content is permission-scoped, answer-safe, and isolated from HR results", async (context) => {
+  const restrictedApp = await createTestApp();
+  context.after(() => restrictedApp.cleanup());
+
+  const forbidden = await restrictedApp.app.inject({
+    method: "GET",
+    url: "/api/pmp",
+    headers: authenticated(restrictedApp.cookie),
+  });
+  assert.equal(forbidden.statusCode, 403);
+  assert.match(forbidden.json().error, /未开通这门课程/);
+
+  const testApp = await createTestApp({
+    userOptions: {
+      moduleIds: ["human-resources", "economics", "english", "pmp"],
+    },
+  });
+  context.after(() => testApp.cleanup());
+
+  const overview = await testApp.app.inject({
+    method: "GET",
+    url: "/api/pmp",
+    headers: authenticated(testApp.cookie),
+  });
+  assert.equal(overview.statusCode, 200, overview.body);
+  assert.equal(overview.headers["cache-control"], "private, no-store");
+  assert.equal(overview.json().examProfile.questionCount, 180);
+  assert.equal(overview.json().examProfile.durationMinutes, 240);
+  assert.deepEqual(
+    overview.json().examProfile.domains.map((domain) => domain.weight),
+    [33, 41, 26],
+  );
+  assert.equal(overview.json().materials.length, 6);
+  assert.equal(overview.json().officialResources.length, 4);
+  assert.equal(overview.json().exams.length, 3);
+  assert.deepEqual(overview.json().recentResults, []);
+
+  const material = await testApp.app.inject({
+    method: "GET",
+    url: `/api/pmp/materials/${overview.json().materials[0].id}`,
+    headers: authenticated(testApp.cookie),
+  });
+  assert.equal(material.statusCode, 200, material.body);
+  assert.equal(material.headers["cache-control"], "private, no-store");
+  assert.match(material.json().content, /PMI/);
+
+  const examId = overview.json().exams[0].id;
+  const examResponse = await testApp.app.inject({
+    method: "GET",
+    url: `/api/pmp/exams/${examId}`,
+    headers: authenticated(testApp.cookie),
+  });
+  assert.equal(examResponse.statusCode, 200, examResponse.body);
+  assert.equal(examResponse.headers["cache-control"], "private, no-store");
+  const exam = examResponse.json();
+  assert.equal(exam.questionCount, 12);
+  assert.equal(exam.durationMinutes, 20);
+  for (const question of exam.questions) {
+    assert.equal(Object.hasOwn(question, "explanation"), false);
+    for (const option of question.options) {
+      assert.equal(Object.hasOwn(option, "correct"), false);
+    }
+  }
+
+  const submission = await testApp.app.inject({
+    method: "POST",
+    url: `/api/pmp/exams/${examId}/submissions`,
+    headers: authenticated(testApp.cookie),
+    payload: {
+      durationSeconds: 120,
+      answers: exam.questions.map((question) => ({
+        questionId: question.id,
+        optionIds: [],
+      })),
+    },
+  });
+  assert.equal(submission.statusCode, 201, submission.body);
+  assert.equal(submission.headers["cache-control"], "private, no-store");
+  const result = submission.json();
+  assert.equal(result.score, 0);
+  assert.equal(result.answers.length, 12);
+  assert.ok(result.answers.every((answer) => answer.explanation.length > 0));
+  assert.ok(
+    result.answers.every((answer) =>
+      answer.options.every((option) => typeof option.correct === "boolean"),
+    ),
+  );
+
+  const persistedResult = await testApp.app.inject({
+    method: "GET",
+    url: `/api/pmp/results/${result.id}`,
+    headers: authenticated(testApp.cookie),
+  });
+  assert.equal(persistedResult.statusCode, 200, persistedResult.body);
+  assert.equal(persistedResult.json().id, result.id);
+
+  const hiddenFromHrResult = await testApp.app.inject({
+    method: "GET",
+    url: `/api/results/${result.id}`,
+    headers: authenticated(testApp.cookie),
+  });
+  assert.equal(hiddenFromHrResult.statusCode, 404);
+
+  const hrResults = await testApp.app.inject({
+    method: "GET",
+    url: "/api/results",
+    headers: authenticated(testApp.cookie),
+  });
+  assert.deepEqual(hrResults.json().results, []);
+
+  const hrDashboard = await testApp.app.inject({
+    method: "GET",
+    url: "/api/dashboard",
+    headers: authenticated(testApp.cookie),
+  });
+  assert.equal(hrDashboard.json().attemptCount, 0);
+
+  const hrExams = await testApp.app.inject({
+    method: "GET",
+    url: "/api/exams",
+    headers: authenticated(testApp.cookie),
+  });
+  const pmpExamIds = new Set(overview.json().exams.map((item) => item.id));
+  assert.ok(hrExams.json().exams.every((item) => !pmpExamIds.has(item.id)));
+
+  const overviewAfter = await testApp.app.inject({
+    method: "GET",
+    url: "/api/pmp",
+    headers: authenticated(testApp.cookie),
+  });
+  assert.equal(overviewAfter.json().recentResults.length, 1);
+  assert.equal(overviewAfter.json().recentResults[0].id, result.id);
 });
 
 test("listening practice hides answers until submission and persists per-user progress", async (context) => {
@@ -1468,6 +1851,19 @@ test("version 1 databases migrate case-question fields without losing rows", asy
     INSERT INTO questions (id, exam_id, type, prompt, explanation, position, points)
       VALUES ('legacy-q', 'legacy-exam', 'single', '旧题目', '旧解析', 0, 1);
 
+    CREATE TABLE question_options (
+      id TEXT PRIMARY KEY,
+      question_id TEXT NOT NULL,
+      label TEXT NOT NULL,
+      content TEXT NOT NULL,
+      is_correct INTEGER NOT NULL CHECK (is_correct IN (0, 1)),
+      position INTEGER NOT NULL CHECK (position >= 0),
+      UNIQUE (question_id, position)
+    );
+    INSERT INTO question_options (
+      id, question_id, label, content, is_correct, position
+    ) VALUES ('legacy-q-a', 'legacy-q', 'A', '旧答案', 1, 0);
+
     CREATE TABLE attempts (
       id TEXT PRIMARY KEY,
       device_id TEXT NOT NULL,
@@ -1493,7 +1889,7 @@ test("version 1 databases migrate case-question fields without losing rows", asy
 
   const migratedDb = openDatabase(databasePath);
   context.after(() => migratedDb.close());
-  assert.equal(migratedDb.pragma("user_version", { simple: true }), 9);
+  assert.equal(migratedDb.pragma("user_version", { simple: true }), 11);
   assert.deepEqual(
     migratedDb.prepare("SELECT id, section, passage FROM questions WHERE id = ?").get("legacy-q"),
     { id: "legacy-q", section: "standard", passage: "" },
@@ -1514,6 +1910,15 @@ test("version 1 databases migrate case-question fields without losing rows", asy
       .get("legacy-exam"),
     { series_id: "", series_order: 999, paper_order: 1 },
   );
+  assert.deepEqual(
+    migratedDb.prepare("SELECT module_id FROM exam_modules WHERE exam_id = ?").get("legacy-exam"),
+    { module_id: "human-resources" },
+  );
+  assert.equal(
+    migratedDb.prepare("SELECT COUNT(*) AS count FROM exam_modules WHERE module_id = ?").get("pmp")
+      .count,
+    3,
+  );
 });
 
 test("version 4 migration keeps only the newest session per user", async (context) => {
@@ -1527,6 +1932,10 @@ test("version 4 migration keeps only the newest session per user", async (contex
 
   const versionFourDb = openDatabase(databasePath);
   versionFourDb.exec(`
+    DELETE FROM exams
+    WHERE id IN (SELECT exam_id FROM exam_modules WHERE module_id = 'pmp');
+    DROP INDEX idx_exam_modules_module;
+    DROP TABLE exam_modules;
     DROP INDEX idx_sessions_one_per_user;
     DROP INDEX idx_admin_audit_created;
     DROP INDEX idx_user_module_access_module;
@@ -1555,7 +1964,7 @@ test("version 4 migration keeps only the newest session per user", async (contex
   versionFourDb.close();
 
   migratedDb = openDatabase(databasePath);
-  assert.equal(migratedDb.pragma("user_version", { simple: true }), 9);
+  assert.equal(migratedDb.pragma("user_version", { simple: true }), 11);
   assert.equal(
     migratedDb
       .prepare("SELECT COUNT(*) AS count FROM sqlite_master WHERE type = 'table' AND name = ?")
@@ -1611,6 +2020,66 @@ test("version 4 migration keeps only the newest session per user", async (contex
   );
 });
 
+test("version 9 migration grants the new PMP module only to doudou", async (context) => {
+  const directory = await mkdtemp(join(tmpdir(), "learning-workbench-pmp-migration-"));
+  const databasePath = join(directory, "version-9.sqlite");
+  let migratedDb;
+  context.after(async () => {
+    migratedDb?.close();
+    await rm(directory, { recursive: true, force: true });
+  });
+
+  const versionNineDb = openDatabase(databasePath);
+  await provisionUser(versionNineDb, {
+    username: "doudou",
+    displayName: "doudou",
+  });
+  await provisionUser(versionNineDb, {
+    username: "another-user",
+    displayName: "其他用户",
+  });
+  versionNineDb.exec(`
+    DELETE FROM exams
+    WHERE id IN (SELECT exam_id FROM exam_modules WHERE module_id = 'pmp');
+    DROP INDEX idx_exam_modules_module;
+    DROP TABLE exam_modules;
+    DELETE FROM learning_modules WHERE id = 'pmp';
+    PRAGMA user_version = 9;
+  `);
+  versionNineDb.close();
+
+  migratedDb = openDatabase(databasePath);
+  assert.equal(migratedDb.pragma("user_version", { simple: true }), 11);
+  assert.deepEqual(
+    migratedDb
+      .prepare(
+        `SELECT users.username
+         FROM user_module_access access
+         JOIN users ON users.id = access.user_id
+         WHERE access.module_id = 'pmp'
+         ORDER BY users.username`,
+      )
+      .all(),
+    [{ username: "doudou" }],
+  );
+  assert.equal(
+    migratedDb.prepare("SELECT COUNT(*) AS count FROM exam_modules WHERE module_id = 'pmp'").get()
+      .count,
+    3,
+  );
+  assert.equal(
+    migratedDb
+      .prepare(
+        `SELECT COUNT(*) AS count
+         FROM questions questions
+         JOIN exam_modules modules ON modules.exam_id = questions.exam_id
+         WHERE modules.module_id = 'pmp'`,
+      )
+      .get().count,
+    36,
+  );
+});
+
 test("HR economist sample imports its exact exam structure and asset metadata", () => {
   const db = openDatabase(":memory:");
   const uploadedAssets = hrEconomistFixture.assets.map((asset, index) => ({
@@ -1645,6 +2114,12 @@ test("HR economist sample imports its exact exam structure and asset metadata", 
         "hr-economist-exam-guide-2026",
       ).count,
       2,
+    );
+    assert.deepEqual(
+      db
+        .prepare("SELECT module_id FROM exam_modules WHERE exam_id = ?")
+        .get("hr-economist-practice-2026-a"),
+      { module_id: "human-resources" },
     );
   } finally {
     db.close();

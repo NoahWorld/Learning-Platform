@@ -19,12 +19,30 @@ import { useRemote } from "../useRemote";
 
 type ExamPhase = "intro" | "active" | "submitting";
 
-export function ExamPage() {
+interface ExamPageProps {
+  apiBase?: string;
+  backPath?: string;
+  backLabel?: string;
+  resultBase?: string;
+  categoryLabel?: string;
+  scoreLabel?: string;
+  reviewRule?: string;
+}
+
+export function ExamPage({
+  apiBase = "/api/exams",
+  backPath = "/exams",
+  backLabel = "返回试卷列表",
+  resultBase = "/results",
+  categoryLabel = "模拟考试",
+  scoreLabel = "分及格",
+  reviewRule = "交卷后可查看解析，错题会自动归档。",
+}: ExamPageProps = {}) {
   const { examId = "" } = useParams();
   const navigate = useNavigate();
   const { data: exam, loading, error } = useRemote<ExamDetail>(
-    (signal) => apiGet(`/api/exams/${encodeURIComponent(examId)}`, signal),
-    [examId],
+    (signal) => apiGet(`${apiBase}/${encodeURIComponent(examId)}`, signal),
+    [apiBase, examId],
   );
   const [phase, setPhase] = useState<ExamPhase>("intro");
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -49,7 +67,7 @@ export function ExamPage() {
 
     try {
       const result = await apiPost<ResultDetail>(
-        `/api/exams/${encodeURIComponent(exam.id)}/submissions`,
+        `${apiBase}/${encodeURIComponent(exam.id)}/submissions`,
         {
           startedAt: new Date(startedAt).toISOString(),
           durationSeconds: Math.max(0, Math.round((Date.now() - startedAt) / 1000)),
@@ -59,14 +77,14 @@ export function ExamPage() {
           })),
         },
       );
-      navigate(`/results/${result.id}`, { replace: true });
+      navigate(`${resultBase}/${result.id}`, { replace: true });
     } catch (requestError) {
       setSubmitError(requestError instanceof Error ? requestError.message : "提交失败");
       setPhase("active");
       setShowReview(false);
       submittedRef.current = false;
     }
-  }, [answers, exam, navigate, startedAt]);
+  }, [answers, apiBase, exam, navigate, resultBase, startedAt]);
 
   useEffect(() => {
     if (phase !== "active" || secondsRemaining <= 0) return;
@@ -111,23 +129,23 @@ export function ExamPage() {
   if (phase === "intro") {
     return (
       <div className="exam-intro">
-        <Link className="focus-back" to="/exams"><ArrowLeft size={17} /> 返回试卷列表</Link>
+        <Link className="focus-back" to={backPath}><ArrowLeft size={17} /> {backLabel}</Link>
         <div className="exam-intro-card">
           <span className="exam-intro-mark"><Target size={34} /></span>
-          <span className="reading-category">模拟考试</span>
+          <span className="reading-category">{categoryLabel}</span>
           <h1>{exam.title}</h1>
           <p>{exam.description || "准备好后开始答题。"}</p>
           <div className="intro-facts">
             <div><ListChecks size={22} /><strong>{exam.questionCount}</strong><span>道题目</span></div>
             <div><Clock3 size={22} /><strong>{exam.durationMinutes}</strong><span>分钟</span></div>
-            <div><Target size={22} /><strong>{exam.passingScore}</strong><span>分及格</span></div>
+            <div><Target size={22} /><strong>{exam.passingScore}</strong><span>{scoreLabel}</span></div>
           </div>
           <div className="exam-rules">
             <strong>开始前请确认</strong>
             <ul>
               <li><CheckCircle2 size={17} /> 开始后立即计时，倒计时结束会自动交卷。</li>
               <li><CheckCircle2 size={17} /> 多选题全选正确得满分；少选每个正确选项得 0.5 分，错选不得分。</li>
-              <li><CheckCircle2 size={17} /> 交卷后可查看解析，错题会自动归档。</li>
+              <li><CheckCircle2 size={17} /> {reviewRule}</li>
             </ul>
           </div>
           <button className="focus-button" onClick={startExam} disabled={exam.questionCount === 0}>

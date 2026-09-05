@@ -24,6 +24,7 @@ export interface ManagedUser {
   examAttemptCount: number;
   listeningAttemptCount: number;
   mistakePracticeCount: number;
+  homeworkAttemptCount: number;
   lastActivityAt: string | null;
   createdAt: string;
   updatedAt: string;
@@ -39,10 +40,38 @@ export interface AdminHomeworkChapter {
   number: string;
   chapterNumber: number;
   title: string;
+  questionCount: number;
   pageCount: number;
   byteLength: number;
   hasTextbookUpdate: boolean;
   fileUrl: string;
+  attemptedQuestionCount: number;
+  wrongQuestionCount: number;
+  totalAttemptCount: number;
+  lastPracticedAt: string | null;
+}
+
+export interface AdminHomeworkQuestionImage {
+  id: string;
+  url: string;
+  alt: string;
+  width: number;
+  height: number;
+}
+
+export interface AdminHomeworkQuestion {
+  id: string;
+  type: "single" | "multiple";
+  section: "standard" | "case";
+  passage: string;
+  prompt: string;
+  points: number;
+  position: number;
+  attemptCount: number;
+  wrongCount: number;
+  lastAnsweredAt: string | null;
+  image: AdminHomeworkQuestionImage | null;
+  options: ExamOption[];
 }
 
 export interface AdminHomeworkResponse {
@@ -52,10 +81,35 @@ export interface AdminHomeworkResponse {
     courseName: string;
     instructor: string;
     chapterCount: number;
+    questionCount: number;
     pageCount: number;
     byteLength: number;
+    attemptedQuestionCount: number;
+    wrongQuestionCount: number;
+    totalAttemptCount: number;
   };
   chapters: AdminHomeworkChapter[];
+}
+
+export interface AdminHomeworkChapterResponse {
+  chapter: AdminHomeworkChapter;
+  questions: AdminHomeworkQuestion[];
+}
+
+export interface AdminHomeworkAnswerResult {
+  id: string;
+  questionId: string;
+  selectedOptionIds: string[];
+  isCorrect: boolean;
+  submittedAt: string;
+  attemptCount: number;
+  wrongCount: number;
+  correctOptions: Array<Pick<ExamOption, "id" | "label" | "content">>;
+  explanation: string;
+  chapterProgress: Pick<
+    AdminHomeworkChapter,
+    "attemptedQuestionCount" | "wrongQuestionCount" | "totalAttemptCount" | "lastPracticedAt"
+  >;
 }
 
 export interface DashboardSummary {
@@ -373,6 +427,56 @@ export interface ResultDetail extends ResultSummary {
   answers: AnswerReview[];
 }
 
+export interface PmpExamDomain {
+  id: string;
+  title: string;
+  englishTitle: string;
+  weight: number;
+  tone: "yellow" | "blue" | "pink";
+}
+
+export interface PmpExamProfile {
+  version: string;
+  questionCount: number;
+  durationMinutes: number;
+  breaks: string;
+  domains: PmpExamDomain[];
+  approachNote: string;
+  passingScoreNote: string;
+  sourceUrl: string;
+}
+
+export interface PmpLearningMaterialSummary {
+  id: string;
+  number: string;
+  title: string;
+  summary: string;
+  category: string;
+  domain: string;
+  estimatedMinutes: number;
+}
+
+export interface PmpLearningMaterialDetail extends PmpLearningMaterialSummary {
+  content: string;
+}
+
+export interface PmpOfficialResource {
+  id: string;
+  title: string;
+  publisher: string;
+  description: string;
+  url: string;
+  kind: string;
+}
+
+export interface PmpOverview {
+  examProfile: PmpExamProfile;
+  materials: PmpLearningMaterialSummary[];
+  officialResources: PmpOfficialResource[];
+  exams: ExamSummary[];
+  recentResults: ResultSummary[];
+}
+
 export interface MistakeItem {
   questionId: string;
   prompt: string;
@@ -387,6 +491,7 @@ export interface MistakeItem {
   practiceCount: number;
   lastPracticedAt: string | null;
   relearned: boolean;
+  image: AdminHomeworkQuestionImage | null;
   correctOptions: Array<Pick<ExamOption, "id" | "label" | "content">>;
 }
 
@@ -404,6 +509,7 @@ export interface MistakePracticeQuestion {
   practiceCount: number;
   lastPracticedAt: string | null;
   relearned: boolean;
+  image: AdminHomeworkQuestionImage | null;
   options: ExamOption[];
 }
 

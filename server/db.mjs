@@ -1,8 +1,10 @@
 import Database from "better-sqlite3";
 import { mkdirSync } from "node:fs";
 import { dirname, resolve } from "node:path";
+import { adminHomeworkExams } from "./admin-homework-quiz-content.mjs";
+import { pmpExams } from "./pmp-content.mjs";
 
-const CURRENT_SCHEMA_VERSION = 9;
+const CURRENT_SCHEMA_VERSION = 11;
 
 export function openDatabase(databasePath = "./data/study-workbench.sqlite") {
   const resolvedPath = databasePath === ":memory:" ? databasePath : resolve(databasePath);
@@ -125,6 +127,11 @@ function migrate(db) {
           PRIMARY KEY (user_id, module_id)
         );
 
+        CREATE TABLE exam_modules (
+          exam_id TEXT PRIMARY KEY REFERENCES exams(id) ON DELETE CASCADE,
+          module_id TEXT NOT NULL REFERENCES learning_modules(id) ON DELETE RESTRICT
+        );
+
         CREATE TABLE admin_audit_log (
           id TEXT PRIMARY KEY,
           actor_user_id TEXT REFERENCES users(id) ON DELETE SET NULL,
@@ -138,7 +145,8 @@ function migrate(db) {
         INSERT INTO learning_modules (id, title, display_order) VALUES
           ('human-resources', '中级经济师·人力资源', 10),
           ('economics', '中级经济师·经济学', 20),
-          ('english', '英语', 30);
+          ('english', '英语', 30),
+          ('pmp', 'PMP·项目管理专业人士', 40);
 
         CREATE TABLE sessions (
           id TEXT PRIMARY KEY,
@@ -172,6 +180,15 @@ function migrate(db) {
         );
 
         CREATE TABLE mistake_practice_attempts (
+          id TEXT PRIMARY KEY,
+          user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+          question_id TEXT NOT NULL REFERENCES questions(id) ON DELETE RESTRICT,
+          selected_option_ids TEXT NOT NULL,
+          is_correct INTEGER NOT NULL CHECK (is_correct IN (0, 1)),
+          submitted_at TEXT NOT NULL
+        );
+
+        CREATE TABLE homework_question_attempts (
           id TEXT PRIMARY KEY,
           user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
           question_id TEXT NOT NULL REFERENCES questions(id) ON DELETE RESTRICT,
@@ -237,6 +254,9 @@ function migrate(db) {
         CREATE INDEX idx_user_module_access_module
           ON user_module_access(module_id, user_id);
 
+        CREATE INDEX idx_exam_modules_module
+          ON exam_modules(module_id, exam_id);
+
         CREATE INDEX idx_admin_audit_created
           ON admin_audit_log(created_at DESC);
 
@@ -249,12 +269,20 @@ function migrate(db) {
         CREATE INDEX idx_mistake_practice_user_correct
           ON mistake_practice_attempts(user_id, is_correct);
 
+        CREATE INDEX IF NOT EXISTS idx_homework_attempts_user_question_submitted
+          ON homework_question_attempts(user_id, question_id, submitted_at DESC);
+
+        CREATE INDEX IF NOT EXISTS idx_homework_attempts_question_correct
+          ON homework_question_attempts(question_id, is_correct);
+
         CREATE INDEX idx_listening_attempts_user_scene_submitted
           ON listening_attempts(user_id, scene_id, submitted_at DESC);
 
         CREATE INDEX idx_daily_listening_attempts_user_story_submitted
           ON daily_listening_attempts(user_id, story_id, submitted_at DESC);
       `);
+      seedPmpExams(db);
+      seedAdminHomeworkExams(db);
       db.pragma(`user_version = ${CURRENT_SCHEMA_VERSION}`);
       db.pragma("optimize");
     })();
@@ -494,8 +522,343 @@ function migrate(db) {
         CREATE INDEX idx_daily_listening_attempts_user_story_submitted
           ON daily_listening_attempts(user_id, story_id, submitted_at DESC);
       `);
+      db.pragma("user_version = 9");
+      db.pragma("optimize");
+    })();
+    version = 9;
+  }
+
+  if (version === 9) {
+    db.transaction(() => {
+      db.exec(`
+        INSERT INTO learning_modules (id, title, display_order)
+        VALUES ('pmp', 'PMP·项目管理专业人士', 40);
+
+        CREATE TABLE exam_modules (
+          exam_id TEXT PRIMARY KEY REFERENCES exams(id) ON DELETE CASCADE,
+          module_id TEXT NOT NULL REFERENCES learning_modules(id) ON DELETE RESTRICT
+        );
+
+        INSERT INTO exam_modules (exam_id, module_id)
+        SELECT id, 'human-resources'
+        FROM exams;
+
+        CREATE INDEX idx_exam_modules_module
+          ON exam_modules(module_id, exam_id);
+      `);
+      seedPmpExams(db);
+      db.prepare(
+        `INSERT INTO user_module_access (user_id, module_id, assigned_by, assigned_at)
+         SELECT id, 'pmp', NULL, ?
+         FROM users
+         WHERE username = ? COLLATE NOCASE`,
+      ).run(new Date().toISOString(), "doudou");
+      db.pragma("user_version = 10");
+      db.pragma("optimize");
+    })();
+    version = 10;
+  }
+
+  if (version === 10) {
+    db.transaction(() => {
+      db.exec(`
+        CREATE TABLE IF NOT EXISTS homework_question_attempts (
+          id TEXT PRIMARY KEY,
+          user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+          question_id TEXT NOT NULL REFERENCES questions(id) ON DELETE RESTRICT,
+          selected_option_ids TEXT NOT NULL,
+          is_correct INTEGER NOT NULL CHECK (is_correct IN (0, 1)),
+          submitted_at TEXT NOT NULL
+        );
+
+        CREATE INDEX IF NOT EXISTS idx_homework_attempts_user_question_submitted
+          ON homework_question_attempts(user_id, question_id, submitted_at DESC);
+
+        CREATE INDEX IF NOT EXISTS idx_homework_attempts_question_correct
+          ON homework_question_attempts(question_id, is_correct);
+      `);
+      seedAdminHomeworkExams(db);
       db.pragma(`user_version = ${CURRENT_SCHEMA_VERSION}`);
       db.pragma("optimize");
     })();
   }
+}
+
+function seedPmpExams(db) {
+  validatePmpExamSeeds();
+  const now = new Date().toISOString();
+  const insertExam = db.prepare(`
+    INSERT INTO exams (
+      id, title, description, duration_minutes, passing_score,
+      series_id, series_title, series_description, series_order, paper_order,
+      status, created_at, updated_at
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `);
+  const insertExamModule = db.prepare(
+    "INSERT INTO exam_modules (exam_id, module_id) VALUES (?, ?)",
+  );
+  const insertQuestion = db.prepare(`
+    INSERT INTO questions (
+      id, exam_id, type, section, passage, prompt, explanation, position, points
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `);
+  const insertOption = db.prepare(`
+    INSERT INTO question_options (
+      id, question_id, label, content, is_correct, position
+    ) VALUES (?, ?, ?, ?, ?, ?)
+  `);
+
+  for (const exam of pmpExams) {
+    insertExam.run(
+      exam.id,
+      exam.title,
+      exam.description,
+      exam.durationMinutes,
+      exam.passingScore,
+      exam.seriesId,
+      exam.seriesTitle,
+      exam.seriesDescription,
+      exam.seriesOrder,
+      exam.paperOrder,
+      exam.status,
+      now,
+      now,
+    );
+    insertExamModule.run(exam.id, exam.moduleId);
+    exam.questions.forEach((question, questionIndex) => {
+      insertQuestion.run(
+        question.id,
+        exam.id,
+        question.type,
+        question.section,
+        question.passage,
+        question.prompt,
+        question.explanation,
+        questionIndex,
+        question.points,
+      );
+      question.options.forEach((option, optionIndex) => {
+        insertOption.run(
+          option.id,
+          question.id,
+          option.label,
+          option.content,
+          option.correct ? 1 : 0,
+          optionIndex,
+        );
+      });
+    });
+  }
+}
+
+function validatePmpExamSeeds() {
+  const ids = new Set();
+  for (const exam of pmpExams) {
+    if (exam.moduleId !== "pmp") {
+      throw new Error(`PMP seed exam ${exam.id} has invalid module ${exam.moduleId}`);
+    }
+    if (exam.questions.length === 0 || exam.questions.length > 30) {
+      throw new Error(`PMP seed exam ${exam.id} must contain 1 to 30 questions`);
+    }
+    if (exam.durationMinutes <= 0 || exam.durationMinutes > 25) {
+      throw new Error(`PMP seed exam ${exam.id} must use a duration from 1 to 25 minutes`);
+    }
+    for (const item of [exam, ...exam.questions, ...exam.questions.flatMap((q) => q.options)]) {
+      if (!item.id || ids.has(item.id)) {
+        throw new Error(`PMP seed content contains a missing or duplicate ID: ${item.id}`);
+      }
+      ids.add(item.id);
+    }
+    for (const question of exam.questions) {
+      const correctCount = question.options.filter((option) => option.correct).length;
+      if (
+        (question.type === "single" && correctCount !== 1)
+        || (question.type === "multiple" && correctCount < 2)
+      ) {
+        throw new Error(`PMP seed question ${question.id} has invalid correct options`);
+      }
+    }
+  }
+}
+
+function seedAdminHomeworkExams(db) {
+  const now = new Date().toISOString();
+  const insertExam = db.prepare(`
+    INSERT INTO exams (
+      id, title, description, duration_minutes, passing_score,
+      series_id, series_title, series_description, series_order, paper_order,
+      status, created_at, updated_at
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `);
+  const insertExamModule = db.prepare(
+    "INSERT INTO exam_modules (exam_id, module_id) VALUES (?, ?)",
+  );
+  const insertQuestion = db.prepare(`
+    INSERT INTO questions (
+      id, exam_id, type, section, passage, prompt, explanation, position, points
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `);
+  const insertOption = db.prepare(`
+    INSERT INTO question_options (
+      id, question_id, label, content, is_correct, position
+    ) VALUES (?, ?, ?, ?, ?, ?)
+  `);
+  const findExam = db.prepare(`
+    SELECT
+      exams.title,
+      exams.description,
+      exams.duration_minutes AS durationMinutes,
+      exams.passing_score AS passingScore,
+      exams.series_id AS seriesId,
+      exams.series_title AS seriesTitle,
+      exams.series_description AS seriesDescription,
+      exams.series_order AS seriesOrder,
+      exams.paper_order AS paperOrder,
+      exams.status,
+      exam_modules.module_id AS moduleId
+    FROM exams
+    LEFT JOIN exam_modules ON exam_modules.exam_id = exams.id
+    WHERE exams.id = ?
+  `);
+  const findQuestions = db.prepare(`
+    SELECT
+      id,
+      type,
+      section,
+      passage,
+      prompt,
+      explanation,
+      position,
+      points
+    FROM questions
+    WHERE exam_id = ?
+    ORDER BY position
+  `);
+  const findOptions = db.prepare(`
+    SELECT
+      id,
+      label,
+      content,
+      is_correct AS isCorrect,
+      position
+    FROM question_options
+    WHERE question_id = ?
+    ORDER BY position
+  `);
+
+  for (const exam of adminHomeworkExams) {
+    const existingExam = findExam.get(exam.id);
+    if (existingExam) {
+      assertSeededAdminHomeworkExamMatches({
+        exam,
+        existingExam,
+        existingQuestions: findQuestions.all(exam.id),
+        findOptions,
+      });
+      continue;
+    }
+
+    insertExam.run(
+      exam.id,
+      exam.title,
+      exam.description,
+      exam.durationMinutes,
+      exam.passingScore,
+      exam.seriesId,
+      exam.seriesTitle,
+      exam.seriesDescription,
+      exam.seriesOrder,
+      exam.paperOrder,
+      exam.status,
+      now,
+      now,
+    );
+    insertExamModule.run(exam.id, exam.moduleId);
+    exam.questions.forEach((question, questionIndex) => {
+      insertQuestion.run(
+        question.id,
+        exam.id,
+        question.type,
+        question.section,
+        question.passage,
+        question.prompt,
+        question.explanation,
+        questionIndex,
+        question.points,
+      );
+      question.options.forEach((option, optionIndex) => {
+        insertOption.run(
+          option.id,
+          question.id,
+          option.label,
+          option.content,
+          option.correct ? 1 : 0,
+          optionIndex,
+        );
+      });
+    });
+  }
+}
+
+function assertSeededAdminHomeworkExamMatches({
+  exam,
+  existingExam,
+  existingQuestions,
+  findOptions,
+}) {
+  const expectedExam = {
+    title: exam.title,
+    description: exam.description,
+    durationMinutes: exam.durationMinutes,
+    passingScore: exam.passingScore,
+    seriesId: exam.seriesId,
+    seriesTitle: exam.seriesTitle,
+    seriesDescription: exam.seriesDescription,
+    seriesOrder: exam.seriesOrder,
+    paperOrder: exam.paperOrder,
+    status: exam.status,
+    moduleId: exam.moduleId,
+  };
+  if (JSON.stringify(existingExam) !== JSON.stringify(expectedExam)) {
+    throw new Error(`Existing admin homework exam ${exam.id} does not match the bundled seed`);
+  }
+  if (existingQuestions.length !== exam.questions.length) {
+    throw new Error(
+      `Existing admin homework exam ${exam.id} has ${existingQuestions.length} questions; `
+        + `expected ${exam.questions.length}`,
+    );
+  }
+
+  exam.questions.forEach((question, questionIndex) => {
+    const expectedQuestion = {
+      id: question.id,
+      type: question.type,
+      section: question.section,
+      passage: question.passage,
+      prompt: question.prompt,
+      explanation: question.explanation,
+      position: questionIndex,
+      points: question.points,
+    };
+    const existingQuestion = existingQuestions[questionIndex];
+    if (JSON.stringify(existingQuestion) !== JSON.stringify(expectedQuestion)) {
+      throw new Error(
+        `Existing admin homework question ${question.id} does not match the bundled seed`,
+      );
+    }
+
+    const existingOptions = findOptions.all(question.id);
+    const expectedOptions = question.options.map((option, optionIndex) => ({
+      id: option.id,
+      label: option.label,
+      content: option.content,
+      isCorrect: option.correct ? 1 : 0,
+      position: optionIndex,
+    }));
+    if (JSON.stringify(existingOptions) !== JSON.stringify(expectedOptions)) {
+      throw new Error(
+        `Existing admin homework options for ${question.id} do not match the bundled seed`,
+      );
+    }
+  });
 }

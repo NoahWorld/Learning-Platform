@@ -21,6 +21,11 @@ import { ResultDetailPage } from "./pages/ResultDetailPage";
 import { ResultsPage } from "./pages/ResultsPage";
 import { AdminUsersPage } from "./pages/AdminUsersPage";
 import { AdminHomeworkPage } from "./pages/AdminHomeworkPage";
+import { AdminHomeworkPracticePage } from "./pages/AdminHomeworkPracticePage";
+import { PmpExamPage } from "./pages/PmpExamPage";
+import { PmpMaterialPage } from "./pages/PmpMaterialPage";
+import { PmpModulePage } from "./pages/PmpModulePage";
+import { PmpResultPage } from "./pages/PmpResultPage";
 
 export default function App() {
   return (
@@ -31,6 +36,7 @@ export default function App() {
         <Route element={<RequireAdmin />}>
           <Route path="admin/users" element={<AdminUsersPage />} />
           <Route path="admin/homework" element={<AdminHomeworkPage />} />
+          <Route path="admin/homework/:chapterId" element={<AdminHomeworkPracticePage />} />
         </Route>
         <Route element={<RequireModule moduleId="economics" />}>
           <Route path="modules/economics" element={<ModulePreviewPage moduleId="economics" />} />
@@ -40,6 +46,12 @@ export default function App() {
           <Route path="modules/english/listening" element={<EnglishListeningPage />} />
           <Route path="modules/english/listening/daily/:storyId" element={<EnglishDailyListeningPage />} />
           <Route path="modules/english/listening/:sceneId" element={<EnglishListeningPracticePage />} />
+        </Route>
+        <Route element={<RequireModule moduleId="pmp" />}>
+          <Route path="modules/pmp" element={<PmpModulePage />} />
+          <Route path="modules/pmp/materials/:materialId" element={<PmpMaterialPage />} />
+          <Route path="modules/pmp/exams/:examId" element={<PmpExamPage />} />
+          <Route path="modules/pmp/results/:resultId" element={<PmpResultPage />} />
         </Route>
         <Route element={<RequireModule moduleId="human-resources" />}>
           <Route element={<AppShell />}>

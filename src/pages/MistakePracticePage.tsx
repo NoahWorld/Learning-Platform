@@ -164,7 +164,19 @@ export function MistakePracticePage() {
         </div>
 
         {question.section === "case" ? (
-          <div className="case-passage"><strong>案例材料</strong><p>{question.passage}</p></div>
+          <div className="case-passage">
+            <strong>案例材料</strong>
+            <p>{question.passage}</p>
+            {question.image ? (
+              <img
+                className="question-reference-image"
+                src={question.image.url}
+                alt={question.image.alt}
+                width={question.image.width}
+                height={question.image.height}
+              />
+            ) : null}
+          </div>
         ) : null}
 
         <h2>{question.prompt}</h2>

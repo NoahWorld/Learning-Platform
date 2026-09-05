@@ -1,14 +1,11 @@
-import { ArrowUpRight, BookOpenCheck, FileText, Layers3, ShieldCheck } from "lucide-react";
+import { ArrowRight, BookOpenCheck, CircleAlert, Layers3, ListChecks, ShieldCheck } from "lucide-react";
 import { useCallback, useEffect } from "react";
+import { Link } from "react-router-dom";
 import { apiGet } from "../api";
 import { AdminSectionNav } from "../components/AdminSectionNav";
 import { ModuleTopBar } from "../components/ModuleTopBar";
 import type { AdminHomeworkResponse } from "../types";
 import { useRemote } from "../useRemote";
-
-function formatMegabytes(byteLength: number) {
-  return `${(byteLength / 1024 / 1024).toFixed(1)} MB`;
-}
 
 export function AdminHomeworkPage() {
   const loadHomework = useCallback(
@@ -44,8 +41,9 @@ export function AdminHomeworkPage() {
           <>
             <section className="homework-summary" aria-label="课后作业概览">
               <div><Layers3 size={21} aria-hidden="true" /><span><strong>{data.collection.chapterCount}</strong>章</span></div>
-              <div><BookOpenCheck size={21} aria-hidden="true" /><span><strong>{data.collection.pageCount}</strong>页</span></div>
-              <div><FileText size={21} aria-hidden="true" /><span><strong>{formatMegabytes(data.collection.byteLength)}</strong>PDF</span></div>
+              <div><ListChecks size={21} aria-hidden="true" /><span><strong>{data.collection.questionCount}</strong>题</span></div>
+              <div><BookOpenCheck size={21} aria-hidden="true" /><span><strong>{data.collection.attemptedQuestionCount}</strong>题已做</span></div>
+              <div><CircleAlert size={21} aria-hidden="true" /><span><strong>{data.collection.wrongQuestionCount}</strong>题答错过</span></div>
             </section>
 
             <section className="homework-grid" aria-label="章节课后题">
@@ -59,11 +57,22 @@ export function AdminHomeworkPage() {
                   <div className="homework-card-copy">
                     <p>第 {chapter.chapterNumber} 章</p>
                     <h2>{chapter.title}</h2>
-                    <small>{chapter.pageCount} 页 · {formatMegabytes(chapter.byteLength)}</small>
+                    <small>
+                      {chapter.questionCount} 题 · 已做 {chapter.attemptedQuestionCount} 题
+                      {chapter.wrongQuestionCount > 0 ? ` · 答错过 ${chapter.wrongQuestionCount} 题` : ""}
+                    </small>
+                    <span className="homework-card-progress" aria-hidden="true">
+                      <i style={{ width: `${(chapter.attemptedQuestionCount / chapter.questionCount) * 100}%` }} />
+                    </span>
                   </div>
-                  <a href={chapter.fileUrl} target="_blank" rel="noreferrer">
-                    打开课后题 <ArrowUpRight size={17} aria-hidden="true" />
-                  </a>
+                  <Link to={`/admin/homework/${chapter.id}`}>
+                    {chapter.attemptedQuestionCount === 0
+                      ? "开始做题"
+                      : chapter.attemptedQuestionCount < chapter.questionCount
+                        ? "继续做题"
+                        : "重新练习"}
+                    <ArrowRight size={17} aria-hidden="true" />
+                  </Link>
                 </article>
               ))}
             </section>

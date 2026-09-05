@@ -81,6 +81,7 @@ const assetSchema = z.object({
 
 const examSchema = z.object({
   id: idSchema,
+  moduleId: idSchema.default("human-resources"),
   title: z.string().min(1).max(200),
   description: z.string().max(2000).default(""),
   durationMinutes: z.number().int().positive().max(1440),

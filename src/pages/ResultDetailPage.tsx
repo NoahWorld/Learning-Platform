@@ -5,11 +5,27 @@ import { ErrorState, LoadingState, formatDate, formatDuration } from "../compone
 import type { ResultDetail } from "../types";
 import { useRemote } from "../useRemote";
 
-export function ResultDetailPage() {
+interface ResultDetailPageProps {
+  apiBase?: string;
+  backPath?: string;
+  backLabel?: string;
+  examBase?: string;
+  successTitle?: string;
+  retryTitle?: string;
+}
+
+export function ResultDetailPage({
+  apiBase = "/api/results",
+  backPath = "/results",
+  backLabel = "返回成绩列表",
+  examBase = "/exams",
+  successTitle = "漂亮，稳稳通过！",
+  retryTitle = "差一点，再来一轮！",
+}: ResultDetailPageProps = {}) {
   const { resultId = "" } = useParams();
   const { data, loading, error } = useRemote<ResultDetail>(
-    (signal) => apiGet(`/api/results/${encodeURIComponent(resultId)}`, signal),
-    [resultId],
+    (signal) => apiGet(`${apiBase}/${encodeURIComponent(resultId)}`, signal),
+    [apiBase, resultId],
   );
 
   if (loading) return <LoadingState label="正在生成考试复盘…" />;
@@ -20,7 +36,7 @@ export function ResultDetailPage() {
 
   return (
     <div className="standard-page result-detail-page">
-      <Link className="comic-back" to="/results"><ArrowLeft size={17} /> 返回成绩列表</Link>
+      <Link className="comic-back" to={backPath}><ArrowLeft size={17} /> {backLabel}</Link>
 
       <section className={`result-hero ${passed ? "celebrate" : "encourage"}`}>
         <div className="result-burst" aria-hidden="true" />
@@ -31,7 +47,7 @@ export function ResultDetailPage() {
         </div>
         <div className="result-copy">
           <span className="hero-label">{passed ? "MISSION COMPLETE" : "KEEP GOING"}</span>
-          <h1>{passed ? "漂亮，稳稳通过！" : "差一点，再来一轮！"}</h1>
+          <h1>{passed ? successTitle : retryTitle}</h1>
           <p>{data.examTitle}</p>
           <div>
             <span><Check size={16} /> 答对 {data.correctCount} 题</span>
@@ -40,7 +56,7 @@ export function ResultDetailPage() {
           </div>
         </div>
         <div className="result-actions">
-          <Link className="comic-button dark" to={`/exams/${data.examId}`}><RotateCcw size={17} /> 再考一次</Link>
+          <Link className="comic-button dark" to={`${examBase}/${data.examId}`}><RotateCcw size={17} /> 再考一次</Link>
           <span>{formatDate(data.submittedAt)}</span>
         </div>
       </section>

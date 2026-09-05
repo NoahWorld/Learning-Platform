@@ -363,7 +363,10 @@ function EditUserForm({
   onDelete: () => void;
 }) {
   const isSelf = currentUserId === user.id;
-  const learningCount = user.examAttemptCount + user.listeningAttemptCount + user.mistakePracticeCount;
+  const learningCount = user.examAttemptCount
+    + user.listeningAttemptCount
+    + user.mistakePracticeCount
+    + user.homeworkAttemptCount;
 
   return (
     <form className="admin-form" onSubmit={onSubmit}>
@@ -375,6 +378,7 @@ function EditUserForm({
         <span><strong>{user.examAttemptCount}</strong>次考试</span>
         <span><strong>{user.listeningAttemptCount}</strong>次听力</span>
         <span><strong>{user.mistakePracticeCount}</strong>次错题练习</span>
+        <span><strong>{user.homeworkAttemptCount}</strong>次课后题</span>
       </div>
       <label className="admin-field"><span>显示名称</span><input required maxLength={40} value={draft.displayName} onChange={(event) => onDraftChange({ ...draft, displayName: event.target.value })} /></label>
       <PasswordField

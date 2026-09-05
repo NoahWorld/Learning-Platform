@@ -1,4 +1,11 @@
-import { ArrowRight, BriefcaseBusiness, Languages, Landmark, Sparkles } from "lucide-react";
+import {
+  ArrowRight,
+  BriefcaseBusiness,
+  ClipboardCheck,
+  Languages,
+  Landmark,
+  Sparkles,
+} from "lucide-react";
 import { useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { ModuleTopBar } from "../components/ModuleTopBar";
@@ -9,6 +16,7 @@ const moduleIcons = {
   "human-resources": BriefcaseBusiness,
   economics: Landmark,
   english: Languages,
+  pmp: ClipboardCheck,
 } satisfies Record<LearningModuleId, typeof BriefcaseBusiness>;
 
 function requestedHumanResourcesPath(state: unknown) {

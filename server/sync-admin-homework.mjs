@@ -4,6 +4,7 @@ import { resolve } from "node:path";
 import {
   adminHomeworkChapters,
   adminHomeworkCollection,
+  adminHomeworkQuestionAssets,
 } from "./admin-homework-content.mjs";
 import { createStorage, ensureBucket } from "./storage.mjs";
 
@@ -37,11 +38,24 @@ function validatePdf(chapter, pdf) {
   return sha256;
 }
 
+function validateQuestionAsset(asset, body) {
+  if (body.length !== asset.byteLength) {
+    throw new Error(
+      `${asset.fileName} has ${body.length} bytes; expected ${asset.byteLength}`,
+    );
+  }
+  const sha256 = createHash("sha256").update(body).digest("hex");
+  if (sha256 !== asset.sha256) {
+    throw new Error(`${asset.fileName} SHA-256 is ${sha256}; expected ${asset.sha256}`);
+  }
+  return sha256;
+}
+
 async function main() {
   const sourceDirectory = readSourceDirectory(process.argv.slice(2));
   const storage = createStorage();
   if (!storage) {
-    throw new Error("MinIO configuration is required to sync administrator homework PDFs");
+    throw new Error("MinIO configuration is required to sync administrator homework files");
   }
   await ensureBucket(storage);
 
@@ -81,10 +95,49 @@ async function main() {
     }));
   }
 
+  for (const asset of adminHomeworkQuestionAssets) {
+    const filePath = resolve(sourceDirectory, "question-assets", asset.fileName);
+    let body;
+    try {
+      body = await readFile(filePath);
+    } catch (error) {
+      throw new Error(`Unable to read administrator homework question image at ${filePath}`, {
+        cause: error,
+      });
+    }
+    const sha256 = validateQuestionAsset(asset, body);
+    await storage.client.putObject(
+      storage.bucket,
+      asset.objectKey,
+      body,
+      body.length,
+      {
+        "Content-Type": asset.contentType,
+        "X-Amz-Meta-Collection": adminHomeworkCollection.id,
+        "X-Amz-Meta-Chapter": asset.chapterId,
+        "X-Amz-Meta-Sha256": sha256,
+      },
+    );
+    const objectStat = await storage.client.statObject(storage.bucket, asset.objectKey);
+    if (Number(objectStat.size) !== body.length) {
+      throw new Error(
+        `MinIO verification failed for ${asset.objectKey}: stored ${objectStat.size}, expected ${body.length}`,
+      );
+    }
+    console.log(JSON.stringify({
+      status: "synced",
+      assetId: asset.id,
+      objectKey: asset.objectKey,
+      bytes: body.length,
+      sha256,
+    }));
+  }
+
   console.log(JSON.stringify({
     status: "complete",
     collectionId: adminHomeworkCollection.id,
     synced: adminHomeworkChapters.length,
+    questionAssetsSynced: adminHomeworkQuestionAssets.length,
   }));
 }
 
